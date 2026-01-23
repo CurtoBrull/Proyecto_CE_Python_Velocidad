@@ -95,36 +95,30 @@ python -m venv venv
 venv\Scripts\activate
 ```
 
-### Paso 3: Instalar Dependencias de FastAPI
+### Paso 3: Instalar Todas las Dependencias
 
 ```bash
-cd api
 pip install -r requirements.txt
 ```
 
-Dependencias instaladas:
+El archivo `requirements.txt` en la raiz del proyecto incluye todas las dependencias:
+
+**Backend (FastAPI):**
 
 - `fastapi` - Framework web asincrono
 - `uvicorn` - Servidor ASGI
 - `sqlalchemy` - ORM para base de datos
 - `pydantic` - Validacion de datos
 
-### Paso 4: Instalar Dependencias de Django
-
-```bash
-cd ../frontend
-pip install -r requirements.txt
-```
-
-Dependencias instaladas:
+**Frontend (Django):**
 
 - `Django` - Framework web
 - `requests` - Cliente HTTP
 
-### Paso 5: Configurar Django
+### Paso 4: Configurar Django
 
 ```bash
-# Desde la carpeta frontend/
+cd frontend
 python manage.py migrate
 ```
 
@@ -241,7 +235,7 @@ echo "Django: http://localhost:8000"
 
 ### Acceso al Frontend
 
-Abrir en el navegador: **http://localhost:8000**
+Abrir en el navegador: **<http://localhost:8000>**
 
 ### Paginas Disponibles
 
@@ -277,7 +271,7 @@ curl -X POST http://localhost:8080/mediciones/
 curl -X POST http://localhost:8080/mediciones/
 ```
 
-O acceder a la documentacion interactiva: **http://localhost:8080/docs**
+O acceder a la documentacion interactiva: **<http://localhost:8080/docs>**
 
 ### Interpretacion de Datos
 
@@ -292,8 +286,8 @@ O acceder a la documentacion interactiva: **http://localhost:8080/docs**
 
 ### Documentacion Interactiva
 
-- **Swagger UI**: http://localhost:8080/docs
-- **ReDoc**: http://localhost:8080/redoc
+- **Swagger UI**: <http://localhost:8080/docs>
+- **ReDoc**: <http://localhost:8080/redoc>
 
 ### Endpoints Disponibles
 
