@@ -3,93 +3,98 @@
 {% block title %}Reportes - Radar de Velocidad{% endblock %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col-12">
-        <h1><i class="bi bi-bar-chart"></i> Reportes y Estadisticas</h1>
-    </div>
+<!-- Header de pagina -->
+<div class="page-header">
+    <h1><i class="bi bi-bar-chart"></i> Reportes y Estadisticas</h1>
 </div>
 
+<!-- Tarjetas de resumen -->
 <div class="row mb-4">
     <div class="col-md-4 mb-3">
         <div class="card text-center h-100">
-            <div class="card-body">
-                <h6 class="card-subtitle mb-2 text-muted">Total Mediciones</h6>
-                <h2 class="text-primary">{{ estadisticas.total_mediciones|default:0 }}</h2>
+            <div class="card-body py-4">
+                <h6 class="text-muted mb-3">Total Mediciones</h6>
+                <div class="display-value primary">{{ estadisticas.total_mediciones|default:0 }}</div>
             </div>
         </div>
     </div>
     <div class="col-md-4 mb-3">
         <div class="card text-center h-100">
-            <div class="card-body">
-                <h6 class="card-subtitle mb-2 text-muted">Velocidad Promedio</h6>
-                <h2 class="text-success">
+            <div class="card-body py-4">
+                <h6 class="text-muted mb-3">Velocidad Promedio</h6>
+                <div class="display-value success">
                     {% if estadisticas.velocidad_promedio_kmh %}
-                        {{ estadisticas.velocidad_promedio_kmh }} km/h
+                        {{ estadisticas.velocidad_promedio_kmh }}
                     {% else %}
                         --
                     {% endif %}
-                </h2>
+                </div>
+                {% if estadisticas.velocidad_promedio_kmh %}
+                    <small class="text-muted">km/h</small>
+                {% endif %}
             </div>
         </div>
     </div>
     <div class="col-md-4 mb-3">
         <div class="card text-center h-100">
-            <div class="card-body">
-                <h6 class="card-subtitle mb-2 text-muted">Excesos Registrados</h6>
-                <h2 class="text-danger">{{ estadisticas.excesos_velocidad|default:0 }}</h2>
+            <div class="card-body py-4">
+                <h6 class="text-muted mb-3">Excesos Registrados</h6>
+                <div class="display-value danger">{{ estadisticas.excesos_velocidad|default:0 }}</div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Grafico de velocidades -->
 <div class="card mb-4">
     <div class="card-header">
-        <h5 class="mb-0"><i class="bi bi-graph-up"></i> Grafico de Velocidades</h5>
+        <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Grafico de Velocidades</h5>
     </div>
     <div class="card-body">
         {% if velocidades_json %}
             <canvas id="velocidadesChart" height="100"></canvas>
         {% else %}
-            <div class="text-center text-muted py-5">
-                <i class="bi bi-graph-up fs-1 d-block mb-2"></i>
-                No hay datos suficientes para generar el grafico
+            <div class="empty-state">
+                <i class="bi bi-graph-up d-block"></i>
+                <p>No hay datos suficientes para generar el grafico</p>
             </div>
         {% endif %}
     </div>
 </div>
 
+<!-- Velocidades maxima y minima -->
 <div class="row">
     <div class="col-md-6 mb-4">
         <div class="card h-100">
             <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-arrow-up"></i> Velocidad Maxima</h5>
+                <h5 class="mb-0"><i class="bi bi-arrow-up me-2"></i>Velocidad Maxima</h5>
             </div>
-            <div class="card-body text-center">
-                <h1 class="display-3 text-warning">
+            <div class="card-body text-center py-5">
+                <div class="display-value warning" style="font-size: 4rem;">
                     {% if estadisticas.velocidad_maxima_kmh %}
                         {{ estadisticas.velocidad_maxima_kmh }}
                     {% else %}
                         --
                     {% endif %}
-                </h1>
-                <p class="text-muted">km/h</p>
+                </div>
+                <p class="text-muted mt-2 mb-0">km/h</p>
             </div>
         </div>
     </div>
     <div class="col-md-6 mb-4">
         <div class="card h-100">
             <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-arrow-down"></i> Velocidad Minima</h5>
+                <h5 class="mb-0"><i class="bi bi-arrow-down me-2"></i>Velocidad Minima</h5>
             </div>
-            <div class="card-body text-center">
-                <h1 class="display-3 text-info">
+            <div class="card-body text-center py-5">
+                <div class="display-value info" style="font-size: 4rem;">
                     {% if estadisticas.velocidad_minima_kmh %}
                         {{ estadisticas.velocidad_minima_kmh }}
                     {% else %}
                         --
                     {% endif %}
-                </h1>
-                <p class="text-muted">km/h</p>
+                </div>
+                <p class="text-muted mt-2 mb-0">km/h</p>
             </div>
         </div>
     </div>
@@ -107,28 +112,49 @@ const velocidadesChart = new Chart(ctx, {
         datasets: [{
             label: 'Velocidad (km/h)',
             data: {{ velocidades_json|safe }},
-            borderColor: 'rgb(75, 192, 192)',
-            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-            tension: 0.1,
-            fill: true
+            borderColor: 'rgb(37, 99, 235)',
+            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+            tension: 0.3,
+            fill: true,
+            pointBackgroundColor: 'rgb(37, 99, 235)',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 4,
+            pointHoverRadius: 6
         }, {
             label: 'Limite (50 km/h)',
             data: Array({{ velocidades_json|length }}).fill(50),
-            borderColor: 'rgb(255, 99, 132)',
+            borderColor: 'rgb(220, 38, 38)',
             borderDash: [5, 5],
             pointRadius: 0,
-            fill: false
+            fill: false,
+            borderWidth: 2
         }]
     },
     options: {
         responsive: true,
+        interaction: {
+            mode: 'index',
+            intersect: false,
+        },
         plugins: {
             legend: {
                 position: 'top',
+                labels: {
+                    usePointStyle: true,
+                    padding: 20
+                }
             },
             title: {
                 display: true,
-                text: 'Historial de Velocidades'
+                text: 'Historial de Velocidades',
+                font: {
+                    size: 16,
+                    weight: '600'
+                },
+                padding: {
+                    bottom: 20
+                }
             }
         },
         scales: {
@@ -136,7 +162,18 @@ const velocidadesChart = new Chart(ctx, {
                 beginAtZero: true,
                 title: {
                     display: true,
-                    text: 'km/h'
+                    text: 'km/h',
+                    font: {
+                        weight: '500'
+                    }
+                },
+                grid: {
+                    color: 'rgba(0, 0, 0, 0.05)'
+                }
+            },
+            x: {
+                grid: {
+                    color: 'rgba(0, 0, 0, 0.05)'
                 }
             }
         }
