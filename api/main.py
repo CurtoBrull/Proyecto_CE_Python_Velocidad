@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, Integer, case
 from datetime import datetime, date
 from typing import List, Optional
 
@@ -11,6 +11,9 @@ import schemas
 
 Base.metadata.create_all(bind=engine)
 
+# Cache en memoria para configuración
+_config_cache = {"distancia_sensores": None}
+
 app = FastAPI(
     title="Radar de Velocidad API",
     description="API para el sistema de radar de velocidad con sensores Arduino",
@@ -19,7 +22,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8000", "http://127.0.0.1:8000"],
+    allow_origins=["http://localhost:8000", "http://127.0.0.1:8000", "http://frontend:8000", "*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -77,32 +80,28 @@ def startup_event():
     y la cierra al finalizar para liberar recursos.
     """
     db = next(get_db())
-    init_configuracion(db)
-    db.close()
+    try:
+        init_configuracion(db)
+        # Cargar configuración en cache
+        config = db.query(models.Configuracion).filter(
+            models.Configuracion.clave == "distancia_sensores"
+        ).first()
+        _config_cache["distancia_sensores"] = float(config.valor) if config else 100.0
+    finally:
+        db.close()
 
 
-def get_distancia_sensores(db: Session) -> float:
+def get_distancia_sensores() -> float:
     """
-    Obtiene la distancia configurada entre los dos sensores desde la base de datos.
+    Obtiene la distancia configurada entre los dos sensores desde la cache en memoria.
 
-    Esta función consulta la tabla Configuracion para obtener el valor asociado
-    a la clave 'distancia_sensores'. Si no se encuentra la configuración,
+    Esta función retorna el valor cacheado de 'distancia_sensores'. Si no está en cache,
     retorna un valor por defecto de 100.0 metros.
 
-    Parámetros:
-    - db (Session): Sesión de base de datos de SQLAlchemy para realizar la consulta.
-
     Retorno:
-    - float: La distancia en metros entre los sensores. Si no hay configuración,
-      retorna 100.0 como valor por defecto.
-
-    Esta función es utilizada por otras partes del código para calcular velocidades
-    basadas en la distancia conocida entre sensores.
+    - float: La distancia en metros entre los sensores.
     """
-    config = db.query(models.Configuracion).filter(
-        models.Configuracion.clave == "distancia_sensores"
-    ).first()
-    return float(config.valor) if config else 100.0
+    return _config_cache.get("distancia_sensores", 100.0)
 
 
 @app.post("/mediciones/", response_model=schemas.MedicionResponse)
@@ -137,7 +136,7 @@ def registrar_medicion(db: Session = Depends(get_db)):
     Esta función asume que las llamadas alternan entre detecciones de los dos sensores.
     """
     timestamp_actual = datetime.now()
-    distancia = get_distancia_sensores(db)
+    distancia = get_distancia_sensores()
 
     medicion_pendiente = db.query(models.Medicion).filter(
         models.Medicion.es_primera_medicion == True,
@@ -211,9 +210,11 @@ def listar_mediciones(
         query = query.filter(models.Medicion.medicion_completa == True)
 
     if fecha_inicio:
-        query = query.filter(func.date(models.Medicion.timestamp) >= fecha_inicio)
+        inicio = datetime.combine(fecha_inicio, datetime.min.time())
+        query = query.filter(models.Medicion.timestamp >= inicio)
     if fecha_fin:
-        query = query.filter(func.date(models.Medicion.timestamp) <= fecha_fin)
+        fin = datetime.combine(fecha_fin, datetime.max.time())
+        query = query.filter(models.Medicion.timestamp <= fin)
 
     return query.order_by(models.Medicion.timestamp.desc()).offset(skip).limit(limit).all()
 
@@ -277,34 +278,34 @@ def obtener_estadisticas(db: Session = Depends(get_db)):
 
     Si no hay mediciones completas, los valores de velocidad serán None.
     """
-    mediciones_completas = db.query(models.Medicion).filter(
-        models.Medicion.medicion_completa == True
-    )
+    hoy = date.today()
+    inicio_hoy = datetime.combine(hoy, datetime.min.time())
+    fin_hoy = datetime.combine(hoy, datetime.max.time())
 
-    total = mediciones_completas.count()
-
+    # Query única consolidada
     stats = db.query(
+        func.count(models.Medicion.id).label("total"),
         func.avg(models.Medicion.velocidad_kmh).label("promedio"),
         func.max(models.Medicion.velocidad_kmh).label("maxima"),
-        func.min(models.Medicion.velocidad_kmh).label("minima")
+        func.min(models.Medicion.velocidad_kmh).label("minima"),
+        func.sum(
+            case((
+                (models.Medicion.timestamp >= inicio_hoy) &
+                (models.Medicion.timestamp <= fin_hoy), 1
+            ), else_=0)
+        ).label("mediciones_hoy"),
+        func.sum(
+            case((models.Medicion.velocidad_kmh > 50, 1), else_=0)
+        ).label("excesos")
     ).filter(models.Medicion.medicion_completa == True).first()
 
-    hoy = date.today()
-    mediciones_hoy = mediciones_completas.filter(
-        func.date(models.Medicion.timestamp) == hoy
-    ).count()
-
-    excesos = mediciones_completas.filter(
-        models.Medicion.velocidad_kmh > 50
-    ).count()
-
     return schemas.EstadisticasResponse(
-        total_mediciones=total,
+        total_mediciones=stats.total or 0,
         velocidad_promedio_kmh=round(stats.promedio, 2) if stats.promedio else None,
         velocidad_maxima_kmh=round(stats.maxima, 2) if stats.maxima else None,
         velocidad_minima_kmh=round(stats.minima, 2) if stats.minima else None,
-        mediciones_hoy=mediciones_hoy,
-        excesos_velocidad=excesos
+        mediciones_hoy=stats.mediciones_hoy or 0,
+        excesos_velocidad=stats.excesos or 0
     )
 
 
@@ -400,6 +401,9 @@ def actualizar_configuracion(
     config.valor = config_update.valor
     db.commit()
     db.refresh(config)
+    # Actualizar cache si es distancia_sensores
+    if clave == "distancia_sensores":
+        _config_cache["distancia_sensores"] = float(config.valor)
     return config
 
 
