@@ -27,6 +27,24 @@ app.add_middleware(
 
 
 def init_configuracion(db: Session):
+    """
+    Inicializa la configuración por defecto en la base de datos.
+
+    Esta función verifica si existe una configuración con la clave 'distancia_sensores'.
+    Si no existe, crea una nueva entrada en la tabla Configuracion con valores por defecto:
+    - Clave: 'distancia_sensores'
+    - Valor: '100' (distancia en metros)
+    - Descripción: 'Distancia en metros entre los dos sensores'
+
+    Parámetros:
+    - db (Session): Sesión de base de datos de SQLAlchemy para realizar operaciones.
+
+    Retorno:
+    - None: No retorna ningún valor, solo modifica la base de datos.
+
+    Esta función se ejecuta automáticamente al iniciar la aplicación para asegurar
+    que la configuración básica esté presente.
+    """
     config = db.query(models.Configuracion).filter(
         models.Configuracion.clave == "distancia_sensores"
     ).first()
@@ -42,12 +60,45 @@ def init_configuracion(db: Session):
 
 @app.on_event("startup")
 def startup_event():
+    """
+    Evento de inicio de la aplicación FastAPI.
+
+    Esta función se ejecuta automáticamente cuando la aplicación FastAPI se inicia.
+    Su propósito es inicializar la configuración por defecto en la base de datos
+    llamando a la función init_configuracion.
+
+    Parámetros:
+    - Ninguno: Es un decorador de evento que no recibe parámetros directos.
+
+    Retorno:
+    - None: No retorna ningún valor.
+
+    Utiliza una sesión de base de datos temporal para realizar la inicialización
+    y la cierra al finalizar para liberar recursos.
+    """
     db = next(get_db())
     init_configuracion(db)
     db.close()
 
 
 def get_distancia_sensores(db: Session) -> float:
+    """
+    Obtiene la distancia configurada entre los dos sensores desde la base de datos.
+
+    Esta función consulta la tabla Configuracion para obtener el valor asociado
+    a la clave 'distancia_sensores'. Si no se encuentra la configuración,
+    retorna un valor por defecto de 100.0 metros.
+
+    Parámetros:
+    - db (Session): Sesión de base de datos de SQLAlchemy para realizar la consulta.
+
+    Retorno:
+    - float: La distancia en metros entre los sensores. Si no hay configuración,
+      retorna 100.0 como valor por defecto.
+
+    Esta función es utilizada por otras partes del código para calcular velocidades
+    basadas en la distancia conocida entre sensores.
+    """
     config = db.query(models.Configuracion).filter(
         models.Configuracion.clave == "distancia_sensores"
     ).first()
@@ -56,6 +107,35 @@ def get_distancia_sensores(db: Session) -> float:
 
 @app.post("/mediciones/", response_model=schemas.MedicionResponse)
 def registrar_medicion(db: Session = Depends(get_db)):
+    """
+    Registra una nueva medición de velocidad o completa una medición pendiente.
+
+    Esta función maneja la lógica principal del sistema de radar de velocidad.
+    Cuando se llama, verifica si hay una medición pendiente (primera medición sin completar).
+    Si existe una medición pendiente, calcula la velocidad basándose en el tiempo
+    transcurrido entre la primera y segunda detección, y completa la medición.
+    Si no hay medición pendiente, crea una nueva medición como primera detección.
+
+    Parámetros:
+    - db (Session): Sesión de base de datos inyectada automáticamente por FastAPI.
+
+    Retorno:
+    - MedicionResponse: Un objeto de respuesta que contiene los detalles de la medición
+      registrada o completada, incluyendo timestamp, distancia, velocidades calculadas, etc.
+
+    Lógica de funcionamiento:
+    1. Obtiene el timestamp actual y la distancia entre sensores.
+    2. Busca una medición pendiente (es_primera_medicion=True, medicion_completa=False).
+    3. Si encuentra una pendiente:
+       - Calcula el tiempo recorrido en segundos.
+       - Calcula velocidad en m/s: distancia / tiempo.
+       - Calcula velocidad en km/h: velocidad_ms * 3.6.
+       - Actualiza la medición con los valores calculados y marca como completa.
+    4. Si no hay pendiente:
+       - Crea una nueva medición con el timestamp actual, distancia, y marca como primera medición incompleta.
+
+    Esta función asume que las llamadas alternan entre detecciones de los dos sensores.
+    """
     timestamp_actual = datetime.now()
     distancia = get_distancia_sensores(db)
 
@@ -100,6 +180,31 @@ def listar_mediciones(
     fecha_fin: Optional[date] = None,
     db: Session = Depends(get_db)
 ):
+    """
+    Lista las mediciones de velocidad con opciones de filtrado y paginación.
+
+    Esta función permite obtener una lista de mediciones almacenadas en la base de datos,
+    con la posibilidad de aplicar filtros por estado de completitud, rango de fechas,
+    y controlar la paginación mediante skip y limit.
+
+    Parámetros de consulta:
+    - skip (int): Número de registros a saltar (para paginación). Por defecto 0. Debe ser >= 0.
+    - limit (int): Número máximo de registros a retornar. Por defecto 20. Debe estar entre 1 y 100.
+    - solo_completas (bool): Si True, solo retorna mediciones completas (con velocidad calculada).
+      Por defecto True.
+    - fecha_inicio (date, opcional): Fecha de inicio para filtrar mediciones (formato YYYY-MM-DD).
+      Si se proporciona, solo incluye mediciones desde esta fecha inclusive.
+    - fecha_fin (date, opcional): Fecha de fin para filtrar mediciones (formato YYYY-MM-DD).
+      Si se proporciona, solo incluye mediciones hasta esta fecha inclusive.
+    - db (Session): Sesión de base de datos inyectada automáticamente por FastAPI.
+
+    Retorno:
+    - List[MedicionResponse]: Lista de objetos MedicionResponse ordenados por timestamp descendente
+      (más recientes primero), aplicando los filtros y límites especificados.
+
+    La función construye una consulta SQLAlchemy dinámicamente aplicando los filtros
+    solicitados y retorna los resultados paginados.
+    """
     query = db.query(models.Medicion)
 
     if solo_completas:
@@ -115,6 +220,27 @@ def listar_mediciones(
 
 @app.get("/mediciones/{medicion_id}", response_model=schemas.MedicionResponse)
 def obtener_medicion(medicion_id: int, db: Session = Depends(get_db)):
+    """
+    Obtiene los detalles de una medición específica por su ID.
+
+    Esta función busca en la base de datos una medición con el ID proporcionado.
+    Si la medición existe, la retorna; si no, lanza una excepción HTTP 404.
+
+    Parámetros:
+    - medicion_id (int): El ID único de la medición a obtener. Se extrae de la URL.
+    - db (Session): Sesión de base de datos inyectada automáticamente por FastAPI.
+
+    Retorno:
+    - MedicionResponse: Un objeto que contiene todos los detalles de la medición encontrada,
+      incluyendo timestamp, distancia, velocidades calculadas, etc.
+
+    Excepciones:
+    - HTTPException (404): Se lanza si no se encuentra una medición con el ID especificado,
+      con el mensaje "Medicion no encontrada".
+
+    Esta función es útil para obtener detalles completos de una medición específica,
+    por ejemplo, para mostrar en una interfaz de usuario o para análisis detallado.
+    """
     medicion = db.query(models.Medicion).filter(models.Medicion.id == medicion_id).first()
     if not medicion:
         raise HTTPException(status_code=404, detail="Medicion no encontrada")
@@ -123,6 +249,34 @@ def obtener_medicion(medicion_id: int, db: Session = Depends(get_db)):
 
 @app.get("/estadisticas/", response_model=schemas.EstadisticasResponse)
 def obtener_estadisticas(db: Session = Depends(get_db)):
+    """
+    Obtiene estadísticas generales de todas las mediciones completas.
+
+    Esta función calcula y retorna estadísticas agregadas de todas las mediciones
+    de velocidad que han sido completadas (es decir, que tienen velocidad calculada).
+    Incluye promedios, máximos, mínimos, conteos por día y excesos de velocidad.
+
+    Parámetros:
+    - db (Session): Sesión de base de datos inyectada automáticamente por FastAPI.
+
+    Retorno:
+    - EstadisticasResponse: Un objeto que contiene las siguientes estadísticas:
+      - total_mediciones: Número total de mediciones completas.
+      - velocidad_promedio_kmh: Velocidad promedio en km/h (redondeada a 2 decimales).
+      - velocidad_maxima_kmh: Velocidad máxima registrada en km/h (redondeada a 2 decimales).
+      - velocidad_minima_kmh: Velocidad mínima registrada en km/h (redondeada a 2 decimales).
+      - mediciones_hoy: Número de mediciones completas realizadas hoy.
+      - excesos_velocidad: Número de mediciones donde la velocidad supera los 50 km/h.
+
+    Cálculos realizados:
+    - Consulta todas las mediciones completas.
+    - Calcula estadísticas agregadas usando funciones SQL (AVG, MAX, MIN).
+    - Filtra mediciones del día actual usando la fecha de hoy.
+    - Cuenta excesos de velocidad (mayor a 50 km/h).
+    - Redondea los valores de velocidad a 2 decimales para presentación.
+
+    Si no hay mediciones completas, los valores de velocidad serán None.
+    """
     mediciones_completas = db.query(models.Medicion).filter(
         models.Medicion.medicion_completa == True
     )
@@ -156,11 +310,48 @@ def obtener_estadisticas(db: Session = Depends(get_db)):
 
 @app.get("/configuracion/", response_model=List[schemas.ConfiguracionResponse])
 def listar_configuracion(db: Session = Depends(get_db)):
+    """
+    Lista todas las configuraciones almacenadas en la base de datos.
+
+    Esta función retorna una lista completa de todas las entradas en la tabla
+    Configuracion, incluyendo claves, valores y descripciones.
+
+    Parámetros:
+    - db (Session): Sesión de base de datos inyectada automáticamente por FastAPI.
+
+    Retorno:
+    - List[ConfiguracionResponse]: Lista de objetos ConfiguracionResponse que contienen
+      todas las configuraciones del sistema.
+
+    Esta función es útil para obtener una vista general de todos los parámetros
+    configurables del sistema, como la distancia entre sensores u otras opciones.
+    """
     return db.query(models.Configuracion).all()
 
 
 @app.get("/configuracion/{clave}", response_model=schemas.ConfiguracionResponse)
 def obtener_configuracion(clave: str, db: Session = Depends(get_db)):
+    """
+    Obtiene los detalles de una configuración específica por su clave.
+
+    Esta función busca en la base de datos una configuración con la clave proporcionada.
+    Si la configuración existe, la retorna; si no, lanza una excepción HTTP 404.
+
+    Parámetros:
+    - clave (str): La clave única de la configuración a obtener. Se extrae de la URL.
+    - db (Session): Sesión de base de datos inyectada automáticamente por FastAPI.
+
+    Retorno:
+    - ConfiguracionResponse: Un objeto que contiene los detalles de la configuración
+      encontrada, incluyendo clave, valor y descripción.
+
+    Excepciones:
+    - HTTPException (404): Se lanza si no se encuentra una configuración con la clave
+      especificada, con el mensaje "Configuracion no encontrada".
+
+    Esta función permite acceder a configuraciones individuales, útil para obtener
+    valores específicos como la distancia entre sensores.
+    """
     config = db.query(models.Configuracion).filter(
         models.Configuracion.clave == clave
     ).first()
@@ -175,6 +366,31 @@ def actualizar_configuracion(
     config_update: schemas.ConfiguracionUpdate,
     db: Session = Depends(get_db)
 ):
+    """
+    Actualiza el valor de una configuración específica por su clave.
+
+    Esta función busca una configuración existente por su clave y actualiza su valor
+    con el nuevo valor proporcionado en el cuerpo de la solicitud. Si la configuración
+    no existe, lanza una excepción HTTP 404.
+
+    Parámetros:
+    - clave (str): La clave única de la configuración a actualizar. Se extrae de la URL.
+    - config_update (ConfiguracionUpdate): Objeto que contiene el nuevo valor para la configuración.
+      Solo incluye el campo 'valor' que se va a actualizar.
+    - db (Session): Sesión de base de datos inyectada automáticamente por FastAPI.
+
+    Retorno:
+    - ConfiguracionResponse: Un objeto que contiene los detalles actualizados de la configuración,
+      incluyendo clave, nuevo valor y descripción.
+
+    Excepciones:
+    - HTTPException (404): Se lanza si no se encuentra una configuración con la clave
+      especificada, con el mensaje "Configuracion no encontrada".
+
+    La función actualiza solo el campo 'valor' de la configuración, manteniendo la clave
+    y descripción originales. Después de la actualización, confirma los cambios en la
+    base de datos y refresca el objeto para retornar los datos actualizados.
+    """
     config = db.query(models.Configuracion).filter(
         models.Configuracion.clave == clave
     ).first()
@@ -189,4 +405,23 @@ def actualizar_configuracion(
 
 @app.post("/", response_model=schemas.MedicionResponse)
 def endpoint_legacy(db: Session = Depends(get_db)):
+    """
+    Endpoint legacy para compatibilidad con versiones anteriores.
+
+    Esta función proporciona un endpoint alternativo en la raíz ("/") que realiza
+    la misma funcionalidad que el endpoint "/mediciones/" para registrar mediciones.
+    Está diseñado para mantener compatibilidad con sistemas o clientes que esperan
+    el endpoint en la ruta raíz.
+
+    Parámetros:
+    - db (Session): Sesión de base de datos inyectada automáticamente por FastAPI.
+
+    Retorno:
+    - MedicionResponse: El mismo objeto retornado por registrar_medicion(),
+      que contiene los detalles de la medición registrada o completada.
+
+    Esta función simplemente delega la lógica a registrar_medicion(), proporcionando
+    una interfaz alternativa para el mismo servicio. Se recomienda usar "/mediciones/"
+    para nuevas implementaciones.
+    """
     return registrar_medicion(db)
