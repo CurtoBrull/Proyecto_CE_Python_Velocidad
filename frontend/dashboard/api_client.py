@@ -6,11 +6,14 @@ from typing import Dict, Any, List, Optional
 class RadarAPIClient:
     def __init__(self):
         self.base_url = getattr(settings, 'FASTAPI_BASE_URL', 'http://localhost:8080')
-        self.timeout = 10
+        self.timeout = 5  # Reducido de 10 a 5 segundos
+        # Crear una sesión reutilizable para mejorar rendimiento
+        self.session = requests.Session()
+        self.session.headers.update({'Connection': 'keep-alive'})
 
     def _get(self, endpoint: str, params: Optional[Dict] = None) -> Dict[str, Any]:
         try:
-            response = requests.get(
+            response = self.session.get(
                 f"{self.base_url}{endpoint}",
                 params=params,
                 timeout=self.timeout
@@ -22,7 +25,7 @@ class RadarAPIClient:
 
     def _post(self, endpoint: str, data: Optional[Dict] = None) -> Dict[str, Any]:
         try:
-            response = requests.post(
+            response = self.session.post(
                 f"{self.base_url}{endpoint}",
                 json=data,
                 timeout=self.timeout
@@ -34,7 +37,7 @@ class RadarAPIClient:
 
     def _put(self, endpoint: str, data: Dict) -> Dict[str, Any]:
         try:
-            response = requests.put(
+            response = self.session.put(
                 f"{self.base_url}{endpoint}",
                 json=data,
                 timeout=self.timeout
