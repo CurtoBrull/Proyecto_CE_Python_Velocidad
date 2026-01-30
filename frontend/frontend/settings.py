@@ -7,7 +7,16 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-change-this-in-production-
 
 DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'frontend', '*']
+ALLOWED_HOSTS = [
+    'localhost', 
+    '127.0.0.1', 
+    'frontend',
+    '.onrender.com',  # Para Render
+    os.getenv('ALLOWED_HOST', ''),  # Host personalizado
+]
+
+# Filtrar hosts vacíos
+ALLOWED_HOSTS = [host for host in ALLOWED_HOSTS if host]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -76,3 +85,7 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 FASTAPI_BASE_URL = os.getenv('API_URL', 'http://localhost:8080')
+
+# Asegurar que la URL del API tenga el protocolo correcto
+if FASTAPI_BASE_URL and not FASTAPI_BASE_URL.startswith(('http://', 'https://')):
+    FASTAPI_BASE_URL = f'https://{FASTAPI_BASE_URL}'

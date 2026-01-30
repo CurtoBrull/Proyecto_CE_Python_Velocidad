@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func, Integer, case
 from datetime import datetime, date
 from typing import List, Optional
+import os
 
 from database import engine, get_db, Base
 import models
@@ -20,9 +21,25 @@ app = FastAPI(
     version="1.0.0"
 )
 
+import os
+
+# Configurar CORS para producción y desarrollo
+allowed_origins = [
+    "http://localhost:8000",
+    "http://127.0.0.1:8000", 
+    "http://frontend:8000",
+    "https://radar-velocidad-frontend.onrender.com"  # Dominio de producción
+]
+
+# Añadir dominio de producción si está configurado
+frontend_url = os.getenv("FRONTEND_URL")
+if frontend_url:
+    allowed_origins.append(frontend_url)
+    allowed_origins.append(frontend_url.replace("http://", "https://"))
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8000", "http://127.0.0.1:8000", "http://frontend:8000", "*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
