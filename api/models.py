@@ -7,13 +7,13 @@ class Medicion(Base):
     __tablename__ = "mediciones"
 
     id = Column(Integer, primary_key=True, index=True)
-    timestamp = Column(DateTime, default=datetime.utcnow)
+    timestamp = Column(DateTime, default=datetime.utcnow, index=True)
     velocidad_ms = Column(Float, nullable=True)
-    velocidad_kmh = Column(Float, nullable=True)
+    velocidad_kmh = Column(Float, nullable=True, index=True)
     distancia = Column(Float, default=100.0)
     tiempo_recorrido = Column(Float, nullable=True)
-    es_primera_medicion = Column(Boolean, default=False)
-    medicion_completa = Column(Boolean, default=False)
+    es_primera_medicion = Column(Boolean, default=False, index=True)
+    medicion_completa = Column(Boolean, default=False, index=True)
 
 
 class Configuracion(Base):

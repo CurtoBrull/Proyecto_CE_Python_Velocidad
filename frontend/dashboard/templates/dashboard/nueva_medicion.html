@@ -27,17 +27,31 @@
                     <form method="post">
                         {% csrf_token %}
                         <input type="hidden" name="accion" value="iniciar">
-                        <button type="submit" class="btn btn-success btn-lg px-5 py-3 btn-pulse">
+                        {% if estado == 'esperando_sensor2' %}
+                        <button type="submit" class="btn btn-warning btn-lg px-5 py-3 btn-pulse">
                             <i class="bi bi-broadcast me-2"></i>
-                            Registrar Paso por Sensor
+                            Registrar Sensor 2
                         </button>
+                        {% else %}
+                        <button type="submit" class="btn btn-primary btn-lg px-5 py-3 btn-pulse">
+                            <i class="bi bi-broadcast me-2"></i>
+                            Registrar Sensor 1
+                        </button>
+                        {% endif %}
                     </form>
 
                     <div class="mt-4">
+                        {% if estado == 'esperando_sensor2' %}
+                        <small class="text-warning">
+                            <i class="bi bi-clock-history me-1"></i>
+                            <strong>Esperando paso por sensor 2...</strong>
+                        </small>
+                        {% else %}
                         <small class="text-muted">
                             <i class="bi bi-info-circle me-1"></i>
-                            Pulsa una vez para el sensor 1, otra vez para el sensor 2
+                            Pulsa para registrar el paso por el sensor 1
                         </small>
+                        {% endif %}
                     </div>
                 </div>
             </div>

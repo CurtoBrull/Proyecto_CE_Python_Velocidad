@@ -83,3 +83,12 @@ class RadarAPIClient:
 
     def registrar_medicion(self) -> Dict[str, Any]:
         return self._post("/mediciones/")
+
+    def hay_medicion_pendiente(self) -> bool:
+        """Verifica si hay una medición esperando el segundo sensor."""
+        params = {"solo_completas": False, "limit": 1}
+        result = self._get("/mediciones/", params)
+        if isinstance(result, list) and len(result) > 0:
+            ultima = result[0]
+            return ultima.get('es_primera_medicion', False) and not ultima.get('medicion_completa', True)
+        return False

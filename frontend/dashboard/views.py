@@ -143,10 +143,14 @@ class NuevaMedicionView(View):
     def get(self, request):
         client = RadarAPIClient()
         distancia = client.obtener_distancia()
+        hay_pendiente = client.hay_medicion_pendiente()
+
+        # Estado: 'esperando_sensor1' (azul), 'esperando_sensor2' (naranja)
+        estado = 'esperando_sensor2' if hay_pendiente else 'esperando_sensor1'
 
         context = {
             'distancia_actual': distancia,
-            'estado': 'inicial',
+            'estado': estado,
         }
         return render(request, self.template_name, context)
 
