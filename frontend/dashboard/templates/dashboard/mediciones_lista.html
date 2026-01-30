@@ -1,0 +1,139 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Mediciones - Radar de Velocidad{% endblock %}
+
+{% block content %}
+<!-- Header de pagina -->
+<div class="page-header">
+    <h1><i class="bi bi-list-ul"></i> Listado de Mediciones</h1>
+</div>
+
+<!-- Filtros -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h6 class="mb-0"><i class="bi bi-funnel me-2"></i>Filtros</h6>
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label for="fecha_inicio" class="form-label">Fecha Inicio</label>
+                <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" value="{{ fecha_inicio }}">
+            </div>
+            <div class="col-md-4">
+                <label for="fecha_fin" class="form-label">Fecha Fin</label>
+                <input type="date" class="form-control" id="fecha_fin" name="fecha_fin" value="{{ fecha_fin }}">
+            </div>
+            <div class="col-md-4">
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-grow-1">
+                        <i class="bi bi-search me-1"></i> Filtrar
+                    </button>
+                    <a href="{% url 'dashboard:mediciones' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle"></i>
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Tabla de mediciones -->
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Fecha/Hora</th>
+                        <th>Velocidad (km/h)</th>
+                        <th>Velocidad (m/s)</th>
+                        <th>Tiempo</th>
+                        <th>Distancia</th>
+                        <th>Estado</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for medicion in mediciones %}
+                    <tr>
+                        <td><strong>#{{ medicion.id }}</strong></td>
+                        <td>{{ medicion.timestamp|slice:":19"|default:"--" }}</td>
+                        <td class="{% if medicion.exceso %}exceso{% endif %}">
+                            {% if medicion.velocidad_kmh %}
+                                {{ medicion.velocidad_kmh|floatformat:2 }}
+                            {% else %}
+                                <span class="text-muted">--</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if medicion.velocidad_ms %}
+                                {{ medicion.velocidad_ms|floatformat:2 }}
+                            {% else %}
+                                <span class="text-muted">--</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if medicion.tiempo_recorrido %}
+                                {{ medicion.tiempo_recorrido|floatformat:2 }} s
+                            {% else %}
+                                <span class="text-muted">--</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ medicion.distancia|floatformat:0 }} m</td>
+                        <td>
+                            {% if medicion.exceso %}
+                                <span class="badge bg-danger">
+                                    <i class="bi bi-exclamation-circle me-1"></i>Exceso
+                                </span>
+                            {% else %}
+                                <span class="badge bg-success">
+                                    <i class="bi bi-check-circle me-1"></i>Normal
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <a href="{% url 'dashboard:medicion_detalle' medicion.id %}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8">
+                            <div class="empty-state">
+                                <i class="bi bi-inbox d-block"></i>
+                                <p>No se encontraron mediciones</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginacion -->
+        {% if mediciones %}
+        <div class="p-3 border-top">
+            <nav aria-label="Paginacion">
+                <ul class="pagination justify-content-center mb-0">
+                    <li class="page-item {% if not has_prev %}disabled{% endif %}">
+                        <a class="page-link" href="?page={{ page|add:'-1' }}&fecha_inicio={{ fecha_inicio }}&fecha_fin={{ fecha_fin }}">
+                            <i class="bi bi-chevron-left me-1"></i> Anterior
+                        </a>
+                    </li>
+                    <li class="page-item active">
+                        <span class="page-link">Pagina {{ page }}</span>
+                    </li>
+                    <li class="page-item {% if not has_next %}disabled{% endif %}">
+                        <a class="page-link" href="?page={{ page|add:'1' }}&fecha_inicio={{ fecha_inicio }}&fecha_fin={{ fecha_fin }}">
+                            Siguiente <i class="bi bi-chevron-right ms-1"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

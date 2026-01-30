@@ -1,0 +1,170 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Nueva Medicion - Radar de Velocidad{% endblock %}
+
+{% block content %}
+<!-- Header de pagina -->
+<div class="page-header">
+    <h1><i class="bi bi-play-circle"></i> Nueva Medicion</h1>
+    <p class="subtitle">Simula el paso de un objeto por los sensores</p>
+</div>
+
+<div class="row">
+    <!-- Panel de control -->
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-broadcast me-2"></i>Panel de Control</h5>
+            </div>
+            <div class="card-body">
+                <div class="control-panel">
+                    <i class="bi bi-speedometer2 icon-large d-block"></i>
+
+                    <p class="lead mb-4">
+                        Distancia entre sensores: <strong>{{ distancia_actual }} metros</strong>
+                    </p>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="accion" value="iniciar">
+                        {% if estado == 'esperando_sensor2' %}
+                        <button type="submit" class="btn btn-warning btn-lg px-5 py-3 btn-pulse">
+                            <i class="bi bi-broadcast me-2"></i>
+                            Registrar Sensor 2
+                        </button>
+                        {% else %}
+                        <button type="submit" class="btn btn-primary btn-lg px-5 py-3 btn-pulse">
+                            <i class="bi bi-broadcast me-2"></i>
+                            Registrar Sensor 1
+                        </button>
+                        {% endif %}
+                    </form>
+
+                    <div class="mt-4">
+                        {% if estado == 'esperando_sensor2' %}
+                        <small class="text-warning">
+                            <i class="bi bi-clock-history me-1"></i>
+                            <strong>Esperando paso por sensor 2...</strong>
+                        </small>
+                        {% else %}
+                        <small class="text-muted">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Pulsa para registrar el paso por el sensor 1
+                        </small>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Como funciona -->
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-question-circle me-2"></i>Como Funciona</h5>
+            </div>
+            <div class="card-body">
+                <!-- Paso 1 -->
+                <div class="d-flex align-items-start mb-4">
+                    <div class="step-number primary me-3">1</div>
+                    <div>
+                        <h6 class="mb-1">Primer clic - Sensor de Entrada</h6>
+                        <p class="text-muted mb-0 small">Simula que el objeto pasa por el primer sensor. Se registra el timestamp inicial.</p>
+                    </div>
+                </div>
+
+                <!-- Paso 2 -->
+                <div class="d-flex align-items-start mb-4">
+                    <div class="step-number warning me-3">2</div>
+                    <div>
+                        <h6 class="mb-1">Segundo clic - Sensor de Salida</h6>
+                        <p class="text-muted mb-0 small">Simula el paso por el segundo sensor. Se calcula la velocidad.</p>
+                    </div>
+                </div>
+
+                <!-- Paso 3 -->
+                <div class="d-flex align-items-start mb-4">
+                    <div class="step-number success me-3">3</div>
+                    <div>
+                        <h6 class="mb-1">Resultado</h6>
+                        <p class="text-muted mb-0 small">Se muestra la velocidad calculada: <code>velocidad = distancia / tiempo</code></p>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="alert alert-info mb-0">
+                    <i class="bi bi-lightbulb me-2"></i>
+                    <strong>Consejo:</strong> Espera unos segundos entre clics para simular diferentes velocidades.
+                    <ul class="mb-0 mt-2 small">
+                        <li>1 segundo = 360 km/h (muy rapido)</li>
+                        <li>5 segundos = 72 km/h</li>
+                        <li>10 segundos = 36 km/h</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Calculadora de velocidad -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-calculator me-2"></i>Calculadora de Velocidad</h5>
+            </div>
+            <div class="card-body">
+                <div class="row align-items-end g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Distancia (m)</label>
+                        <input type="number" class="form-control" id="calc-distancia" value="{{ distancia_actual }}" readonly>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Tiempo (segundos)</label>
+                        <input type="number" class="form-control" id="calc-tiempo" placeholder="Ej: 5" step="0.1" min="0.1">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-primary w-100" onclick="calcularVelocidad()">
+                            <i class="bi bi-calculator me-1"></i> Calcular
+                        </button>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Resultado</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control form-control-lg text-center fw-bold" id="calc-resultado" readonly placeholder="--">
+                            <span class="input-group-text">km/h</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function calcularVelocidad() {
+    const distancia = parseFloat(document.getElementById('calc-distancia').value);
+    const tiempo = parseFloat(document.getElementById('calc-tiempo').value);
+    const resultado = document.getElementById('calc-resultado');
+
+    if (tiempo > 0) {
+        const velocidadMs = distancia / tiempo;
+        const velocidadKmh = velocidadMs * 3.6;
+        resultado.value = velocidadKmh.toFixed(2);
+
+        if (velocidadKmh > 50) {
+            resultado.style.color = 'var(--danger)';
+        } else {
+            resultado.style.color = 'var(--success)';
+        }
+    } else {
+        resultado.value = '--';
+        resultado.style.color = '';
+    }
+}
+</script>
+{% endblock %}
