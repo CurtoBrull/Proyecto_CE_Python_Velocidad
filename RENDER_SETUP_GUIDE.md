@@ -6,7 +6,7 @@ Esta guía te llevará paso a paso para desplegar tu sistema de radar de velocid
 
 - ✅ Cuenta gratuita en [render.com](https://render.com)
 - ✅ Repositorio en GitHub con el código
-- ✅ Rama `feature/integracion-arduino-radar` con los cambios
+- ✅ Rama `feature/deploy-render` con los cambios
 
 ## 🎯 Paso 1: Desplegar el API Backend
 
@@ -22,7 +22,7 @@ Esta guía te llevará paso a paso para desplegar tu sistema de radar de velocid
 
 **Configuración básica:**
 - **Name**: `radar-velocidad-api`
-- **Branch**: `feature/integracion-arduino-radar`
+- **Branch**: `feature/deploy-render`
 - **Root Directory**: Dejar vacío
 - **Environment**: `Python 3`
 - **Build Command**: 
@@ -59,13 +59,13 @@ En la sección **"Environment Variables"**, añade:
 1. En el dashboard, haz clic en **"New +"** → **"Web Service"**
 2. Selecciona **"Build and deploy from a Git repository"**
 3. Conecta el **mismo repositorio**
-4. Selecciona la rama `feature/integracion-arduino-radar`
+4. Selecciona la rama `feature/deploy-render`
 
 ### 2.2 Configurar el Frontend
 
 **Configuración básica:**
 - **Name**: `radar-velocidad-frontend`
-- **Branch**: `feature/integracion-arduino-radar`
+- **Branch**: `feature/deploy-render`
 - **Root Directory**: Dejar vacío
 - **Environment**: `Python 3`
 - **Build Command**: 

@@ -13,7 +13,7 @@ El sistema se despliega como **dos servicios web independientes**:
 
 - Cuenta gratuita en [Render.com](https://render.com)
 - Repositorio Git con el código del proyecto
-- Rama `feature/integracion-arduino-radar` actualizada
+- Rama `feature/deploy-render` actualizada
 
 ## 🚀 Pasos para Desplegar (Plan Gratuito)
 
@@ -38,7 +38,7 @@ Asegúrate de que tienes todos los archivos necesarios:
 1. Ve a [Render Dashboard](https://dashboard.render.com)
 2. Haz clic en "New +" → "Web Service"
 3. Conecta tu repositorio de GitHub
-4. Selecciona la rama `feature/integracion-arduino-radar`
+4. Selecciona la rama `feature/deploy-render`
 5. Configura el servicio:
 
 **Configuración del API:**
@@ -59,7 +59,7 @@ Asegúrate de que tienes todos los archivos necesarios:
 
 1. En el Dashboard, haz clic en "New +" → "Web Service"
 2. Conecta el mismo repositorio
-3. Selecciona la rama `feature/integracion-arduino-radar`
+3. Selecciona la rama `feature/deploy-render`
 4. Configura el servicio:
 
 **Configuración del Frontend:**
@@ -218,7 +218,7 @@ python test_deployment.py
 ## � Actualizaciones
 
 Para actualizar el despliegue:
-1. Haz push de los cambios a la rama `feature/integracion-arduino-radar`
+1. Haz push de los cambios a la rama `feature/deploy-render`
 2. Ve al dashboard de Render
 3. Selecciona cada servicio y haz clic en "Manual Deploy"
 4. O configura auto-deploy desde GitHub en la configuración del servicio
