@@ -1,15 +1,30 @@
 #!/usr/bin/env python3
 """
 Script para verificar el despliegue del sistema de radar de velocidad en Render.
+Actualiza las URLs con las de tu despliegue real.
 """
 
 import requests
 import time
 import json
+import sys
 
-# URLs de los servicios desplegados
-API_URL = "https://radar-velocidad-api.onrender.com"
-FRONTEND_URL = "https://radar-velocidad-frontend.onrender.com"
+# ⚠️ ACTUALIZA ESTAS URLs CON LAS DE TU DESPLIEGUE REAL
+API_URL = "https://radar-velocidad-api-xxxx.onrender.com"  # Cambiar por tu URL del API
+FRONTEND_URL = "https://radar-velocidad-frontend-yyyy.onrender.com"  # Cambiar por tu URL del frontend
+
+def check_urls():
+    """Verifica que las URLs estén actualizadas."""
+    if "xxxx" in API_URL or "yyyy" in FRONTEND_URL:
+        print("❌ ERROR: Debes actualizar las URLs en este script")
+        print(f"API_URL actual: {API_URL}")
+        print(f"FRONTEND_URL actual: {FRONTEND_URL}")
+        print("\n📝 Instrucciones:")
+        print("1. Ve a tu dashboard de Render")
+        print("2. Copia las URLs reales de tus servicios")
+        print("3. Actualiza las variables API_URL y FRONTEND_URL en este script")
+        return False
+    return True
 
 def test_api_health():
     """Verifica que el API esté funcionando."""
@@ -93,6 +108,10 @@ def main():
     print("🚀 Iniciando verificación del despliegue en Render")
     print("=" * 50)
     
+    # Verificar que las URLs estén actualizadas
+    if not check_urls():
+        return False
+    
     tests = [
         ("API Health Check", test_api_health),
         ("API Documentation", test_api_docs),
@@ -125,8 +144,14 @@ def main():
         print(f"🌐 Frontend: {FRONTEND_URL}")
         print(f"🔗 API: {API_URL}")
         print(f"📚 Docs: {API_URL}/docs")
+        print("\n💡 Configuración para Arduino:")
+        print(f"   POST {API_URL}/mediciones/")
     else:
         print("⚠️  Algunas pruebas fallaron. Revisa los logs de Render.")
+        print("\n🔍 Posibles causas:")
+        print("- Los servicios están iniciándose (espera 1-2 minutos)")
+        print("- Variables de entorno mal configuradas")
+        print("- Problemas de CORS entre frontend y API")
     
     return passed == len(tests)
 

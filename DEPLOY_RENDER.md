@@ -1,6 +1,6 @@
-# Despliegue en Render - Sistema Radar de Velocidad
+# Despliegue en Render - Sistema Radar de Velocidad (Plan Gratuito)
 
-Este documento explica cómo desplegar el sistema de radar de velocidad en Render con dos aplicaciones separadas.
+Este documento explica cómo desplegar el sistema de radar de velocidad en Render con dos aplicaciones separadas usando el plan gratuito.
 
 ## 🏗️ Arquitectura de Despliegue
 
@@ -11,18 +11,17 @@ El sistema se despliega como **dos servicios web independientes**:
 
 ## 📋 Requisitos Previos
 
-- Cuenta en [Render.com](https://render.com)
+- Cuenta gratuita en [Render.com](https://render.com)
 - Repositorio Git con el código del proyecto
 - Rama `feature/integracion-arduino-radar` actualizada
 
-## 🚀 Pasos para Desplegar
+## 🚀 Pasos para Desplegar (Plan Gratuito)
 
 ### 1. Preparar el Repositorio
 
 Asegúrate de que tienes todos los archivos necesarios:
 
 ```
-├── render.yaml                 # Configuración de Render
 ├── api/
 │   ├── requirements.txt        # Dependencias del API
 │   ├── start.py               # Script de inicio
@@ -34,31 +33,79 @@ Asegúrate de que tienes todos los archivos necesarios:
     └── ...
 ```
 
-### 2. Conectar con Render
+### 2. Desplegar API Backend (Servicio 1)
 
 1. Ve a [Render Dashboard](https://dashboard.render.com)
-2. Haz clic en "New +" → "Blueprint"
+2. Haz clic en "New +" → "Web Service"
 3. Conecta tu repositorio de GitHub
 4. Selecciona la rama `feature/integracion-arduino-radar`
-5. Render detectará automáticamente el archivo `render.yaml`
+5. Configura el servicio:
 
-### 3. Configurar Variables de Entorno
+**Configuración del API:**
+- **Name**: `radar-velocidad-api`
+- **Environment**: `Python 3`
+- **Build Command**: `cd api && pip install -r requirements.txt`
+- **Start Command**: `cd api && python start.py`
+- **Plan**: `Free`
 
-Render configurará automáticamente las siguientes variables:
+**Variables de Entorno del API:**
+- `PYTHON_VERSION`: `3.11`
+- `DATABASE_URL`: `sqlite:///./radar_velocidad.db`
+
+6. Haz clic en "Create Web Service"
+7. **¡IMPORTANTE!** Anota la URL generada (ej: `https://radar-velocidad-api-xxxx.onrender.com`)
+
+### 3. Desplegar Frontend (Servicio 2)
+
+1. En el Dashboard, haz clic en "New +" → "Web Service"
+2. Conecta el mismo repositorio
+3. Selecciona la rama `feature/integracion-arduino-radar`
+4. Configura el servicio:
+
+**Configuración del Frontend:**
+- **Name**: `radar-velocidad-frontend`
+- **Environment**: `Python 3`
+- **Build Command**: `cd frontend && pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate`
+- **Start Command**: `cd frontend && gunicorn frontend.wsgi:application --bind 0.0.0.0:$PORT`
+- **Plan**: `Free`
+
+**Variables de Entorno del Frontend:**
+- `PYTHON_VERSION`: `3.11`
+- `DEBUG`: `False`
+- `SECRET_KEY`: `tu-clave-secreta-muy-segura-aqui-cambiar-en-produccion`
+- `API_URL`: `https://radar-velocidad-api-xxxx.onrender.com` (URL del paso anterior)
+
+5. Haz clic en "Create Web Service"
+
+### 4. Actualizar CORS en el API
+
+Una vez que tengas la URL del frontend, necesitas actualizar el API:
+
+1. Ve al servicio del API en Render
+2. Añade una variable de entorno:
+   - **Key**: `FRONTEND_URL`
+   - **Value**: `https://radar-velocidad-frontend-yyyy.onrender.com` (URL de tu frontend)
+3. Redespliega el servicio API
+
+### 5. Configurar Variables de Entorno
 
 **API Backend:**
-- `PYTHON_VERSION`: 3.11
-- `DATABASE_URL`: sqlite:///./radar_velocidad.db
-- `PORT`: Asignado automáticamente por Render
+```
+PYTHON_VERSION=3.11
+DATABASE_URL=sqlite:///./radar_velocidad.db
+FRONTEND_URL=https://radar-velocidad-frontend-yyyy.onrender.com
+```
 
 **Frontend:**
-- `PYTHON_VERSION`: 3.11
-- `DEBUG`: False
-- `SECRET_KEY`: Generado automáticamente
-- `API_URL`: URL del servicio API (configurado automáticamente)
-- `PORT`: Asignado automáticamente por Render
+```
+PYTHON_VERSION=3.11
+DEBUG=False
+SECRET_KEY=tu-clave-secreta-muy-segura-aqui-cambiar-en-produccion
+API_URL=https://radar-velocidad-api-xxxx.onrender.com
+ALLOWED_HOST=radar-velocidad-frontend-yyyy.onrender.com
+```
 
-### 4. Proceso de Despliegue
+### 6. Proceso de Despliegue
 
 Render ejecutará automáticamente:
 
@@ -76,45 +123,47 @@ Render ejecutará automáticamente:
 
 Una vez desplegado, tendrás:
 
-- **API**: `https://radar-velocidad-api.onrender.com`
-  - Documentación: `https://radar-velocidad-api.onrender.com/docs`
-  - Endpoint mediciones: `https://radar-velocidad-api.onrender.com/mediciones/`
+- **API**: `https://radar-velocidad-api-xxxx.onrender.com`
+  - Documentación: `https://radar-velocidad-api-xxxx.onrender.com/docs`
+  - Endpoint mediciones: `https://radar-velocidad-api-xxxx.onrender.com/mediciones/`
 
-- **Frontend**: `https://radar-velocidad-frontend.onrender.com`
-  - Dashboard principal: `https://radar-velocidad-frontend.onrender.com/`
+- **Frontend**: `https://radar-velocidad-frontend-yyyy.onrender.com`
+  - Dashboard principal: `https://radar-velocidad-frontend-yyyy.onrender.com/`
+
+*Nota: Las URLs exactas dependerán de los nombres que asigne Render automáticamente.*
 
 ## 🧪 Verificar el Despliegue
 
 ### Probar el API
 
 ```bash
+# Reemplaza con tu URL real del API
+API_URL="https://radar-velocidad-api-xxxx.onrender.com"
+
 # Crear una medición de prueba
-curl -X POST https://radar-velocidad-api.onrender.com/mediciones/
+curl -X POST $API_URL/mediciones/
 
 # Esperar unos segundos y crear otra para completar la medición
-curl -X POST https://radar-velocidad-api.onrender.com/mediciones/
+sleep 3
+curl -X POST $API_URL/mediciones/
 
 # Ver las mediciones
-curl https://radar-velocidad-api.onrender.com/mediciones/
+curl $API_URL/mediciones/
 ```
 
 ### Probar el Frontend
 
-1. Visita `https://radar-velocidad-frontend.onrender.com/`
+1. Visita tu URL del frontend
 2. Verifica que se muestren las mediciones
 3. Prueba la navegación entre páginas
 
 ## 🔧 Configuración para Arduino
 
-Una vez desplegado, configura tus placas Arduino para enviar datos a:
+Una vez desplegado, configura tus placas Arduino para enviar datos a tu URL del API:
 
-```
-POST https://radar-velocidad-api.onrender.com/mediciones/
-```
-
-Ejemplo de código Arduino:
 ```cpp
-const char* serverURL = "https://radar-velocidad-api.onrender.com";
+// Reemplaza con tu URL real
+const char* serverURL = "https://radar-velocidad-api-xxxx.onrender.com";
 const char* endpoint = "/mediciones/";
 
 // En tu función de detección:
@@ -136,9 +185,19 @@ Render proporciona:
 
 ### Problemas Comunes
 
-1. **Error de CORS**: Verifica que `API_URL` esté configurado correctamente
-2. **Base de datos no inicializada**: Los logs del API mostrarán el proceso de inicialización
-3. **Archivos estáticos no cargan**: Verifica que `collectstatic` se ejecutó correctamente
+1. **Error de CORS**: 
+   - Verifica que `FRONTEND_URL` esté configurado en el API
+   - Verifica que `API_URL` esté configurado en el frontend
+   
+2. **Base de datos no inicializada**: 
+   - Los logs del API mostrarán el proceso de inicialización
+   
+3. **Archivos estáticos no cargan**: 
+   - Verifica que `collectstatic` se ejecutó correctamente en el build
+   
+4. **Frontend no puede conectar al API**:
+   - Verifica que las URLs estén correctas en las variables de entorno
+   - Revisa los logs del frontend para errores de conexión
 
 ### Ver Logs
 
@@ -147,35 +206,55 @@ En el dashboard de Render:
 2. Ve a la pestaña "Logs"
 3. Filtra por tipo de log (Build, Deploy, Runtime)
 
-## 🔄 Actualizaciones
+### Comandos de Verificación
+
+Puedes usar el script incluido para verificar el despliegue:
+
+```bash
+# Edita las URLs en test_deployment.py con tus URLs reales
+python test_deployment.py
+```
+
+## � Actualizaciones
 
 Para actualizar el despliegue:
 1. Haz push de los cambios a la rama `feature/integracion-arduino-radar`
-2. Render detectará automáticamente los cambios
-3. Se ejecutará un nuevo despliegue automáticamente
+2. Ve al dashboard de Render
+3. Selecciona cada servicio y haz clic en "Manual Deploy"
+4. O configura auto-deploy desde GitHub en la configuración del servicio
 
-## 💰 Costos
+## � Limitaciones del Plan Gratuito
 
-Render ofrece:
-- **Plan gratuito**: Suficiente para desarrollo y pruebas
-- **Plan de pago**: Para producción con mayor rendimiento
+El plan gratuito de Render incluye:
+- **750 horas de cómputo por mes** (suficiente para 2 servicios)
+- **Suspensión automática** tras 15 minutos de inactividad
+- **Reinicio automático** al recibir requests (puede tardar 30-60 segundos)
+- **Límite de ancho de banda**: 100GB/mes
 
-El plan gratuito incluye:
-- 750 horas de cómputo por mes
-- Suspensión automática tras inactividad
-- Reinicio automático al recibir requests
+**Importante**: Los servicios se suspenden automáticamente, por lo que la primera request después de inactividad será más lenta.
 
 ## 🔒 Seguridad
 
 Configuraciones de seguridad aplicadas:
 - `DEBUG=False` en producción
-- `SECRET_KEY` generado automáticamente
+- `SECRET_KEY` configurado manualmente (cámbialo por uno seguro)
 - CORS configurado para dominios específicos
 - HTTPS habilitado automáticamente por Render
+- Variables de entorno para configuración sensible
 
 ## 📞 Soporte
 
 Si tienes problemas:
 1. Revisa los logs en el dashboard de Render
 2. Consulta la [documentación de Render](https://render.com/docs)
-3. Verifica la configuración en `render.yaml`
+3. Verifica que las variables de entorno estén configuradas correctamente
+4. Asegúrate de que las URLs entre servicios sean correctas
+
+## 🎯 Checklist de Despliegue
+
+- [ ] API desplegado y funcionando
+- [ ] Frontend desplegado y funcionando  
+- [ ] Variables de entorno configuradas en ambos servicios
+- [ ] CORS actualizado con URL del frontend
+- [ ] Pruebas de conectividad exitosas
+- [ ] URLs documentadas para configuración Arduino
