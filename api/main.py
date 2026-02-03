@@ -12,7 +12,7 @@ import schemas
 Base.metadata.create_all(bind=engine)
 
 # Cache en memoria para configuración
-_config_cache = {"distancia_sensores": None}
+_config_cache = {"distancia_sensores": None, "limite_velocidad": None}
 
 app = FastAPI(
     title="Radar de Velocidad API",
@@ -48,6 +48,7 @@ def init_configuracion(db: Session):
     Esta función se ejecuta automáticamente al iniciar la aplicación para asegurar
     que la configuración básica esté presente.
     """
+    # Inicializar distancia_sensores
     config = db.query(models.Configuracion).filter(
         models.Configuracion.clave == "distancia_sensores"
     ).first()
@@ -58,6 +59,19 @@ def init_configuracion(db: Session):
             descripcion="Distancia en metros entre los dos sensores"
         )
         db.add(config)
+        db.commit()
+
+    # Inicializar limite_velocidad
+    limite = db.query(models.Configuracion).filter(
+        models.Configuracion.clave == "limite_velocidad"
+    ).first()
+    if not limite:
+        limite = models.Configuracion(
+            clave="limite_velocidad",
+            valor="50",
+            descripcion="Limite de velocidad en km/h"
+        )
+        db.add(limite)
         db.commit()
 
 
@@ -87,6 +101,11 @@ def startup_event():
             models.Configuracion.clave == "distancia_sensores"
         ).first()
         _config_cache["distancia_sensores"] = float(config.valor) if config else 100.0
+
+        limite = db.query(models.Configuracion).filter(
+            models.Configuracion.clave == "limite_velocidad"
+        ).first()
+        _config_cache["limite_velocidad"] = float(limite.valor) if limite else 50.0
     finally:
         db.close()
 
@@ -401,9 +420,11 @@ def actualizar_configuracion(
     config.valor = config_update.valor
     db.commit()
     db.refresh(config)
-    # Actualizar cache si es distancia_sensores
+    # Actualizar cache
     if clave == "distancia_sensores":
         _config_cache["distancia_sensores"] = float(config.valor)
+    elif clave == "limite_velocidad":
+        _config_cache["limite_velocidad"] = float(config.valor)
     return config
 
 
