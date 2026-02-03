@@ -50,9 +50,51 @@
         </div>
     </div>
 
+    <!-- Limite de velocidad -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-speedometer2 me-2"></i>Limite de Velocidad</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">
+                    Define el limite de velocidad permitido. Las mediciones que superen este valor
+                    se marcaran como exceso de velocidad.
+                </p>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label for="limite_velocidad" class="form-label">Limite (km/h)</label>
+                        <div class="input-group">
+                            <input type="number"
+                                   class="form-control form-control-lg"
+                                   id="limite_velocidad"
+                                   name="limite_velocidad"
+                                   value="{{ limite_velocidad }}"
+                                   min="1"
+                                   max="500"
+                                   step="1"
+                                   required>
+                            <span class="input-group-text">km/h</span>
+                        </div>
+                        <div class="form-text mt-2">
+                            Valor actual: <strong>{{ limite_velocidad }} km/h</strong>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-check-lg me-1"></i> Guardar Limite
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
     <!-- Informacion del sistema -->
     <div class="col-md-6 mb-4">
-        <div class="card mb-4">
+        <div class="card h-100">
             <div class="card-header">
                 <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Informacion del Sistema</h5>
             </div>
@@ -60,27 +102,30 @@
                 <table class="table table-borderless mb-0">
                     <tr>
                         <th class="text-muted">API FastAPI:</th>
-                        <td><code class="bg-light px-2 py-1 rounded">http://localhost:8080</code></td>
+                        <td><code class="bg-light px-2 py-1 rounded">https://radarpythonapi.onrender.com/</code></td>
                     </tr>
                     <tr>
                         <th class="text-muted">Frontend Django:</th>
-                        <td><code class="bg-light px-2 py-1 rounded">http://localhost:8000</code></td>
+                        <td><code class="bg-light px-2 py-1 rounded">https://radarpython.onrender.com/</code></td>
                     </tr>
                     <tr>
                         <th class="text-muted">Limite de velocidad:</th>
-                        <td><span class="badge bg-danger">50 km/h</span></td>
+                        <td><span class="badge bg-danger">{{ limite_velocidad }} km/h</span></td>
                     </tr>
                 </table>
 
                 <div class="alert alert-info mt-3 mb-0">
                     <i class="bi bi-lightbulb me-2"></i>
-                    <strong>Nota:</strong> Los cambios en la distancia afectaran las mediciones futuras.
-                    Las mediciones existentes conservaran la distancia con la que fueron registradas.
+                    <strong>Nota:</strong> Los cambios en la configuracion afectaran las mediciones futuras.
+                    Las mediciones existentes conservaran los valores con los que fueron registradas.
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="card">
+    <!-- Formula de calculo -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
             <div class="card-header">
                 <h5 class="mb-0"><i class="bi bi-calculator me-2"></i>Formula de Calculo</h5>
             </div>

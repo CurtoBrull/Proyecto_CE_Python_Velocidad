@@ -81,11 +81,29 @@ class RadarAPIClient:
             {"valor": str(nueva_distancia)}
         )
 
+    def obtener_limite_velocidad(self) -> float:
+        result = self._get("/configuracion/limite_velocidad")
+        if "error" not in result:
+            return float(result.get("valor", 50))
+        return 50.0
+
+    def actualizar_limite_velocidad(self, nuevo_limite: float) -> Dict[str, Any]:
+        return self._put(
+            "/configuracion/limite_velocidad",
+            {"valor": str(nuevo_limite)}
+        )
+
     def registrar_medicion(self) -> Dict[str, Any]:
         return self._post("/mediciones/")
 
     def hay_medicion_pendiente(self) -> bool:
         """Verifica si hay una medición esperando el segundo sensor."""
+        # Primero intentar con /estado/ (API simple)
+        result = self._get("/estado/")
+        if "error" not in result:
+            return result.get('esperando_sensor2', False)
+
+        # Fallback: API completa con /mediciones/
         params = {"solo_completas": False, "limit": 1}
         result = self._get("/mediciones/", params)
         if isinstance(result, list) and len(result) > 0:

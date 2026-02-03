@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect
 from django.views import View
 from django.contrib import messages
+from django.http import JsonResponse
+from django.conf import settings
 from .api_client import RadarAPIClient
 
 
@@ -13,15 +15,17 @@ class DashboardView(View):
         estadisticas = client.obtener_estadisticas()
         ultimas_mediciones = client.obtener_mediciones(limit=10)
         distancia = client.obtener_distancia()
+        limite_velocidad = client.obtener_limite_velocidad()
 
         for medicion in ultimas_mediciones:
             velocidad = medicion.get('velocidad_kmh')
-            medicion['exceso'] = velocidad and velocidad > 50
+            medicion['exceso'] = velocidad and velocidad > limite_velocidad
 
         context = {
             'estadisticas': estadisticas,
             'ultimas_mediciones': ultimas_mediciones,
             'distancia_actual': distancia,
+            'limite_velocidad': limite_velocidad,
         }
         return render(request, self.template_name, context)
 
@@ -46,9 +50,11 @@ class MedicionesListView(View):
             fecha_fin=fecha_fin
         )
 
+        limite_velocidad = client.obtener_limite_velocidad()
+
         for medicion in mediciones:
             velocidad = medicion.get('velocidad_kmh')
-            medicion['exceso'] = velocidad and velocidad > 50
+            medicion['exceso'] = velocidad and velocidad > limite_velocidad
 
         context = {
             'mediciones': mediciones,
@@ -57,6 +63,7 @@ class MedicionesListView(View):
             'has_next': len(mediciones) == limit,
             'fecha_inicio': fecha_inicio or '',
             'fecha_fin': fecha_fin or '',
+            'limite_velocidad': limite_velocidad,
         }
         return render(request, self.template_name, context)
 
@@ -72,10 +79,14 @@ class MedicionDetailView(View):
             messages.error(request, 'Medicion no encontrada')
             return redirect('dashboard:mediciones')
 
+        limite_velocidad = client.obtener_limite_velocidad()
         velocidad = medicion.get('velocidad_kmh')
-        medicion['exceso'] = velocidad and velocidad > 50
+        medicion['exceso'] = velocidad and velocidad > limite_velocidad
 
-        context = {'medicion': medicion}
+        context = {
+            'medicion': medicion,
+            'limite_velocidad': limite_velocidad,
+        }
         return render(request, self.template_name, context)
 
 
@@ -110,9 +121,11 @@ class ConfiguracionView(View):
     def get(self, request):
         client = RadarAPIClient()
         distancia = client.obtener_distancia()
+        limite_velocidad = client.obtener_limite_velocidad()
 
         context = {
             'distancia_actual': distancia,
+            'limite_velocidad': limite_velocidad,
         }
         return render(request, self.template_name, context)
 
@@ -134,6 +147,21 @@ class ConfiguracionView(View):
             except ValueError:
                 messages.error(request, 'Valor de distancia invalido')
 
+        nuevo_limite = request.POST.get('limite_velocidad')
+        if nuevo_limite:
+            try:
+                limite = float(nuevo_limite)
+                if limite > 0:
+                    result = client.actualizar_limite_velocidad(limite)
+                    if 'error' not in result:
+                        messages.success(request, f'Limite de velocidad actualizado a {limite} km/h')
+                    else:
+                        messages.error(request, f'Error: {result["error"]}')
+                else:
+                    messages.error(request, 'El limite debe ser mayor a 0')
+            except ValueError:
+                messages.error(request, 'Valor de limite invalido')
+
         return redirect('dashboard:configuracion')
 
 
@@ -143,6 +171,7 @@ class NuevaMedicionView(View):
     def get(self, request):
         client = RadarAPIClient()
         distancia = client.obtener_distancia()
+        limite_velocidad = client.obtener_limite_velocidad()
         hay_pendiente = client.hay_medicion_pendiente()
 
         # Estado: 'esperando_sensor1' (azul), 'esperando_sensor2' (naranja)
@@ -150,6 +179,7 @@ class NuevaMedicionView(View):
 
         context = {
             'distancia_actual': distancia,
+            'limite_velocidad': limite_velocidad,
             'estado': estado,
         }
         return render(request, self.template_name, context)
@@ -161,12 +191,14 @@ class NuevaMedicionView(View):
         if accion == 'iniciar':
             result = client.registrar_medicion()
             if 'error' not in result:
-                if result.get('es_primera_medicion'):
-                    messages.info(request, 'Sensor 1 activado. Esperando paso por sensor 2...')
-                else:
-                    velocidad_kmh = result.get('velocidad_kmh', 0)
-                    tiempo = result.get('tiempo_recorrido', 0)
-                    if velocidad_kmh and velocidad_kmh > 50:
+                # Compatibilidad con API simple (mensaje) y API completa (es_primera_medicion)
+                velocidad_kmh = result.get('velocidad_kmh')
+                tiempo = result.get('tiempo_recorrido') or result.get('tiempo_segundos')
+
+                if velocidad_kmh is not None and tiempo is not None:
+                    # Medición completa
+                    limite_velocidad = client.obtener_limite_velocidad()
+                    if velocidad_kmh > limite_velocidad:
                         messages.warning(
                             request,
                             f'Medicion completada: {velocidad_kmh:.2f} km/h en {tiempo:.2f}s - EXCESO DE VELOCIDAD'
@@ -176,7 +208,59 @@ class NuevaMedicionView(View):
                             request,
                             f'Medicion completada: {velocidad_kmh:.2f} km/h en {tiempo:.2f}s'
                         )
+                else:
+                    # Esperando segundo sensor
+                    mensaje = result.get('mensaje', 'Sensor 1 activado. Esperando sensor 2...')
+                    messages.info(request, mensaje)
             else:
                 messages.error(request, f'Error al registrar: {result["error"]}')
 
         return redirect('dashboard:nueva_medicion')
+
+
+class MedicionesAutoView(View):
+    template_name = 'dashboard/mediciones_auto.html'
+
+    def get(self, request):
+        client = RadarAPIClient()
+        distancia = client.obtener_distancia()
+        limite_velocidad = client.obtener_limite_velocidad()
+        hay_pendiente = client.hay_medicion_pendiente()
+
+        estado = 'esperando_sensor2' if hay_pendiente else 'esperando_sensor1'
+
+        ultimas_mediciones = client.obtener_mediciones(limit=5)
+        for medicion in ultimas_mediciones:
+            velocidad = medicion.get('velocidad_kmh')
+            medicion['exceso'] = velocidad and velocidad > limite_velocidad
+
+        api_url = getattr(settings, 'FASTAPI_BASE_URL', 'http://localhost:8080')
+
+        context = {
+            'distancia_actual': distancia,
+            'limite_velocidad': limite_velocidad,
+            'estado': estado,
+            'ultimas_mediciones': ultimas_mediciones,
+            'api_url': api_url,
+        }
+        return render(request, self.template_name, context)
+
+
+class MedicionesAutoAPIView(View):
+    """Endpoint para polling desde JavaScript."""
+
+    def get(self, request):
+        client = RadarAPIClient()
+        hay_pendiente = client.hay_medicion_pendiente()
+        limite_velocidad = client.obtener_limite_velocidad()
+
+        ultimas_mediciones = client.obtener_mediciones(limit=5)
+        for medicion in ultimas_mediciones:
+            velocidad = medicion.get('velocidad_kmh')
+            medicion['exceso'] = velocidad and velocidad > limite_velocidad
+
+        return JsonResponse({
+            'estado': 'esperando_sensor2' if hay_pendiente else 'esperando_sensor1',
+            'limite_velocidad': limite_velocidad,
+            'ultimas_mediciones': ultimas_mediciones,
+        })

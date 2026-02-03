@@ -42,8 +42,13 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'mediciones_auto' %}active{% endif %}" href="{% url 'dashboard:mediciones_auto' %}">
+                            <i class="bi bi-broadcast"></i> Auto (Placa)
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'nueva_medicion' %}active{% endif %}" href="{% url 'dashboard:nueva_medicion' %}">
-                            <i class="bi bi-play-circle"></i> Nueva Medicion
+                            <i class="bi bi-play-circle"></i> Manual
                         </a>
                     </li>
                     <li class="nav-item">
