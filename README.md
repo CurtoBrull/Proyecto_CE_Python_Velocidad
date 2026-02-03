@@ -233,3 +233,68 @@ curl -X POST http://localhost:8080/mediciones/ \
 ## Integración con hardware
 
 Ver [placa/README.md](placa/README.md) para configurar el ESP32/ESP8266 con sensores.
+
+## Configurar DBeaver para PostgreSQL
+
+Para conectarte a la base de datos PostgreSQL (local o en Render):
+
+### 1. Nueva conexión
+
+- Abre DBeaver
+- Clic en **New Database Connection** (icono de enchufe) o `Ctrl+Shift+N`
+- Selecciona **PostgreSQL** → **Next**
+
+### 2. Configurar conexión
+
+| Campo | Valor (ejemplo Render) |
+|-------|------------------------|
+| **Host** | `dpg-xxx.frankfurt-postgres.render.com` |
+| **Port** | `5432` |
+| **Database** | `radar_velocidad_db` |
+| **Username** | `radar_velocidad_db_user` |
+| **Password** | `(tu password)` |
+
+Para **local con Docker**:
+
+| Campo | Valor |
+|-------|-------|
+| **Host** | `localhost` |
+| **Port** | `5432` |
+| **Database** | `radar_velocidad` |
+| **Username** | `radar` |
+| **Password** | `radar123` |
+
+### 3. Configurar SSL (solo para Render)
+
+- Ve a la pestaña **SSL**
+- Marca **Use SSL**
+- En **SSL mode** selecciona: `require`
+
+### 4. Probar conexión
+
+- Clic en **Test Connection**
+- Si pide descargar drivers, acepta
+- Debe mostrar "Connected"
+- Clic en **Finish**
+
+### 5. Consultas útiles
+
+```sql
+-- Ver todas las mediciones
+SELECT * FROM mediciones ORDER BY timestamp DESC;
+
+-- Ver configuración
+SELECT * FROM configuracion;
+
+-- Mediciones con exceso de velocidad
+SELECT * FROM mediciones WHERE velocidad_kmh > 50;
+
+-- Estadísticas
+SELECT
+    COUNT(*) as total,
+    AVG(velocidad_kmh) as promedio,
+    MAX(velocidad_kmh) as maxima,
+    MIN(velocidad_kmh) as minima
+FROM mediciones
+WHERE medicion_completa = true;
+```
