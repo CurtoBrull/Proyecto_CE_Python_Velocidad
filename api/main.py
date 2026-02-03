@@ -124,7 +124,10 @@ def get_distancia_sensores() -> float:
 
 
 @app.post("/mediciones/", response_model=schemas.MedicionResponse)
-def registrar_medicion(db: Session = Depends(get_db)):
+def registrar_medicion(
+    medicion: schemas.MedicionCreate = None,
+    db: Session = Depends(get_db)
+):
     """
     Registra una nueva medición de velocidad o completa una medición pendiente.
 
@@ -135,6 +138,7 @@ def registrar_medicion(db: Session = Depends(get_db)):
     Si no hay medición pendiente, crea una nueva medición como primera detección.
 
     Parámetros:
+    - medicion (MedicionCreate): Datos opcionales de la medición (timestamp desde la placa).
     - db (Session): Sesión de base de datos inyectada automáticamente por FastAPI.
 
     Retorno:
@@ -154,7 +158,11 @@ def registrar_medicion(db: Session = Depends(get_db)):
 
     Esta función asume que las llamadas alternan entre detecciones de los dos sensores.
     """
-    timestamp_actual = datetime.now()
+    # Usar el timestamp de la placa si se proporciona, sino usar el del servidor
+    if medicion and medicion.timestamp:
+        timestamp_actual = datetime.fromtimestamp(medicion.timestamp)
+    else:
+        timestamp_actual = datetime.now()
     distancia = get_distancia_sensores()
 
     medicion_pendiente = db.query(models.Medicion).filter(

@@ -8,7 +8,7 @@ class MedicionBase(BaseModel):
 
 
 class MedicionCreate(MedicionBase):
-    pass
+    timestamp: Optional[float] = None  # Unix timestamp desde la placa
 
 
 class MedicionResponse(BaseModel):
