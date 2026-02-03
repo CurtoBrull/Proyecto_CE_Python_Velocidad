@@ -1,0 +1,37 @@
+services:
+  # Servicio de Backend (FastAPI)
+  - type: web
+    name: radar-api
+    runtime: docker
+    rootDir: api
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: radar-postgres
+          property: connectionString
+      - key: PORT
+        value: 8080
+    plan: free
+
+  # Servicio de Frontend (Django)
+  - type: web
+    name: radar-frontend
+    runtime: docker
+    rootDir: frontend
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "false"
+      - key: API_URL
+        fromService:
+          name: radar-api
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
+    plan: free
+
+databases:
+  - name: radar-postgres
+    plan: free
+    databaseName: radar_velocidad
+    user: radar

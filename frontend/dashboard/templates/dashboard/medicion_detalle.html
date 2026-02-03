@@ -1,0 +1,124 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Medicion #{{ medicion.id }} - Radar de Velocidad{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'dashboard:mediciones' %}">Mediciones</a></li>
+        <li class="breadcrumb-item active">Medicion #{{ medicion.id }}</li>
+    </ol>
+</nav>
+
+<!-- Header de pagina -->
+<div class="page-header">
+    <h1><i class="bi bi-speedometer"></i> Detalle de Medicion #{{ medicion.id }}</h1>
+</div>
+
+<div class="row">
+    <!-- Informacion General -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Informacion General</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless mb-0">
+                    <tr>
+                        <th class="text-muted" style="width: 40%">ID:</th>
+                        <td><strong>#{{ medicion.id }}</strong></td>
+                    </tr>
+                    <tr>
+                        <th class="text-muted">Fecha/Hora:</th>
+                        <td>{{ medicion.timestamp|slice:":19"|default:"--" }}</td>
+                    </tr>
+                    <tr>
+                        <th class="text-muted">Distancia:</th>
+                        <td>{{ medicion.distancia|floatformat:0 }} metros</td>
+                    </tr>
+                    <tr>
+                        <th class="text-muted">Estado:</th>
+                        <td>
+                            {% if medicion.medicion_completa %}
+                                <span class="badge bg-success">
+                                    <i class="bi bi-check-circle me-1"></i>Completa
+                                </span>
+                            {% else %}
+                                <span class="badge bg-warning">
+                                    <i class="bi bi-clock me-1"></i>En progreso
+                                </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Datos de Velocidad -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-speedometer2 me-2"></i>Datos de Velocidad</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless mb-0">
+                    <tr>
+                        <th class="text-muted" style="width: 40%">Velocidad (km/h):</th>
+                        <td class="{% if medicion.exceso %}exceso{% endif %} fs-5">
+                            {% if medicion.velocidad_kmh %}
+                                <strong>{{ medicion.velocidad_kmh|floatformat:2 }}</strong> km/h
+                            {% else %}
+                                <span class="text-muted">--</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="text-muted">Velocidad (m/s):</th>
+                        <td>
+                            {% if medicion.velocidad_ms %}
+                                {{ medicion.velocidad_ms|floatformat:2 }} m/s
+                            {% else %}
+                                <span class="text-muted">--</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="text-muted">Tiempo recorrido:</th>
+                        <td>
+                            {% if medicion.tiempo_recorrido %}
+                                {{ medicion.tiempo_recorrido|floatformat:3 }} segundos
+                            {% else %}
+                                <span class="text-muted">--</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="text-muted">Exceso de velocidad:</th>
+                        <td>
+                            {% if medicion.exceso %}
+                                <span class="badge bg-danger fs-6">
+                                    <i class="bi bi-exclamation-triangle me-1"></i>SI - Supera 50 km/h
+                                </span>
+                            {% else %}
+                                <span class="badge bg-success fs-6">
+                                    <i class="bi bi-check-circle me-1"></i>NO
+                                </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Boton volver -->
+<div class="text-center">
+    <a href="{% url 'dashboard:mediciones' %}" class="btn btn-outline-primary">
+        <i class="bi bi-arrow-left me-1"></i> Volver a Mediciones
+    </a>
+</div>
+{% endblock %}

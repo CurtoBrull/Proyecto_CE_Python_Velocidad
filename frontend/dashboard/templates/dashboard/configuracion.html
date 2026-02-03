@@ -1,0 +1,100 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Configuracion - Radar de Velocidad{% endblock %}
+
+{% block content %}
+<!-- Header de pagina -->
+<div class="page-header">
+    <h1><i class="bi bi-gear"></i> Configuracion</h1>
+    <p class="subtitle">Ajusta los parametros del sistema de radar de velocidad</p>
+</div>
+
+<div class="row">
+    <!-- Distancia entre sensores -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-rulers me-2"></i>Distancia entre Sensores</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">
+                    Define la distancia en metros entre el sensor de entrada y el sensor de salida.
+                    Este valor se utiliza para calcular la velocidad de los vehiculos.
+                </p>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label for="distancia" class="form-label">Distancia (metros)</label>
+                        <div class="input-group">
+                            <input type="number"
+                                   class="form-control form-control-lg"
+                                   id="distancia"
+                                   name="distancia"
+                                   value="{{ distancia_actual }}"
+                                   min="1"
+                                   max="10000"
+                                   step="0.1"
+                                   required>
+                            <span class="input-group-text">metros</span>
+                        </div>
+                        <div class="form-text mt-2">
+                            Valor actual: <strong>{{ distancia_actual }} metros</strong>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg me-1"></i> Guardar Cambios
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Informacion del sistema -->
+    <div class="col-md-6 mb-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Informacion del Sistema</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless mb-0">
+                    <tr>
+                        <th class="text-muted">API FastAPI:</th>
+                        <td><code class="bg-light px-2 py-1 rounded">http://localhost:8080</code></td>
+                    </tr>
+                    <tr>
+                        <th class="text-muted">Frontend Django:</th>
+                        <td><code class="bg-light px-2 py-1 rounded">http://localhost:8000</code></td>
+                    </tr>
+                    <tr>
+                        <th class="text-muted">Limite de velocidad:</th>
+                        <td><span class="badge bg-danger">50 km/h</span></td>
+                    </tr>
+                </table>
+
+                <div class="alert alert-info mt-3 mb-0">
+                    <i class="bi bi-lightbulb me-2"></i>
+                    <strong>Nota:</strong> Los cambios en la distancia afectaran las mediciones futuras.
+                    Las mediciones existentes conservaran la distancia con la que fueron registradas.
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-calculator me-2"></i>Formula de Calculo</h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-3">La velocidad se calcula usando la formula:</p>
+                <div class="alert alert-secondary text-center mb-3">
+                    <strong class="fs-5">Velocidad = Distancia / Tiempo</strong>
+                </div>
+                <ul class="mb-0 small">
+                    <li><strong>Velocidad (m/s)</strong> = distancia / tiempo_recorrido</li>
+                    <li><strong>Velocidad (km/h)</strong> = velocidad_ms * 3.6</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
