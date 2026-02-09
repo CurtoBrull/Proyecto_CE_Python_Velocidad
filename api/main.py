@@ -91,25 +91,10 @@ def init_configuracion(db: Session):
 
 @app.on_event("startup")
 def startup_event():
-    """
-    Evento de inicio de la aplicación FastAPI.
-
-    Esta función se ejecuta automáticamente cuando la aplicación FastAPI se inicia.
-    Su propósito es inicializar la configuración por defecto en la base de datos
-    llamando a la función init_configuracion.
-
-    Parámetros:
-    - Ninguno: Es un decorador de evento que no recibe parámetros directos.
-
-    Retorno:
-    - None: No retorna ningún valor.
-
-    Utiliza una sesión de base de datos temporal para realizar la inicialización
-    y la cierra al finalizar para liberar recursos.
-    """
-    db = next(get_db())
-    try:
+    with next(get_db()) as db:
+        # Inicializar configuración en DB (ya verifica duplicados)
         init_configuracion(db)
+
         # Cargar configuración en cache
         config = db.query(models.Configuracion).filter(
             models.Configuracion.clave == "distancia_sensores"
@@ -120,8 +105,7 @@ def startup_event():
             models.Configuracion.clave == "limite_velocidad"
         ).first()
         _config_cache["limite_velocidad"] = float(limite.valor) if limite else 50.0
-    finally:
-        db.close()
+
 
 
 def get_distancia_sensores() -> float:
