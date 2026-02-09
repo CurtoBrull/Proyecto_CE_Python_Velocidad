@@ -9,6 +9,7 @@ urlpatterns = [
     path('mediciones-auto/', views.MedicionesAutoView.as_view(), name='mediciones_auto'),
     path('api/mediciones-auto/', views.MedicionesAutoAPIView.as_view(), name='mediciones_auto_api'),
     path('auto/', views.AutoView.as_view(), name='auto'),
+    path('api/ultimo-post/', views.UltimoPostAPIView.as_view(), name='ultimo_post_api'),
     path('mediciones/', views.MedicionesListView.as_view(), name='mediciones'),
     path('mediciones/<int:pk>/', views.MedicionDetailView.as_view(), name='medicion_detalle'),
     path('reportes/', views.ReportesView.as_view(), name='reportes'),

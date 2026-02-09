@@ -287,3 +287,12 @@ class AutoView(View):
             'api_url': api_url,
         }
         return render(request, self.template_name, context)
+
+
+class UltimoPostAPIView(View):
+    """Endpoint para obtener el último POST recibido por FastAPI."""
+
+    def get(self, request):
+        client = RadarAPIClient()
+        ultimo_post = client.obtener_ultimo_post()
+        return JsonResponse(ultimo_post)

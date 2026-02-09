@@ -15,6 +15,9 @@ Base.metadata.create_all(bind=engine)
 # Cache en memoria para configuración
 _config_cache = {"distancia_sensores": None, "limite_velocidad": None}
 
+# Almacenamiento del último POST recibido para mostrar en tiempo real
+_ultimo_post = {"timestamp": None, "data": None}
+
 app = FastAPI(
     title="Radar de Velocidad API",
     description="API para el sistema de radar de velocidad con sensores Arduino",
@@ -181,6 +184,20 @@ def registrar_medicion(
 
         db.commit()
         db.refresh(medicion_pendiente)
+        
+        # Guardar en memoria para mostrar en tiempo real
+        _ultimo_post["timestamp"] = datetime.now().isoformat()
+        _ultimo_post["data"] = {
+            "id": medicion_pendiente.id,
+            "timestamp": medicion_pendiente.timestamp.isoformat(),
+            "distancia": medicion_pendiente.distancia,
+            "velocidad_ms": medicion_pendiente.velocidad_ms,
+            "velocidad_kmh": medicion_pendiente.velocidad_kmh,
+            "tiempo_recorrido": medicion_pendiente.tiempo_recorrido,
+            "medicion_completa": True,
+            "es_primera_medicion": False
+        }
+        
         return medicion_pendiente
     else:
         nueva_medicion = models.Medicion(
@@ -192,7 +209,35 @@ def registrar_medicion(
         db.add(nueva_medicion)
         db.commit()
         db.refresh(nueva_medicion)
+        
+        # Guardar en memoria para mostrar en tiempo real
+        _ultimo_post["timestamp"] = datetime.now().isoformat()
+        _ultimo_post["data"] = {
+            "id": nueva_medicion.id,
+            "timestamp": nueva_medicion.timestamp.isoformat(),
+            "distancia": nueva_medicion.distancia,
+            "velocidad_ms": None,
+            "velocidad_kmh": None,
+            "tiempo_recorrido": None,
+            "medicion_completa": False,
+            "es_primera_medicion": True,
+            "mensaje": "Sensor 1 activado. Esperando sensor 2..."
+        }
+        
         return nueva_medicion
+
+
+@app.get("/ultimo-post/")
+def obtener_ultimo_post():
+    """
+    Devuelve el último POST recibido en /mediciones/ para mostrar en tiempo real.
+    
+    Este endpoint es usado por auto.html para mostrar los datos que llegan
+    de los sensores en tiempo real.
+    """
+    if _ultimo_post["data"] is None:
+        return {"mensaje": "No hay datos aún", "data": None}
+    return _ultimo_post
 
 
 @app.get("/mediciones/", response_model=List[schemas.MedicionResponse])

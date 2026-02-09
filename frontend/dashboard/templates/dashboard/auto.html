@@ -19,7 +19,7 @@
         max-height: 600px;
         overflow-y: auto;
     }
-    
+
     .waiting-message {
         color: #969696;
         font-style: italic;
@@ -53,34 +53,43 @@
 {% block extra_js %}
 <script>
     // API Configuration
-    // Usa el endpoint intermedio de Django en lugar de llamar directamente a FastAPI
-    const API_URL = window.location.origin;  // https://radarpython.onrender.com
-    const ENDPOINT = '/api/mediciones-auto/';  // Endpoint de Django
+    // Usa el endpoint intermedio de Django que consulta FastAPI
+    const API_URL = window.location.origin;
+    const ENDPOINT = '/api/ultimo-post/';  // Endpoint para obtener el último POST recibido
     let updateInterval = null;
-    
+    let ultimoTimestamp = null;  // Para detectar si hay nuevo POST
+
     async function actualizarDatos() {
         try {
             const fullUrl = `${API_URL}${ENDPOINT}`;
             const response = await fetch(fullUrl);
-            
+
             if (!response.ok) {
                 throw new Error(`HTTP Error: ${response.status}`);
             }
-            
+
             const data = await response.json();
-            document.getElementById('json-output').textContent = JSON.stringify(data, null, 2);
-            
+
+            // Solo actualizar si hay datos nuevos
+            if (data.data === null) {
+                document.getElementById('json-output').innerHTML =
+                    '<span class="waiting-message">Esperando POST desde los sensores...</span>';
+            } else if (data.timestamp !== ultimoTimestamp) {
+                ultimoTimestamp = data.timestamp;
+                document.getElementById('json-output').textContent = JSON.stringify(data, null, 2);
+            }
+
         } catch (error) {
             console.error('Error al obtener datos:', error);
             document.getElementById('json-output').textContent = `Error: ${error.message}`;
         }
     }
-    
+
     document.addEventListener('DOMContentLoaded', () => {
         actualizarDatos();
-        updateInterval = setInterval(actualizarDatos, 2000);
+        updateInterval = setInterval(actualizarDatos, 1000);  // Polling cada 1 segundo
     });
-    
+
     window.addEventListener('beforeunload', () => {
         if (updateInterval) clearInterval(updateInterval);
     });

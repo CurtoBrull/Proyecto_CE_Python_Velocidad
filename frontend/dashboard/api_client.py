@@ -110,3 +110,7 @@ class RadarAPIClient:
             ultima = result[0]
             return ultima.get('es_primera_medicion', False) and not ultima.get('medicion_completa', True)
         return False
+
+    def obtener_ultimo_post(self) -> Dict[str, Any]:
+        """Obtiene el último POST recibido por FastAPI para mostrar en tiempo real."""
+        return self._get("/ultimo-post/")
