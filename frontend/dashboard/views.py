@@ -247,14 +247,24 @@ class MedicionesAutoView(View):
 
 
 class MedicionesAutoAPIView(View):
-    """Endpoint para polling desde JavaScript."""
+    """Endpoint para polling desde JavaScript - solo mediciones en tiempo real."""
 
     def get(self, request):
+        from datetime import datetime, timedelta
+
         client = RadarAPIClient()
         hay_pendiente = client.hay_medicion_pendiente()
         limite_velocidad = client.obtener_limite_velocidad()
 
-        ultimas_mediciones = client.obtener_mediciones(limit=5)
+        # Solo obtener mediciones de los últimos 10 segundos (tiempo real)
+        ahora = datetime.now()
+        hace_10_segundos = ahora - timedelta(seconds=10)
+        fecha_inicio = hace_10_segundos.strftime('%Y-%m-%dT%H:%M:%S')
+
+        ultimas_mediciones = client.obtener_mediciones(
+            limit=5,
+            fecha_inicio=fecha_inicio
+        )
         for medicion in ultimas_mediciones:
             velocidad = medicion.get('velocidad_kmh')
             medicion['exceso'] = velocidad and velocidad > limite_velocidad
