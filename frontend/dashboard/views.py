@@ -264,3 +264,16 @@ class MedicionesAutoAPIView(View):
             'limite_velocidad': limite_velocidad,
             'ultimas_mediciones': ultimas_mediciones,
         })
+
+
+class AutoView(View):
+    """Vista reactiva que muestra JSON recibido desde la API."""
+    template_name = 'dashboard/auto.html'
+
+    def get(self, request):
+        api_url = getattr(settings, 'FASTAPI_BASE_URL', 'http://localhost:8080')
+        
+        context = {
+            'api_url': api_url,
+        }
+        return render(request, self.template_name, context)

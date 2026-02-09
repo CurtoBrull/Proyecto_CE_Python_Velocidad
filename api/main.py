@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func, Integer, case
 from datetime import datetime, date
 from typing import List, Optional
+import os
 
 from database import engine, get_db, Base
 import models
@@ -20,9 +21,22 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# CORS Configuration
+# Allow origins from environment variable or default to local development + Render URLs
+allowed_origins = [
+    "http://localhost:8000",           # Local development
+    "http://127.0.0.1:8000",          # Local development alternative
+    "http://frontend:8000",             # Docker Compose
+    "https://radarpython.onrender.com", # Render frontend
+    os.getenv("FRONTEND_URL", ""),      # Environment variable for flexibility
+]
+
+# Remove empty strings from allowed_origins
+allowed_origins = [origin for origin in allowed_origins if origin]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8000", "http://127.0.0.1:8000", "http://frontend:8000", "*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

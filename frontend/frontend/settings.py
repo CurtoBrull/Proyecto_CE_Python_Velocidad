@@ -75,4 +75,5 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# API Configuration - Use environment variable for API URL (important for Render deployment)
 FASTAPI_BASE_URL = os.getenv('API_URL', 'http://localhost:8080')

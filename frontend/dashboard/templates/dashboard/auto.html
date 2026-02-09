@@ -1,0 +1,88 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Monitor Auto - Radar de Velocidad{% endblock %}
+
+{% block extra_css %}
+<style>
+    .json-display {
+        background-color: #1e1e1e;
+        color: #d4d4d4;
+        border: 1px solid #404040;
+        border-radius: 8px;
+        padding: 20px;
+        font-family: 'Courier New', 'Consolas', monospace;
+        font-size: 14px;
+        line-height: 1.6;
+        white-space: pre-wrap;
+        word-break: break-all;
+        min-height: 300px;
+        max-height: 600px;
+        overflow-y: auto;
+    }
+    
+    .waiting-message {
+        color: #969696;
+        font-style: italic;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="bi bi-car-front"></i> Monitor Auto</h1>
+    <p class="subtitle">Visualización JSON en tiempo real</p>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="bi bi-braces"></i> Datos JSON</h5>
+            </div>
+            <div class="card-body">
+                <div class="json-display" id="json-output">
+                    <span class="waiting-message">Esperando JSON...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // API Configuration
+    // Usa el endpoint intermedio de Django en lugar de llamar directamente a FastAPI
+    const API_URL = window.location.origin;  // https://radarpython.onrender.com
+    const ENDPOINT = '/api/mediciones-auto/';  // Endpoint de Django
+    let updateInterval = null;
+    
+    async function actualizarDatos() {
+        try {
+            const fullUrl = `${API_URL}${ENDPOINT}`;
+            const response = await fetch(fullUrl);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP Error: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            document.getElementById('json-output').textContent = JSON.stringify(data, null, 2);
+            
+        } catch (error) {
+            console.error('Error al obtener datos:', error);
+            document.getElementById('json-output').textContent = `Error: ${error.message}`;
+        }
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        actualizarDatos();
+        updateInterval = setInterval(actualizarDatos, 2000);
+    });
+    
+    window.addEventListener('beforeunload', () => {
+        if (updateInterval) clearInterval(updateInterval);
+    });
+</script>
+{% endblock %}

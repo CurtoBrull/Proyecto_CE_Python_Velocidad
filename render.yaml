@@ -24,10 +24,7 @@ services:
       - key: DEBUG
         value: "false"
       - key: API_URL
-        fromService:
-          name: radar-api
-          type: web
-          envVarKey: RENDER_EXTERNAL_URL
+        value: "https://radarpythonapi.onrender.com"
     plan: free
 
 databases:

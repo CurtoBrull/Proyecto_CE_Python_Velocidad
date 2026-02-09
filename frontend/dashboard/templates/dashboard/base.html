@@ -47,6 +47,11 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'auto' %}active{% endif %}" href="{% url 'dashboard:auto' %}">
+                            <i class="bi bi-car-front"></i> Monitor Auto
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'nueva_medicion' %}active{% endif %}" href="{% url 'dashboard:nueva_medicion' %}">
                             <i class="bi bi-play-circle"></i> Manual
                         </a>
