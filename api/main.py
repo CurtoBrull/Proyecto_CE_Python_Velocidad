@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func, Integer, case
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime, date
-from typing import List, Optional
+from typing import List, Optional, Union, Dict
 import os
 
 from database import engine, get_db, Base
@@ -130,7 +130,7 @@ def get_distancia_sensores() -> float:
     return _config_cache.get("distancia_sensores", 100.0)
 
 
-@app.post("/mediciones/", response_model=schemas.MedicionResponse)
+@app.post("/mediciones/")
 def registrar_medicion(
     medicion: schemas.MedicionCreate = None,
     db: Session = Depends(get_db)
@@ -139,81 +139,41 @@ def registrar_medicion(
     Registra una nueva medición de velocidad o completa una medición pendiente.
 
     Esta función maneja la lógica principal del sistema de radar de velocidad.
-    Cuando se llama, verifica si hay una medición pendiente (primera medición sin completar).
-    Si existe una medición pendiente, calcula la velocidad basándose en el tiempo
-    transcurrido entre la primera y segunda detección, y completa la medición.
-    Si no hay medición pendiente, crea una nueva medición como primera detección.
-
+    - Cuando llega detector1: inicia una nueva medición
+    - Ignora detector1 adicionales mientras haya medición pendiente
+    - Cuando llega detector2: completa la medición pendiente y calcula velocidad
+    
     Parámetros:
-    - medicion (MedicionCreate): Datos opcionales de la medición (timestamp desde la placa).
+    - medicion (MedicionCreate): Datos del JSON con detector1 o detector2
     - db (Session): Sesión de base de datos inyectada automáticamente por FastAPI.
 
     Retorno:
-    - MedicionResponse: Un objeto de respuesta que contiene los detalles de la medición
-      registrada o completada, incluyendo timestamp, distancia, velocidades calculadas, etc.
-
-    Lógica de funcionamiento:
-    1. Obtiene el timestamp actual y la distancia entre sensores.
-    2. Busca una medición pendiente (es_primera_medicion=True, medicion_completa=False).
-    3. Si encuentra una pendiente:
-       - Calcula el tiempo recorrido en segundos.
-       - Calcula velocidad en m/s: distancia / tiempo.
-       - Calcula velocidad en km/h: velocidad_ms * 3.6.
-       - Actualiza la medición con los valores calculados y marca como completa.
-    4. Si no hay pendiente:
-       - Crea una nueva medición con el timestamp actual, distancia, y marca como primera medición incompleta.
-
-    Esta función asume que las llamadas alternan entre detecciones de los dos sensores.
+    - MedicionResponse: Medición registrada o completada
     """
-    # Obtener timestamp y distancia
-    if medicion and medicion.detector1:
-        timestamp_actual = medicion.detector1
-    elif medicion and medicion.detector2:
-        timestamp_actual = medicion.detector2
-    else:
-        timestamp_actual = datetime.now()
     
-    distancia = get_distancia_sensores()
-
-    # Buscar si hay una medición pendiente
-    medicion_pendiente = db.query(models.Medicion).filter(
-        models.Medicion.es_primera_medicion == True,
-        models.Medicion.medicion_completa == False
-    ).first()
-
-    if medicion_pendiente:
-        # Completar la medición pendiente
-        tiempo_recorrido = (timestamp_actual - medicion_pendiente.timestamp).total_seconds()
-        velocidad_ms = distancia / tiempo_recorrido
-        velocidad_kmh = velocidad_ms * 3.6
-
-        medicion_pendiente.velocidad_ms = velocidad_ms
-        medicion_pendiente.velocidad_kmh = velocidad_kmh
-        medicion_pendiente.tiempo_recorrido = tiempo_recorrido
-        medicion_pendiente.medicion_completa = True
-        medicion_pendiente.es_primera_medicion = False
-
-        db.commit()
-        db.refresh(medicion_pendiente)
+    # Verificar qué detector llegó
+    tiene_detector1 = medicion and hasattr(medicion, 'detector1') and medicion.detector1 is not None
+    tiene_detector2 = medicion and hasattr(medicion, 'detector2') and medicion.detector2 is not None
+    
+    # Si llega detector1
+    if tiene_detector1:
+        # Verificar si ya hay una medición pendiente
+        medicion_pendiente = db.query(models.Medicion).filter(
+            models.Medicion.es_primera_medicion == True,
+            models.Medicion.medicion_completa == False
+        ).first()
         
-        # Guardar en memoria para mostrar en tiempo real
-        _ultimo_post["timestamp"] = datetime.now().isoformat()
-        _ultimo_post["data"] = {
-            "id": medicion_pendiente.id,
-            "timestamp": medicion_pendiente.timestamp.isoformat(),
-            "distancia": medicion_pendiente.distancia,
-            "velocidad_ms": medicion_pendiente.velocidad_ms,
-            "velocidad_kmh": medicion_pendiente.velocidad_kmh,
-            "tiempo_recorrido": medicion_pendiente.tiempo_recorrido,
-            "medicion_completa": True,
-            "es_primera_medicion": False
-        }
+        if medicion_pendiente:
+            # Ya hay una medición esperando detector2, ignorar este detector1
+            return {
+                "mensaje": "Medición ya en progreso. Esperando detector 2",
+                "estado": "ignorado"
+            }
         
-        return medicion_pendiente
-    else:
-        # Crear nueva medición
+        # Crear nueva medición con detector1
+        distancia = get_distancia_sensores()
         nueva_medicion = models.Medicion(
-            timestamp=timestamp_actual,
+            timestamp=medicion.detector1,
             distancia=distancia,
             es_primera_medicion=True,
             medicion_completa=False
@@ -237,6 +197,67 @@ def registrar_medicion(
         }
         
         return nueva_medicion
+    
+    # Si llega detector2
+    elif tiene_detector2:
+        # Buscar medición pendiente
+        medicion_pendiente = db.query(models.Medicion).filter(
+            models.Medicion.es_primera_medicion == True,
+            models.Medicion.medicion_completa == False
+        ).first()
+        
+        if not medicion_pendiente:
+            # No hay medición iniciada, ignorar este detector2
+            return {
+                "mensaje": "No hay medición en progreso. Esperando detector 1",
+                "estado": "ignorado"
+            }
+        
+        # Completar la medición
+        distancia = get_distancia_sensores()
+        tiempo_recorrido = (medicion.detector2 - medicion_pendiente.timestamp).total_seconds()
+        
+        # Evitar división por cero
+        if tiempo_recorrido <= 0:
+            return {
+                "mensaje": "Tiempo recorrido inválido",
+                "estado": "error"
+            }
+        
+        velocidad_ms = distancia / tiempo_recorrido
+        velocidad_kmh = velocidad_ms * 3.6
+
+        medicion_pendiente.velocidad_ms = velocidad_ms
+        medicion_pendiente.velocidad_kmh = velocidad_kmh
+        medicion_pendiente.tiempo_recorrido = tiempo_recorrido
+        medicion_pendiente.medicion_completa = True
+        medicion_pendiente.es_primera_medicion = False
+
+        db.commit()
+        db.refresh(medicion_pendiente)
+        
+        # Guardar en memoria para mostrar en tiempo real
+        _ultimo_post["timestamp"] = datetime.now().isoformat()
+        _ultimo_post["data"] = {
+            "id": medicion_pendiente.id,
+            "timestamp": medicion_pendiente.timestamp.isoformat(),
+            "distancia": medicion_pendiente.distancia,
+            "velocidad_ms": round(medicion_pendiente.velocidad_ms, 2),
+            "velocidad_kmh": round(medicion_pendiente.velocidad_kmh, 2),
+            "tiempo_recorrido": round(medicion_pendiente.tiempo_recorrido, 3),
+            "medicion_completa": True,
+            "es_primera_medicion": False,
+            "mensaje": "Medición completada"
+        }
+        
+        return medicion_pendiente
+    
+    else:
+        # No llegó ni detector1 ni detector2
+        return {
+            "mensaje": "Datos inválidos. Se espera detector1 o detector2",
+            "estado": "error"
+        }
 
 
 @app.get("/ultimo-post/")
@@ -491,7 +512,7 @@ def actualizar_configuracion(
     return config
 
 
-@app.post("/", response_model=schemas.MedicionResponse)
+@app.post("/")
 def endpoint_legacy(db: Session = Depends(get_db)):
     """
     Endpoint legacy para compatibilidad con versiones anteriores.
