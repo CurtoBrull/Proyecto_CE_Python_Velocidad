@@ -151,6 +151,25 @@ def registrar_medicion(
     - Medición registrada, completada o mensaje de estado
     """
     
+    def convertir_timestamp(valor):
+        """Convierte timestamp a datetime. Acepta string ISO, unix timestamp, o datetime"""
+        if isinstance(valor, str):
+            # Probar formato ISO
+            try:
+                return datetime.fromisoformat(valor.replace('Z', '+00:00'))
+            except:
+                pass
+        if isinstance(valor, (int, float)):
+            # Unix timestamp (segundos)
+            try:
+                return datetime.fromtimestamp(valor)
+            except:
+                pass
+        if isinstance(valor, datetime):
+            return valor
+        # Si todo falla, usar ahora
+        return datetime.now()
+    
     # Extraer detector1 o detector2 del JSON
     detector1 = datos.get("detector1")
     detector2 = datos.get("detector2")
@@ -170,11 +189,8 @@ def registrar_medicion(
                 "estado": "ignorado"
             }
         
-        # Convertir timestamp string a datetime
-        try:
-            timestamp_dt = datetime.fromisoformat(detector1.replace('Z', '+00:00')) if isinstance(detector1, str) else detector1
-        except:
-            timestamp_dt = datetime.now()
+        # Convertir timestamp a datetime
+        timestamp_dt = convertir_timestamp(detector1)
         
         # Crear nueva medición con detector1
         distancia = get_distancia_sensores()
@@ -219,11 +235,8 @@ def registrar_medicion(
                 "estado": "ignorado"
             }
         
-        # Convertir timestamp string a datetime
-        try:
-            timestamp_dt = datetime.fromisoformat(detector2.replace('Z', '+00:00')) if isinstance(detector2, str) else detector2
-        except:
-            timestamp_dt = datetime.now()
+        # Convertir timestamp a datetime
+        timestamp_dt = convertir_timestamp(detector2)
         
         # Completar la medición
         distancia = get_distancia_sensores()
