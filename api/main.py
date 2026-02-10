@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, Query
+from fastapi import FastAPI, Depends, HTTPException, Query, Body
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import func, Integer, case
@@ -132,31 +132,31 @@ def get_distancia_sensores() -> float:
 
 @app.post("/mediciones/")
 def registrar_medicion(
-    medicion: schemas.MedicionCreate = None,
+    datos: Dict = Body(...),
     db: Session = Depends(get_db)
 ):
     """
     Registra una nueva medición de velocidad o completa una medición pendiente.
 
     Esta función maneja la lógica principal del sistema de radar de velocidad.
-    - Cuando llega detector1: inicia una nueva medición
+    - Cuando llega {"detector1": "timestamp"}: inicia una nueva medición
     - Ignora detector1 adicionales mientras haya medición pendiente
-    - Cuando llega detector2: completa la medición pendiente y calcula velocidad
+    - Cuando llega {"detector2": "timestamp"}: completa la medición pendiente y calcula velocidad
     
     Parámetros:
-    - medicion (MedicionCreate): Datos del JSON con detector1 o detector2
+    - datos: JSON con clave "detector1" o "detector2" y su timestamp como valor
     - db (Session): Sesión de base de datos inyectada automáticamente por FastAPI.
 
     Retorno:
-    - MedicionResponse: Medición registrada o completada
+    - Medición registrada, completada o mensaje de estado
     """
     
-    # Verificar qué detector llegó
-    tiene_detector1 = medicion and hasattr(medicion, 'detector1') and medicion.detector1 is not None
-    tiene_detector2 = medicion and hasattr(medicion, 'detector2') and medicion.detector2 is not None
+    # Extraer detector1 o detector2 del JSON
+    detector1 = datos.get("detector1")
+    detector2 = datos.get("detector2")
     
     # Si llega detector1
-    if tiene_detector1:
+    if detector1 is not None:
         # Verificar si ya hay una medición pendiente
         medicion_pendiente = db.query(models.Medicion).filter(
             models.Medicion.es_primera_medicion == True,
@@ -170,10 +170,16 @@ def registrar_medicion(
                 "estado": "ignorado"
             }
         
+        # Convertir timestamp string a datetime
+        try:
+            timestamp_dt = datetime.fromisoformat(detector1.replace('Z', '+00:00')) if isinstance(detector1, str) else detector1
+        except:
+            timestamp_dt = datetime.now()
+        
         # Crear nueva medición con detector1
         distancia = get_distancia_sensores()
         nueva_medicion = models.Medicion(
-            timestamp=medicion.detector1,
+            timestamp=timestamp_dt,
             distancia=distancia,
             es_primera_medicion=True,
             medicion_completa=False
@@ -199,7 +205,7 @@ def registrar_medicion(
         return nueva_medicion
     
     # Si llega detector2
-    elif tiene_detector2:
+    elif detector2 is not None:
         # Buscar medición pendiente
         medicion_pendiente = db.query(models.Medicion).filter(
             models.Medicion.es_primera_medicion == True,
@@ -213,9 +219,15 @@ def registrar_medicion(
                 "estado": "ignorado"
             }
         
+        # Convertir timestamp string a datetime
+        try:
+            timestamp_dt = datetime.fromisoformat(detector2.replace('Z', '+00:00')) if isinstance(detector2, str) else detector2
+        except:
+            timestamp_dt = datetime.now()
+        
         # Completar la medición
         distancia = get_distancia_sensores()
-        tiempo_recorrido = (medicion.detector2 - medicion_pendiente.timestamp).total_seconds()
+        tiempo_recorrido = (timestamp_dt - medicion_pendiente.timestamp).total_seconds()
         
         # Evitar división por cero
         if tiempo_recorrido <= 0:
