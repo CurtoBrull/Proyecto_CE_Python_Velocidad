@@ -221,73 +221,7 @@ def registrar_medicion(
             } 
             return medicion_pendiente
 
-    # Usar el timestamp de la placa si se proporciona, sino usar el del servidor
-
-   ''' if medicion and medicion.timestamp:
-        timestamp_actual = datetime.fromtimestamp(medicion.timestamp)
-    else:
-        timestamp_actual = datetime.now()
-    distancia = get_distancia_sensores()
-
-    medicion_pendiente = db.query(models.Medicion).filter(
-        models.Medicion.es_primera_medicion == True,
-        models.Medicion.medicion_completa == False
-    ).first()
-
-    if medicion_pendiente:
-        tiempo_recorrido = (timestamp_actual - medicion_pendiente.timestamp).total_seconds()
-        velocidad_ms = distancia / tiempo_recorrido
-        velocidad_kmh = velocidad_ms * 3.6
-
-        medicion_pendiente.velocidad_ms = velocidad_ms
-        medicion_pendiente.velocidad_kmh = velocidad_kmh
-        medicion_pendiente.tiempo_recorrido = tiempo_recorrido
-        medicion_pendiente.medicion_completa = True
-        medicion_pendiente.es_primera_medicion = False
-
-        db.commit()
-        db.refresh(medicion_pendiente)
-        
-        # Guardar en memoria para mostrar en tiempo real
-        _ultimo_post["timestamp"] = datetime.now().isoformat()
-        _ultimo_post["data"] = {
-            "id": medicion_pendiente.id,
-            "timestamp": medicion_pendiente.timestamp.isoformat(),
-            "distancia": medicion_pendiente.distancia,
-            "velocidad_ms": medicion_pendiente.velocidad_ms,
-            "velocidad_kmh": medicion_pendiente.velocidad_kmh,
-            "tiempo_recorrido": medicion_pendiente.tiempo_recorrido,
-            "medicion_completa": True,
-            "es_primera_medicion": False
-        }
-        
-        return medicion_pendiente
-    else:
-        nueva_medicion = models.Medicion(
-            timestamp=timestamp_actual,
-            distancia=distancia,
-            es_primera_medicion=True,
-            medicion_completa=False
-        )
-        db.add(nueva_medicion)
-        db.commit()
-        db.refresh(nueva_medicion)
-        
-        # Guardar en memoria para mostrar en tiempo real
-        _ultimo_post["timestamp"] = datetime.now().isoformat()
-        _ultimo_post["data"] = {
-            "id": nueva_medicion.id,
-            "timestamp": nueva_medicion.timestamp.isoformat(),
-            "distancia": nueva_medicion.distancia,
-            "velocidad_ms": None,
-            "velocidad_kmh": None,
-            "tiempo_recorrido": None,
-            "medicion_completa": False,
-            "es_primera_medicion": True,
-            "mensaje": "Sensor 1 activado. Esperando sensor 2..."
-        }
-        
-        return nueva_medicion'''
+# Usar el timestamp de la placa si se proporciona, sino usar el del servidor
 
 
 @app.get("/ultimo-post/")
