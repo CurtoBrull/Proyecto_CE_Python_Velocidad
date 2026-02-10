@@ -11,8 +11,6 @@ from database import engine, get_db, Base
 import models
 import schemas
 
-MEDICION_INICIADA = False
-
 # Cache en memoria para configuración
 _config_cache = {"distancia_sensores": None, "limite_velocidad": None}
 
