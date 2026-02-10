@@ -10,6 +10,8 @@ from database import engine, get_db, Base
 import models
 import schemas
 
+MEDICION_INICIADA = False
+
 Base.metadata.create_all(bind=engine)
 
 # Cache en memoria para configuración
@@ -159,8 +161,69 @@ def registrar_medicion(
 
     Esta función asume que las llamadas alternan entre detecciones de los dos sensores.
     """
+    if MEDICION_INICIADA==False:
+        if medicion.detector1:
+            nueva_medicion = models.Medicion(
+            timestamp=medicion.detector1.isoformat(),
+            distancia=get_distancia_sensores,
+            es_primera_medicion=True,
+            medicion_completa=False
+        )
+        db.add(nueva_medicion)
+        db.commit()
+        db.refresh(nueva_medicion)
+        
+        # Guardar en memoria para mostrar en tiempo real
+        _ultimo_post["timestamp"] = medicion.detector1.isoformat()
+        _ultimo_post["data"] = {
+            "id": nueva_medicion.id,
+            "timestamp": nueva_medicion.timestamp.isoformat(),
+            "distancia": nueva_medicion.distancia,
+            "velocidad_ms": None,
+            "velocidad_kmh": None,
+            "tiempo_recorrido": None,
+            "medicion_completa": False,
+            "es_primera_medicion": True,
+            "mensaje": "Sensor 1 activado. Esperando sensor 2..."
+        }
+        MEDICION_INICIADA=True
+        
+        return nueva_medicion
+    else:
+        medicion_pendiente = db.query(models.Medicion).filter(
+        models.Medicion.es_primera_medicion == True,
+        models.Medicion.medicion_completa == False).first()
+        if medicion.detector2:
+            tiempo_recorrido = (medicion.detector2 - medicion_pendiente.timestamp).total_seconds()
+            velocidad_ms = get_distancia_sensores() / tiempo_recorrido
+            velocidad_kmh = velocidad_ms * 3.6
+
+            medicion_pendiente.velocidad_ms = velocidad_ms
+            medicion_pendiente.velocidad_kmh = velocidad_kmh
+            medicion_pendiente.tiempo_recorrido = tiempo_recorrido
+            medicion_pendiente.medicion_completa = True
+            medicion_pendiente.es_primera_medicion = False
+
+            db.commit()
+            db.refresh(medicion_pendiente)
+            
+            # Guardar en memoria para mostrar en tiempo real
+            _ultimo_post["timestamp"] = datetime.now().isoformat()
+            _ultimo_post["data"] = {
+                "id": medicion_pendiente.id,
+                "timestamp": medicion_pendiente.timestamp.isoformat(),
+                "distancia": medicion_pendiente.distancia,
+                "velocidad_ms": medicion_pendiente.velocidad_ms,
+                "velocidad_kmh": medicion_pendiente.velocidad_kmh,
+                "tiempo_recorrido": medicion_pendiente.tiempo_recorrido,
+                "medicion_completa": True,
+                "es_primera_medicion": False
+            } 
+            return medicion_pendiente
+
     # Usar el timestamp de la placa si se proporciona, sino usar el del servidor
-    if medicion and medicion.timestamp:
+
+   ''' if medicion and medicion.timestamp:
         timestamp_actual = datetime.fromtimestamp(medicion.timestamp)
     else:
         timestamp_actual = datetime.now()
@@ -224,7 +287,7 @@ def registrar_medicion(
             "mensaje": "Sensor 1 activado. Esperando sensor 2..."
         }
         
-        return nueva_medicion
+        return nueva_medicion'''
 
 
 @app.get("/ultimo-post/")
