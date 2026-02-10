@@ -12,8 +12,6 @@ import schemas
 
 MEDICION_INICIADA = False
 
-Base.metadata.create_all(bind=engine)
-
 # Cache en memoria para configuración
 _config_cache = {"distancia_sensores": None, "limite_velocidad": None}
 
@@ -96,6 +94,7 @@ def init_configuracion(db: Session):
 
 @app.on_event("startup")
 def startup_event():
+    Base.metadata.create_all(bind=engine)
     with next(get_db()) as db:
         # Inicializar configuración en DB (ya verifica duplicados)
         init_configuracion(db)
