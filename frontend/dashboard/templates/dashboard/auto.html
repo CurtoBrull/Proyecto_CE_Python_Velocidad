@@ -4,60 +4,475 @@
 
 {% block extra_css %}
 <style>
-    .json-display {
-        background-color: #1e1e1e;
-        color: #d4d4d4;
-        border: 1px solid #404040;
-        border-radius: 8px;
-        padding: 20px;
-        font-family: 'Courier New', 'Consolas', monospace;
-        font-size: 14px;
-        line-height: 1.6;
-        white-space: pre-wrap;
-        word-break: break-all;
-        min-height: 300px;
-        max-height: 600px;
-        overflow-y: auto;
+    /* ---- Indicador de conexión ---- */
+    .status-indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 8px;
     }
 
-    .waiting-message {
-        color: #969696;
-        font-style: italic;
+    .status-connected {
+        background-color: #28a745;
+    }
+
+    .status-disconnected {
+        background-color: #dc3545;
+    }
+
+    .status-waiting {
+        background-color: #ffc107;
+        animation: pulse-dot 1.5s infinite;
+    }
+
+    @keyframes pulse-dot {
+
+        0%,
+        100% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.5;
+        }
+    }
+
+    /* ---- Sensor status box ---- */
+    .sensor-status {
+        padding: 2rem 1.5rem;
+        border-radius: 16px;
+        text-align: center;
+        transition: all 0.4s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .sensor-status::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .sensor-esperando-1 {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .sensor-esperando-2 {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        animation: pulse-bg 1.5s infinite;
+    }
+
+    .sensor-completado {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        animation: completado-glow 1s ease;
+    }
+
+    @keyframes pulse-bg {
+
+        0%,
+        100% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.85;
+        }
+    }
+
+    @keyframes completado-glow {
+        0% {
+            box-shadow: 0 0 30px rgba(56, 239, 125, 0.6);
+        }
+
+        100% {
+            box-shadow: none;
+        }
+    }
+
+    /* ---- Velocidad display ---- */
+    .velocidad-display {
+        font-size: 5rem;
+        font-weight: 700;
+        line-height: 1;
+        letter-spacing: -0.04em;
+        transition: all 0.3s ease;
+    }
+
+    .velocidad-normal {
+        color: var(--success);
+    }
+
+    .velocidad-exceso {
+        color: var(--danger);
+    }
+
+    .velocidad-idle {
+        color: var(--gray-300);
+    }
+
+    /* ---- Datos detalle ---- */
+    .dato-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.6rem 0;
+        border-bottom: 1px solid var(--gray-100);
+    }
+
+    .dato-item:last-child {
+        border-bottom: none;
+    }
+
+    .dato-label {
+        color: var(--gray-500);
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .dato-value {
+        font-weight: 600;
+        color: var(--gray-800);
+    }
+
+    /* ---- Highlight nueva medicion ---- */
+    @keyframes highlight-card {
+        0% {
+            box-shadow: 0 0 0 4px rgba(56, 239, 125, 0.5);
+        }
+
+        100% {
+            box-shadow: var(--shadow);
+        }
+    }
+
+    .card.nueva-medicion {
+        animation: highlight-card 1.2s ease;
+    }
+
+    /* ---- Historial mini ---- */
+    .historial-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--gray-100);
+        animation: fadeIn 0.3s ease;
+    }
+
+    .historial-item:last-child {
+        border-bottom: none;
+    }
+
+    .historial-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        flex-shrink: 0;
+    }
+
+    .historial-icon.normal {
+        background: linear-gradient(135deg, var(--success) 0%, var(--success-light) 100%);
+        color: #fff;
+    }
+
+    .historial-icon.exceso {
+        background: linear-gradient(135deg, var(--danger) 0%, var(--danger-light) 100%);
+        color: #fff;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
+<!-- Header de pagina -->
 <div class="page-header">
     <h1><i class="bi bi-car-front"></i> Monitor Auto</h1>
-    <p class="subtitle">Visualización JSON en tiempo real</p>
+    <p class="subtitle">Visualización en tiempo real de las mediciones de los sensores</p>
 </div>
 
 <div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header bg-dark text-white">
-                <h5 class="mb-0"><i class="bi bi-braces"></i> Datos JSON</h5>
+    <!-- Estado del sistema -->
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <span class="status-indicator status-waiting" id="connection-status"></span>
+                    Estado del Sistema
+                </h5>
             </div>
             <div class="card-body">
-                <div class="json-display" id="json-output">
-                    <span class="waiting-message">Esperando JSON...</span>
+                <div class="sensor-status sensor-esperando-1" id="sensor-status">
+                    <i class="bi bi-broadcast fs-1 mb-3 d-block"></i>
+                    <h4 class="mb-2" id="sensor-status-text">Esperando Sensor 1</h4>
+                    <small id="sensor-status-desc">Sistema listo. Esperando detección en sensor 1...</small>
+                </div>
+
+                <div class="mt-4">
+                    <div class="dato-item">
+                        <span class="dato-label">Última actualización</span>
+                        <span class="dato-value" id="last-update">--</span>
+                    </div>
+                    <div class="dato-item">
+                        <span class="dato-label">Conexión</span>
+                        <span class="dato-value" id="connection-text">Conectando...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Última velocidad -->
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100" id="velocidad-card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-speedometer2 me-2"></i>Última Velocidad</h5>
+            </div>
+            <div class="card-body text-center d-flex flex-column justify-content-center">
+                <div class="velocidad-display velocidad-idle" id="ultima-velocidad">--</div>
+                <div class="fs-4 text-muted">km/h</div>
+                <div class="mt-3" id="velocidad-status"></div>
+                <div class="mt-2 text-muted small" id="ultima-timestamp"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detalles de la medición -->
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-clipboard-data me-2"></i>Detalles Medición</h5>
+            </div>
+            <div class="card-body" id="detalles-medicion">
+                <div class="empty-state">
+                    <i class="bi bi-inbox d-block"></i>
+                    <p>Esperando datos de los sensores...</p>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Historial reciente -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Historial Reciente</h5>
+                <span class="badge bg-secondary" id="historial-count">0 mediciones</span>
+            </div>
+            <div class="card-body" id="historial-body">
+                <div class="empty-state">
+                    <i class="bi bi-inbox d-block"></i>
+                    <p>No hay mediciones recientes</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Info de conexión -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>
+            <strong>Conexión con la placa:</strong> Esta página se actualiza automáticamente cada 1 segundo.
+            Asegúrate de que la placa ESP32 esté conectada y enviando datos a la API.
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    // API Configuration
-    // Usa el endpoint intermedio de Django que consulta FastAPI
+    // API Configuration — misma lógica original
     const API_URL = window.location.origin;
-    const ENDPOINT = '/api/ultimo-post/';  // Endpoint para obtener el último POST recibido
+    const ENDPOINT = '/api/ultimo-post/';
     let updateInterval = null;
-    let ultimoTimestamp = null;  // Para detectar si hay nuevo POST
+    let ultimoTimestamp = null;
+
+    // Historial local (guardamos las últimas mediciones completadas)
+    let historial = [];
+    const MAX_HISTORIAL = 10;
+
+    function actualizarEstadoSensor(data) {
+        const statusDiv = document.getElementById('sensor-status');
+        const statusText = document.getElementById('sensor-status-text');
+        const statusDesc = document.getElementById('sensor-status-desc');
+
+        if (data === null) {
+            // Sin datos aún
+            statusDiv.className = 'sensor-status sensor-esperando-1';
+            statusText.textContent = 'Esperando Sensor 1';
+            statusDesc.textContent = 'Sistema listo. Esperando detección en sensor 1...';
+        } else if (data.medicion_completa === false && data.es_primera_medicion === true) {
+            // Sensor 1 activado, esperando sensor 2
+            statusDiv.className = 'sensor-status sensor-esperando-2';
+            statusText.textContent = 'Esperando Sensor 2';
+            statusDesc.textContent = 'Objeto detectado en sensor 1, esperando paso por sensor 2...';
+        } else if (data.medicion_completa === true) {
+            // Medición completada
+            statusDiv.className = 'sensor-status sensor-completado';
+            statusText.textContent = '¡Medición Completada!';
+            statusDesc.textContent = data.mensaje || 'Medición registrada correctamente';
+        } else {
+            statusDiv.className = 'sensor-status sensor-esperando-1';
+            statusText.textContent = 'Esperando Sensor 1';
+            statusDesc.textContent = 'Sistema listo. Esperando detección en sensor 1...';
+        }
+    }
+
+    function actualizarVelocidad(data) {
+        const velocidadEl = document.getElementById('ultima-velocidad');
+        const statusEl = document.getElementById('velocidad-status');
+        const timestampEl = document.getElementById('ultima-timestamp');
+        const cardEl = document.getElementById('velocidad-card');
+
+        if (data && data.medicion_completa && data.velocidad_kmh !== null) {
+            velocidadEl.textContent = data.velocidad_kmh.toFixed(1);
+
+            // Determinar si es exceso (asumimos 50 km/h como límite por defecto)
+            const esExceso = data.velocidad_kmh > 50;
+            velocidadEl.className = 'velocidad-display ' + (esExceso ? 'velocidad-exceso' : 'velocidad-normal');
+
+            if (esExceso) {
+                statusEl.innerHTML = '<span class="badge bg-danger fs-6"><i class="bi bi-exclamation-triangle me-1"></i>EXCESO</span>';
+            } else {
+                statusEl.innerHTML = '<span class="badge bg-success fs-6"><i class="bi bi-check-circle me-1"></i>Normal</span>';
+            }
+
+            if (data.timestamp) {
+                timestampEl.textContent = data.timestamp.replace('T', ' ').slice(0, 19);
+            }
+
+            // Animación de nueva medición
+            cardEl.classList.add('nueva-medicion');
+            setTimeout(() => cardEl.classList.remove('nueva-medicion'), 1200);
+        } else {
+            velocidadEl.textContent = '--';
+            velocidadEl.className = 'velocidad-display velocidad-idle';
+            statusEl.innerHTML = '';
+            timestampEl.textContent = '';
+        }
+    }
+
+    function actualizarDetalles(data) {
+        const detallesEl = document.getElementById('detalles-medicion');
+
+        if (data && data.medicion_completa && data.velocidad_kmh !== null) {
+            detallesEl.innerHTML = `
+                <div class="dato-item">
+                    <span class="dato-label">Velocidad</span>
+                    <span class="dato-value">${data.velocidad_kmh.toFixed(2)} km/h</span>
+                </div>
+                <div class="dato-item">
+                    <span class="dato-label">Velocidad (m/s)</span>
+                    <span class="dato-value">${data.velocidad_ms ? data.velocidad_ms.toFixed(2) : '--'} m/s</span>
+                </div>
+                <div class="dato-item">
+                    <span class="dato-label">Tiempo recorrido</span>
+                    <span class="dato-value">${data.tiempo_recorrido ? data.tiempo_recorrido.toFixed(3) : '--'} s</span>
+                </div>
+                <div class="dato-item">
+                    <span class="dato-label">Distancia</span>
+                    <span class="dato-value">${data.distancia} m</span>
+                </div>
+                <div class="dato-item">
+                    <span class="dato-label">ID Medición</span>
+                    <span class="dato-value">#${data.id}</span>
+                </div>
+            `;
+        } else if (data && data.es_primera_medicion) {
+            detallesEl.innerHTML = `
+                <div class="sensor-status sensor-esperando-2" style="padding:1rem; border-radius:12px;">
+                    <i class="bi bi-hourglass-split fs-3 d-block mb-2"></i>
+                    <p class="mb-1 fw-bold">${data.mensaje || 'Esperando sensor 2...'}</p>
+                    <small>Distancia: ${data.distancia} m</small>
+                </div>
+            `;
+        } else {
+            detallesEl.innerHTML = `
+                <div class="empty-state">
+                    <i class="bi bi-inbox d-block"></i>
+                    <p>Esperando datos de los sensores...</p>
+                </div>
+            `;
+        }
+    }
+
+    function agregarAlHistorial(data) {
+        if (!data || !data.medicion_completa || data.velocidad_kmh === null) return;
+
+        // Evitar duplicados por ID
+        if (historial.some(h => h.id === data.id)) return;
+
+        historial.unshift(data);
+        if (historial.length > MAX_HISTORIAL) historial.pop();
+
+        renderHistorial();
+    }
+
+    function renderHistorial() {
+        const bodyEl = document.getElementById('historial-body');
+        const countEl = document.getElementById('historial-count');
+
+        if (historial.length === 0) {
+            bodyEl.innerHTML = `
+                <div class="empty-state">
+                    <i class="bi bi-inbox d-block"></i>
+                    <p>No hay mediciones recientes</p>
+                </div>
+            `;
+            countEl.textContent = '0 mediciones';
+            return;
+        }
+
+        let html = '';
+        historial.forEach(h => {
+            const esExceso = h.velocidad_kmh > 50;
+            const timestamp = h.timestamp ? h.timestamp.replace('T', ' ').slice(0, 19) : '--';
+            html += `
+                <div class="historial-item">
+                    <div class="historial-icon ${esExceso ? 'exceso' : 'normal'}">
+                        <i class="bi ${esExceso ? 'bi-exclamation-triangle' : 'bi-check'}"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="d-flex justify-content-between">
+                            <strong class="${esExceso ? 'text-danger' : 'text-success'}">${h.velocidad_kmh.toFixed(2)} km/h</strong>
+                            <span class="badge ${esExceso ? 'bg-danger' : 'bg-success'}">${esExceso ? 'Exceso' : 'Normal'}</span>
+                        </div>
+                        <small class="text-muted">${timestamp} · ${h.tiempo_recorrido ? h.tiempo_recorrido.toFixed(3) + 's' : '--'}</small>
+                    </div>
+                </div>
+            `;
+        });
+
+        bodyEl.innerHTML = html;
+        countEl.textContent = historial.length + ' mediciones';
+    }
 
     async function actualizarDatos() {
         try {
@@ -70,18 +485,28 @@
 
             const data = await response.json();
 
+            // Conexión exitosa
+            document.getElementById('connection-status').className = 'status-indicator status-connected';
+            document.getElementById('connection-text').textContent = 'Conectado';
+            document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+
             // Solo actualizar si hay datos nuevos
             if (data.data === null) {
-                document.getElementById('json-output').innerHTML =
-                    '<span class="waiting-message">Esperando POST desde los sensores...</span>';
+                actualizarEstadoSensor(null);
+                actualizarVelocidad(null);
+                actualizarDetalles(null);
             } else if (data.timestamp !== ultimoTimestamp) {
                 ultimoTimestamp = data.timestamp;
-                document.getElementById('json-output').textContent = JSON.stringify(data, null, 2);
+                actualizarEstadoSensor(data.data);
+                actualizarVelocidad(data.data);
+                actualizarDetalles(data.data);
+                agregarAlHistorial(data.data);
             }
 
         } catch (error) {
             console.error('Error al obtener datos:', error);
-            document.getElementById('json-output').textContent = `Error: ${error.message}`;
+            document.getElementById('connection-status').className = 'status-indicator status-disconnected';
+            document.getElementById('connection-text').textContent = 'Desconectado';
         }
     }
 
