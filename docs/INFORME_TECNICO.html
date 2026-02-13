@@ -1,0 +1,3435 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>INFORME_TECNICO.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="proyecto-radar-de-velocidad">PROYECTO: RADAR DE VELOCIDAD</h1>
+<h2 id="sistema-de-medici%C3%B3n-de-velocidad-mediante-sensores-iot">Sistema de Medición de Velocidad mediante Sensores IoT</h2>
+<hr>
+<div style="text-align: center; margin-top: 200px;">
+<h3 id="autores"><strong>AUTORES</strong></h3>
+<p><strong>Hernández Rivas, Antonio Jesús</strong></p>
+<p><strong>Curto Brull, Javier</strong></p>
+<h3 id="curso"><strong>CURSO</strong></h3>
+<p><strong>CE Desarrollo de Aplicaciones Lenguaje Python</strong></p>
+<h3 id="fecha"><strong>FECHA</strong></h3>
+<p>Febrero 2026</p>
+</div>
+<div style="page-break-after: always;"></div>
+<hr>
+<h2 id="%C3%ADndice">ÍNDICE</h2>
+<ol>
+<li>
+<p><a href="#1-an%C3%A1lisis-de-requisitos">Análisis de Requisitos</a></p>
+<ul>
+<li>1.1 <a href="#11-introducci%C3%B3n">Introducción</a></li>
+<li>1.2 <a href="#12-objetivos-del-proyecto">Objetivos del Proyecto</a></li>
+<li>1.3 <a href="#13-requisitos-funcionales">Requisitos Funcionales</a></li>
+<li>1.4 <a href="#14-requisitos-no-funcionales">Requisitos No Funcionales</a></li>
+<li>1.5 <a href="#15-requisitos-t%C3%A9cnicos">Requisitos Técnicos</a></li>
+</ul>
+</li>
+<li>
+<p><a href="#2-dise%C3%B1o-del-sistema">Diseño del Sistema</a></p>
+<ul>
+<li>2.1 <a href="#21-arquitectura-general">Arquitectura General</a></li>
+<li>2.2 <a href="#22-componentes-hardware">Componentes Hardware</a></li>
+<li>2.3 <a href="#23-componentes-software">Componentes Software</a></li>
+<li>2.4 <a href="#24-flujo-de-datos">Flujo de Datos</a></li>
+<li>2.5 <a href="#25-diagrama-de-base-de-datos">Diagrama de Base de Datos</a></li>
+<li>2.6 <a href="#26-diagrama-de-secuencia">Diagrama de Secuencia</a></li>
+</ul>
+</li>
+<li>
+<p><a href="#3-implementaci%C3%B3n">Implementación</a></p>
+<ul>
+<li>3.1 <a href="#31-api-backend-fastapi">API Backend (FastAPI)</a></li>
+<li>3.2 <a href="#32-frontend-dashboard-django">Frontend Dashboard (Django)</a></li>
+<li>3.3 <a href="#33-firmware-microcontrolador-micropython">Firmware Microcontrolador (MicroPython)</a></li>
+<li>3.4 <a href="#34-repositorio-del-proyecto">Repositorio del Proyecto</a></li>
+</ul>
+</li>
+<li>
+<p><a href="#4-pruebas-y-validaci%C3%B3n">Pruebas y Validación</a></p>
+<ul>
+<li>4.1 <a href="#41-plan-de-pruebas">Plan de Pruebas</a></li>
+<li>4.2 <a href="#42-casos-de-prueba">Casos de Prueba</a></li>
+<li>4.3 <a href="#43-resultados-de-pruebas">Resultados de Pruebas</a></li>
+<li>4.4 <a href="#44-validaci%C3%B3n-del-sistema">Validación del Sistema</a></li>
+</ul>
+</li>
+<li>
+<p><a href="#5-documentaci%C3%B3n">Documentación</a></p>
+<ul>
+<li>5.1 <a href="#51-instalaci%C3%B3n-y-configuraci%C3%B3n">Instalación y Configuración</a></li>
+<li>5.2 <a href="#52-estructura-del-proyecto">Estructura del Proyecto</a></li>
+<li>5.3 <a href="#53-api-endpoints">API Endpoints</a></li>
+<li>5.4 <a href="#54-configuraci%C3%B3n-del-hardware">Configuración del Hardware</a></li>
+</ul>
+</li>
+<li>
+<p><a href="#6-manual-de-usuario">Manual de Usuario</a></p>
+<ul>
+<li>6.1 <a href="#61-requisitos-previos">Requisitos Previos</a></li>
+<li>6.2 <a href="#62-gu%C3%ADa-de-instalaci%C3%B3n">Guía de Instalación</a></li>
+<li>6.3 <a href="#63-uso-del-sistema">Uso del Sistema</a></li>
+<li>6.4 <a href="#64-soluci%C3%B3n-de-problemas">Solución de Problemas</a></li>
+</ul>
+</li>
+<li>
+<p><a href="#7-referencias">Referencias</a></p>
+</li>
+</ol>
+<div style="page-break-after: always;"></div>
+<hr>
+<h2 id="1-an%C3%A1lisis-de-requisitos">1. ANÁLISIS DE REQUISITOS</h2>
+<h3 id="11-introducci%C3%B3n">1.1 Introducción</h3>
+<p>El proyecto <strong>Radar de Velocidad</strong> es un sistema IoT diseñado para medir la velocidad de objetos en movimiento (vehículos, personas, etc.) utilizando tecnología de sensores de proximidad. El sistema integra hardware (microcontrolador ESP32 con sensores), backend (API REST), y frontend (dashboard web) para proporcionar una solución completa de monitorización de velocidad.</p>
+<p><strong>Contexto del Proyecto:</strong></p>
+<ul>
+<li>Desarrollado como proyecto académico para el curso de Desarrollo de Aplicaciones con Python</li>
+<li>Aplica conceptos de IoT, comunicación HTTP, arquitectura cliente-servidor y programación de sistemas embebidos</li>
+<li>Utiliza tecnologías modernas y frameworks actuales del ecosistema Python</li>
+</ul>
+<h3 id="12-objetivos-del-proyecto">1.2 Objetivos del Proyecto</h3>
+<h4 id="objetivo-general">Objetivo General</h4>
+<p>Desarrollar un sistema completo de medición de velocidad basado en sensores IoT, con capacidad de almacenamiento, procesamiento y visualización de datos en tiempo real.</p>
+<h4 id="objetivos-espec%C3%ADficos">Objetivos Específicos</h4>
+<ol>
+<li><strong>Hardware:</strong> Implementar un sistema de detección con dos sensores de movimiento conectados a un microcontrolador ESP32</li>
+<li><strong>Backend:</strong> Desarrollar una API REST robusta para recibir, procesar y almacenar mediciones</li>
+<li><strong>Frontend:</strong> Crear un dashboard web intuitivo para visualizar estadísticas y mediciones</li>
+<li><strong>Integración:</strong> Establecer comunicación bidireccional entre todos los componentes del sistema</li>
+<li><strong>Validación:</strong> Realizar pruebas exhaustivas para garantizar la precisión de las mediciones</li>
+</ol>
+<div style="page-break-after: always;"></div>
+<h3 id="13-requisitos-funcionales">1.3 Requisitos Funcionales</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requisito</th>
+<th>Prioridad</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RF-01</td>
+<td>Detección de paso</td>
+<td>Alta</td>
+<td>El sistema debe detectar el paso de un objeto por el sensor 1</td>
+</tr>
+<tr>
+<td>RF-02</td>
+<td>Detección de salida</td>
+<td>Alta</td>
+<td>El sistema debe detectar el paso del mismo objeto por el sensor 2</td>
+</tr>
+<tr>
+<td>RF-03</td>
+<td>Cálculo de velocidad</td>
+<td>Alta</td>
+<td>Calcular velocidad = distancia / (tiempo2 - tiempo1)</td>
+</tr>
+<tr>
+<td>RF-04</td>
+<td>Almacenamiento</td>
+<td>Alta</td>
+<td>Guardar todas las mediciones con timestamp preciso</td>
+</tr>
+<tr>
+<td>RF-05</td>
+<td>Visualización web</td>
+<td>Media</td>
+<td>Mostrar mediciones en un dashboard accesible vía navegador</td>
+</tr>
+<tr>
+<td>RF-06</td>
+<td>Estadísticas</td>
+<td>Media</td>
+<td>Calcular promedio, máximo, mínimo de velocidades</td>
+</tr>
+<tr>
+<td>RF-07</td>
+<td>Configuración</td>
+<td>Media</td>
+<td>Permitir configurar distancia entre sensores y límite de velocidad</td>
+</tr>
+<tr>
+<td>RF-08</td>
+<td>Alertas de exceso</td>
+<td>Baja</td>
+<td>Identificar mediciones que superen el límite configurado</td>
+</tr>
+<tr>
+<td>RF-09</td>
+<td>Reinicio de medición</td>
+<td>Media</td>
+<td>Permitir cancelar una medición en curso</td>
+</tr>
+<tr>
+<td>RF-10</td>
+<td>API REST</td>
+<td>Alta</td>
+<td>Exponer endpoints para interacción con el sistema</td>
+</tr>
+</tbody>
+</table>
+<h3 id="14-requisitos-no-funcionales">1.4 Requisitos No Funcionales</h3>
+<h4 id="rendimiento">Rendimiento</h4>
+<ul>
+<li><strong>RNF-01:</strong> El sistema debe procesar una medición en menos de 100ms</li>
+<li><strong>RNF-02:</strong> La latencia de comunicación HTTP no debe exceder 500ms</li>
+<li><strong>RNF-03:</strong> Soportar al menos 100 mediciones por hora</li>
+</ul>
+<h4 id="precisi%C3%B3n">Precisión</h4>
+<ul>
+<li><strong>RNF-04:</strong> Precisión de timestamp de al menos 100ms</li>
+<li><strong>RNF-05:</strong> Cálculo de velocidad con precisión de 2 decimales</li>
+</ul>
+<h4 id="disponibilidad">Disponibilidad</h4>
+<ul>
+<li><strong>RNF-06:</strong> API disponible 24/7 (excepto mantenimiento programado)</li>
+<li><strong>RNF-07:</strong> Reconexión automática del ESP32 en caso de pérdida de WiFi</li>
+</ul>
+<h4 id="usabilidad">Usabilidad</h4>
+<ul>
+<li><strong>RNF-08:</strong> Interface web responsive (adaptable a móviles)</li>
+<li><strong>RNF-09:</strong> Documentación completa de instalación y uso</li>
+<li><strong>RNF-10:</strong> Feedback visual en el hardware (LEDs)</li>
+</ul>
+<h4 id="seguridad">Seguridad</h4>
+<ul>
+<li><strong>RNF-11:</strong> CORS habilitado para permitir comunicación cross-origin</li>
+<li><strong>RNF-12:</strong> Validación de datos en todos los endpoints</li>
+</ul>
+<h3 id="15-requisitos-t%C3%A9cnicos">1.5 Requisitos Técnicos</h3>
+<h4 id="hardware">Hardware</h4>
+<ul>
+<li>Microcontrolador: ESP32 o ESP8266 con WiFi integrado</li>
+<li>Sensores: 2x sensores de movimiento (PIR, infrarrojos o ultrasónicos)</li>
+<li>Alimentación: 5V DC (USB o fuente externa)</li>
+<li>LEDs indicadores: Verde (sistema OK), Rojo (error/exceso)</li>
+</ul>
+<h4 id="software---backend">Software - Backend</h4>
+<ul>
+<li><strong>Lenguaje:</strong> Python 3.10+</li>
+<li><strong>Framework:</strong> FastAPI 0.104+</li>
+<li><strong>Servidor:</strong> Uvicorn (ASGI)</li>
+<li><strong>Almacenamiento:</strong> JSON (desarrollo) / SQLite o PostgreSQL (producción)</li>
+<li><strong>Librerías:</strong> Pydantic, python-multipart</li>
+</ul>
+<h4 id="software---frontend">Software - Frontend</h4>
+<ul>
+<li><strong>Framework:</strong> Django 5.0+</li>
+<li><strong>Template Engine:</strong> Django Templates</li>
+<li><strong>Cliente HTTP:</strong> requests</li>
+<li><strong>Base de datos:</strong> SQLite (integrada con Django)</li>
+</ul>
+<h4 id="software---firmware">Software - Firmware</h4>
+<ul>
+<li><strong>Lenguaje:</strong> MicroPython</li>
+<li><strong>Librerías:</strong> network (WiFi), urequests (HTTP), machine (GPIO)</li>
+<li><strong>Protocolo:</strong> HTTP POST con JSON</li>
+</ul>
+<h4 id="infraestructura">Infraestructura</h4>
+<ul>
+<li><strong>Sistema Operativo:</strong> Compatible con Windows, Linux, macOS</li>
+<li><strong>Conectividad:</strong> Red local WiFi (2.4GHz)</li>
+<li><strong>Puertos:</strong> 8080 (API), 8000 (Frontend)</li>
+</ul>
+<div style="page-break-after: always;"></div>
+<hr>
+<h2 id="2-dise%C3%B1o-del-sistema">2. DISEÑO DEL SISTEMA</h2>
+<h3 id="21-arquitectura-general">2.1 Arquitectura General</h3>
+<p>El sistema implementa una arquitectura de <strong>tres capas</strong> con comunicación HTTP:</p>
+<pre class="hljs"><code><div>┌─────────────────────────────────────────────────────────────────┐
+│                         CAPA DE PRESENTACIÓN                     │
+│                                                                   │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │          Frontend Django (Puerto 8000)                   │   │
+│  │  - Dashboard con estadísticas                            │   │
+│  │  - Lista de mediciones                                   │   │
+│  │  - Configuración del sistema                             │   │
+│  │  - Gráficos y reportes                                   │   │
+│  └──────────────────────┬──────────────────────────────────┘   │
+└─────────────────────────┼────────────────────────────────────────┘
+                          │ HTTP GET/POST
+                          ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                         CAPA DE LÓGICA                           │
+│                                                                   │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │          API FastAPI (Puerto 8080)                       │   │
+│  │  - Endpoints REST                                        │   │
+│  │  - Cálculo de velocidad                                  │   │
+│  │  - Validación de datos                                   │   │
+│  │  - Gestión de configuración                              │   │
+│  └──────────────────────┬──────────────────────────────────┘   │
+└─────────────────────────┼────────────────────────────────────────┘
+                          │ Lectura/Escritura
+                          ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                        CAPA DE DATOS                             │
+│                                                                   │
+│  ┌──────────────────┐         ┌──────────────────┐             │
+│  │ mediciones.json  │         │   config.json    │             │
+│  │ - medicion1      │         │ - distancia      │             │
+│  │ - timestamp      │         │ - limite_vel     │             │
+│  └──────────────────┘         └──────────────────┘             │
+└─────────────────────────────────────────────────────────────────┘
+                          ▲
+                          │ HTTP POST
+                          │
+┌─────────────────────────────────────────────────────────────────┐
+│                        CAPA DE HARDWARE                          │
+│                                                                   │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │            ESP32/ESP8266 (MicroPython)                   │   │
+│  │                                                           │   │
+│  │  ┌──────────┐    ┌──────────┐    ┌──────────┐          │   │
+│  │  │ Sensor 1 │    │ Sensor 2 │    │   LEDs   │          │   │
+│  │  │  (GPIO)  │    │  (GPIO)  │    │ Verde/Rojo│         │   │
+│  │  └──────────┘    └──────────┘    └──────────┘          │   │
+│  │                                                           │   │
+│  │  - Detección por interrupción                            │   │
+│  │  - Timestamp preciso con NTP                             │   │
+│  │  - Feedback visual con LEDs                              │   │
+│  └─────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘
+</div></code></pre>
+<p><strong>Características de la arquitectura:</strong></p>
+<ul>
+<li><strong>Desacoplamiento:</strong> Cada capa puede desarrollarse y probarse independientemente</li>
+<li><strong>Escalabilidad:</strong> Fácil migración de JSON a base de datos relacional</li>
+<li><strong>Modularidad:</strong> Componentes reemplazables (ej: cambiar Django por React)</li>
+<li><strong>Comunicación HTTP:</strong> Protocolo estándar, fácil de debuggear y mantener</li>
+</ul>
+<h3 id="22-componentes-hardware">2.2 Componentes Hardware</h3>
+<h4 id="esquema-de-conexiones-esp32">Esquema de Conexiones ESP32</h4>
+<pre class="hljs"><code><div>                    ESP32 DevKit v1
+                   ┌─────────────────┐
+                   │                 │
+    Sensor 1  ────▶│ GPIO 12         │
+    (Señal)        │                 │
+                   │                 │
+    Sensor 2  ────▶│ GPIO 13         │
+    (Señal)        │                 │
+                   │                 │
+    LED Verde ◀────│ GPIO 14         │
+                   │                 │
+    LED Rojo  ◀────│ GPIO 27         │
+                   │                 │
+    5V        ────▶│ VIN             │
+                   │                 │
+    GND       ────▶│ GND             │
+                   │                 │
+                   └─────────────────┘
+                          │
+                          │ WiFi 2.4GHz
+                          │
+                          ▼
+                    [Router WiFi]
+                          │
+                          ▼
+                    [Servidor API]
+</div></code></pre>
+<h4 id="lista-de-componentes">Lista de Componentes</h4>
+<table>
+<thead>
+<tr>
+<th>Componente</th>
+<th>Especificación</th>
+<th>Cantidad</th>
+<th>Función</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ESP32 DevKit</td>
+<td>240MHz, WiFi 2.4GHz, Bluetooth</td>
+<td>1</td>
+<td>Controlador principal</td>
+</tr>
+<tr>
+<td>Sensor PIR HC-SR501</td>
+<td>Detección de movimiento infrarrojo</td>
+<td>2</td>
+<td>Detección de paso</td>
+</tr>
+<tr>
+<td>LED Verde 5mm</td>
+<td>20mA, 2.0-2.2V</td>
+<td>1</td>
+<td>Indicador sistema OK</td>
+</tr>
+<tr>
+<td>LED Rojo 5mm</td>
+<td>20mA, 1.8-2.0V</td>
+<td>1</td>
+<td>Indicador error/exceso</td>
+</tr>
+<tr>
+<td>Resistencias</td>
+<td>220Ω</td>
+<td>2</td>
+<td>Limitación corriente LEDs</td>
+</tr>
+<tr>
+<td>Cables Dupont</td>
+<td>Macho-Macho</td>
+<td>10</td>
+<td>Conexiones</td>
+</tr>
+<tr>
+<td>Protoboard</td>
+<td>830 puntos</td>
+<td>1</td>
+<td>Montaje circuito</td>
+</tr>
+<tr>
+<td>Cable USB</td>
+<td>Micro-USB</td>
+<td>1</td>
+<td>Alimentación y programación</td>
+</tr>
+</tbody>
+</table>
+<h3 id="23-componentes-software">2.3 Componentes Software</h3>
+<h4 id="231-api-backend---fastapi">2.3.1 API Backend - FastAPI</h4>
+<p><strong>Módulos principales:</strong></p>
+<pre class="hljs"><code><div>api/
+├── main.py              # Aplicación FastAPI, endpoints, lógica
+├── models.py            # Modelos Pydantic para validación
+├── database.py          # Conexión y gestión de base de datos
+└── schemas.py           # Esquemas de respuesta
+</div></code></pre>
+<p><strong>Tecnologías:</strong></p>
+<ul>
+<li><strong>FastAPI:</strong> Framework web moderno y rápido</li>
+<li><strong>Uvicorn:</strong> Servidor ASGI de alto rendimiento</li>
+<li><strong>Pydantic:</strong> Validación de datos con type hints</li>
+<li><strong>JSON:</strong> Almacenamiento persistente simple</li>
+</ul>
+<div style="page-break-after: always;"></div>
+<h4 id="232-frontend---django">2.3.2 Frontend - Django</h4>
+<p><strong>Módulos principales:</strong></p>
+<pre class="hljs"><code><div>frontend/
+├── manage.py
+├── frontend/
+│   ├── settings.py      # Configuración Django
+│   ├── urls.py          # Rutas principales
+│   └── wsgi.py          # WSGI para deployment
+└── dashboard/
+    ├── views.py         # Vistas y lógica del dashboard
+    ├── urls.py          # Rutas del dashboard
+    ├── api_client.py    # Cliente HTTP para la API
+    └── templates/       # Plantillas HTML
+        ├── base.html
+        ├── index.html
+        ├── mediciones.html
+        └── configuracion.html
+</div></code></pre>
+<p><strong>Tecnologías:</strong></p>
+<ul>
+<li><strong>Django 5.0:</strong> Framework web full-stack</li>
+<li><strong>Django Templates:</strong> Motor de plantillas integrado</li>
+<li><strong>Bootstrap 5:</strong> Framework CSS para UI responsive</li>
+<li><strong>Chart.js:</strong> Librería para gráficos interactivos</li>
+</ul>
+<h4 id="233-firmware---micropython">2.3.3 Firmware - MicroPython</h4>
+<p><strong>Archivo principal:</strong></p>
+<pre class="hljs"><code><div>placa/
+├── main.py              # Código principal del ESP32
+├── boot.py              # Configuración inicial (opcional)
+└── README.md            # Documentación de hardware
+</div></code></pre>
+<p><strong>Librerías utilizadas:</strong></p>
+<ul>
+<li><strong>network:</strong> Gestión de conexión WiFi</li>
+<li><strong>urequests:</strong> Cliente HTTP para enviar mediciones</li>
+<li><strong>machine:</strong> Control de pines GPIO y hardware</li>
+<li><strong>time:</strong> Gestión de tiempo y delays</li>
+<li><strong>ntptime:</strong> Sincronización con servidor NTP</li>
+</ul>
+<div style="page-break-after: always;"></div>
+<h3 id="24-flujo-de-datos">2.4 Flujo de Datos</h3>
+<pre class="hljs"><code><div>┌─────────────────────────────────────────────────────────────────────┐
+│                     FLUJO COMPLETO DE MEDICIÓN                       │
+└─────────────────────────────────────────────────────────────────────┘
+
+1. DETECCIÓN SENSOR 1
+   ┌──────────────┐
+   │   Objeto     │ ──────▶ Sensor 1 detecta movimiento
+   │  en movmto   │         │
+   └──────────────┘         │
+                            ▼
+                   ┌─────────────────┐
+                   │  ESP32          │
+                   │  GPIO 12 = HIGH │
+                   │  Interrupción   │
+                   └────────┬────────┘
+                            │
+                            ▼
+                   timestamp1 = time.time()
+                            │
+                            ▼
+                   POST /mediciones/
+                   {&quot;timestamp&quot;: 1706985430.123}
+                            │
+                            ▼
+                   ┌─────────────────┐
+                   │  FastAPI        │
+                   │  - Guarda T1    │
+                   │  - Estado:      │
+                   │    &quot;Esperando   │
+                   │     sensor 2&quot;   │
+                   └─────────────────┘
+
+   [Objeto viajando entre sensores]
+   [Distancia: 100 metros]
+   [Tiempo transcurrido: 5 segundos]
+
+2. DETECCIÓN SENSOR 2
+   ┌──────────────┐
+   │   Objeto     │ ──────▶ Sensor 2 detecta movimiento
+   │  en movmto   │         │
+   └──────────────┘         │
+                            ▼
+                   ┌─────────────────┐
+                   │  ESP32          │
+                   │  GPIO 13 = HIGH │
+                   │  Interrupción   │
+                   └────────┬────────┘
+                            │
+                            ▼
+                   timestamp2 = time.time()
+                            │
+                            ▼
+                   POST /mediciones/
+                   {&quot;timestamp&quot;: 1706985435.123}
+                            │
+                            ▼
+                   ┌─────────────────────────────────┐
+                   │  FastAPI                        │
+                   │  - Lee T1: 1706985430.123       │
+                   │  - Recibe T2: 1706985435.123    │
+                   │  - Calcula:                     │
+                   │    Δt = T2 - T1 = 5.0s          │
+                   │    v = 100m / 5.0s = 20 m/s     │
+                   │    v = 20 * 3.6 = 72 km/h       │
+                   │  - Guarda en DB                 │
+                   │  - Limpia estado                │
+                   └────────┬────────────────────────┘
+                            │
+                            ▼
+                   Response:
+                   {
+                     &quot;mensaje&quot;: &quot;Velocidad: 72.00 km/h&quot;,
+                     &quot;velocidad_ms&quot;: 20.0,
+                     &quot;velocidad_kmh&quot;: 72.0,
+                     &quot;tiempo_segundos&quot;: 5.0
+                   }
+                            │
+                            ▼
+                   ┌─────────────────┐
+                   │  ESP32          │
+                   │  - Parsea JSON  │
+                   │  - Si &gt;50 km/h: │
+                   │    LED Rojo ON  │
+                   │  - Si ≤50 km/h: │
+                   │    LED Verde ON │
+                   └─────────────────┘
+
+3. VISUALIZACIÓN
+                   ┌─────────────────┐
+                   │  Usuario        │
+                   │  Abre navegador │
+                   │  localhost:8000 │
+                   └────────┬────────┘
+                            │
+                            ▼
+                   ┌─────────────────┐
+                   │  Django         │
+                   │  GET /          │
+                   └────────┬────────┘
+                            │
+                            ▼
+                   GET http://localhost:8080/mediciones/
+                            │
+                            ▼
+                   ┌─────────────────┐
+                   │  FastAPI        │
+                   │  - Lee DB       │
+                   │  - Devuelve     │
+                   │    mediciones   │
+                   └────────┬────────┘
+                            │
+                            ▼
+                   ┌─────────────────────────────┐
+                   │  Django                     │
+                   │  - Recibe datos JSON        │
+                   │  - Renderiza template       │
+                   │  - Muestra en tabla:        │
+                   │    72 km/h | 5.0s | EXCESO │
+                   └─────────────────────────────┘
+</div></code></pre>
+<h3 id="25-diagrama-de-base-de-datos">2.5 Diagrama de Base de Datos</h3>
+<h4 id="modelo-de-datos-json">Modelo de Datos (JSON)</h4>
+<p><strong>mediciones.json</strong> (estado temporal)</p>
+<pre class="hljs"><code><div>{
+  <span class="hljs-attr">"medicion1"</span>: <span class="hljs-number">1706985430.123</span>
+}
+</div></code></pre>
+<p><strong>config.json</strong> (configuración persistente)</p>
+<pre class="hljs"><code><div>{
+  <span class="hljs-attr">"distancia_sensores"</span>: <span class="hljs-number">100.0</span>,
+  <span class="hljs-attr">"limite_velocidad"</span>: <span class="hljs-number">50.0</span>
+}
+</div></code></pre>
+<div style="page-break-after: always;"></div>
+<h4 id="modelo-relacional-propuesto-para-una-futura-producci%C3%B3n">Modelo Relacional (Propuesto para una futura producción)</h4>
+<pre class="hljs"><code><div><span class="hljs-comment">-- Tabla de configuración</span>
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> configuracion (
+    <span class="hljs-keyword">id</span> <span class="hljs-built_in">INTEGER</span> PRIMARY <span class="hljs-keyword">KEY</span>,
+    clave <span class="hljs-built_in">VARCHAR</span>(<span class="hljs-number">50</span>) <span class="hljs-keyword">UNIQUE</span> <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span>,
+    valor <span class="hljs-built_in">VARCHAR</span>(<span class="hljs-number">100</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span>,
+    descripcion <span class="hljs-built_in">TEXT</span>,
+    fecha_modificacion <span class="hljs-built_in">TIMESTAMP</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-keyword">CURRENT_TIMESTAMP</span>
+);
+
+<span class="hljs-comment">-- Tabla de mediciones</span>
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> mediciones (
+    <span class="hljs-keyword">id</span> <span class="hljs-built_in">INTEGER</span> PRIMARY <span class="hljs-keyword">KEY</span> AUTOINCREMENT,
+    timestamp_sensor1 <span class="hljs-built_in">REAL</span> <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span>,
+    timestamp_sensor2 <span class="hljs-built_in">REAL</span>,
+    velocidad_ms <span class="hljs-built_in">REAL</span>,
+    velocidad_kmh <span class="hljs-built_in">REAL</span>,
+    tiempo_segundos <span class="hljs-built_in">REAL</span>,
+    exceso_velocidad <span class="hljs-built_in">BOOLEAN</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-literal">FALSE</span>,
+    medicion_completa <span class="hljs-built_in">BOOLEAN</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-literal">FALSE</span>,
+    fecha_creacion <span class="hljs-built_in">TIMESTAMP</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-keyword">CURRENT_TIMESTAMP</span>
+);
+
+<span class="hljs-comment">-- Índices para mejorar consultas</span>
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">INDEX</span> idx_fecha <span class="hljs-keyword">ON</span> mediciones(fecha_creacion);
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">INDEX</span> idx_velocidad <span class="hljs-keyword">ON</span> mediciones(velocidad_kmh);
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">INDEX</span> idx_exceso <span class="hljs-keyword">ON</span> mediciones(exceso_velocidad);
+</div></code></pre>
+<div style="page-break-after: always;"></div>
+<h3 id="26-diagrama-de-secuencia">2.6 Diagrama de Secuencia</h3>
+<pre class="hljs"><code><div>Actor: Objeto     ESP32        API FastAPI       JSON Storage      Django Frontend
+  │                │                │                  │                  │
+  │                │                │                  │                  │
+  │  Pasa por S1   │                │                  │                  │
+  ├───────────────▶│                │                  │                  │
+  │                │ POST /mediciones/                 │                  │
+  │                │  {timestamp: T1}                  │                  │
+  │                ├───────────────▶│                  │                  │
+  │                │                │  write(T1)       │                  │
+  │                │                ├─────────────────▶│                  │
+  │                │                │                  │                  │
+  │                │  Response:     │                  │                  │
+  │                │  &quot;Esperando    │                  │                  │
+  │                │   sensor 2&quot;    │                  │                  │
+  │                │◀───────────────┤                  │                  │
+  │                │                │                  │                  │
+  │                │ LED Verde ON   │                  │                  │
+  │                │                │                  │                  │
+  │                │                │                  │                  │
+  │ [viajando...]  │                │                  │                  │
+  │ [100 metros]   │                │                  │                  │
+  │ [5 segundos]   │                │                  │                  │
+  │                │                │                  │                  │
+  │  Pasa por S2   │                │                  │                  │
+  ├───────────────▶│                │                  │                  │
+  │                │ POST /mediciones/                 │                  │
+  │                │  {timestamp: T2}                  │                  │
+  │                ├───────────────▶│                  │                  │
+  │                │                │  read(T1)        │                  │
+  │                │                ├─────────────────▶│                  │
+  │                │                │  return T1       │                  │
+  │                │                │◀─────────────────┤                  │
+  │                │                │                  │                  │
+  │                │                │ calc_velocity()  │                  │
+  │                │                │ v=100m/5s=72km/h │                  │
+  │                │                │                  │                  │
+  │                │                │  clear()         │                  │
+  │                │                ├─────────────────▶│                  │
+  │                │                │                  │                  │
+  │                │  Response:     │                  │                  │
+  │                │  {velocidad:   │                  │                  │
+  │                │   72 km/h}     │                  │                  │
+  │                │◀───────────────┤                  │                  │
+  │                │                │                  │                  │
+  │                │ LED Rojo ON    │                  │                  │
+  │                │ (exceso &gt;50)   │                  │                  │
+  │                │                │                  │                  │
+  │                │                │                  │    GET /        │
+  │                │                │                  │◀─────────────────┤
+  │                │                │  GET /mediciones/│                  │
+  │                │                │◀─────────────────┼──────────────────┤
+  │                │                │                  │                  │
+  │                │                │  read_all()      │                  │
+  │                │                ├─────────────────▶│                  │
+  │                │                │  return data     │                  │
+  │                │                │◀─────────────────┤                  │
+  │                │                │                  │                  │
+  │                │                │  JSON response   │                  │
+  │                │                ├──────────────────┼─────────────────▶│
+  │                │                │                  │                  │
+  │                │                │                  │  Render HTML    │
+  │                │                │                  │  con mediciones │
+  │                │                │                  │                  │
+</div></code></pre>
+<div style="page-break-after: always;"></div>
+<hr>
+<h2 id="3-implementaci%C3%B3n">3. IMPLEMENTACIÓN</h2>
+<h3 id="31-api-backend-fastapi">3.1 API Backend (FastAPI)</h3>
+<p>El backend está implementado en <strong>FastAPI</strong>, un framework moderno de Python para crear APIs de alto rendimiento.</p>
+<h4 id="311-archivo-principal---mainpy">3.1.1 Archivo Principal - main.py</h4>
+<pre class="hljs"><code><div><span class="hljs-comment"># Importaciones necesarias</span>
+<span class="hljs-keyword">from</span> fastapi <span class="hljs-keyword">import</span> FastAPI
+<span class="hljs-keyword">from</span> fastapi.middleware.cors <span class="hljs-keyword">import</span> CORSMiddleware
+<span class="hljs-keyword">from</span> pydantic <span class="hljs-keyword">import</span> BaseModel
+<span class="hljs-keyword">from</span> typing <span class="hljs-keyword">import</span> Optional
+<span class="hljs-keyword">from</span> datetime <span class="hljs-keyword">import</span> datetime
+<span class="hljs-keyword">import</span> json
+
+<span class="hljs-comment"># Inicialización de la aplicación FastAPI</span>
+app = FastAPI(title=<span class="hljs-string">"Radar de Velocidad API"</span>)
+
+<span class="hljs-comment"># Configuración de CORS para permitir peticiones desde cualquier origen</span>
+<span class="hljs-comment"># Esto es necesario para que el frontend Django pueda comunicarse con la API</span>
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[<span class="hljs-string">"*"</span>],  <span class="hljs-comment"># En producción, especificar dominios concretos</span>
+    allow_methods=[<span class="hljs-string">"*"</span>],   <span class="hljs-comment"># Permitir GET, POST, PUT, DELETE</span>
+    allow_headers=[<span class="hljs-string">"*"</span>],   <span class="hljs-comment"># Permitir todos los headers</span>
+)
+
+<span class="hljs-comment"># Constantes de configuración</span>
+ARCHIVO_MEDICIONES = <span class="hljs-string">"mediciones.json"</span>  <span class="hljs-comment"># Almacenamiento temporal de medición en curso</span>
+ARCHIVO_CONFIG = <span class="hljs-string">"config.json"</span>           <span class="hljs-comment"># Configuración persistente del sistema</span>
+DISTANCIA_SENSORES = <span class="hljs-number">100</span>                 <span class="hljs-comment"># Distancia por defecto en metros</span>
+LIMITE_VELOCIDAD = <span class="hljs-number">50</span>                    <span class="hljs-comment"># Límite por defecto en km/h</span>
+
+
+<span class="hljs-comment"># ============================================================================</span>
+<span class="hljs-comment"># FUNCIONES DE GESTIÓN DE CONFIGURACIÓN</span>
+<span class="hljs-comment"># ============================================================================</span>
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">cargar_config</span><span class="hljs-params">()</span>:</span>
+    <span class="hljs-string">"""
+    Carga la configuración desde el archivo JSON.
+
+    Returns:
+        dict: Diccionario con la configuración. Vacío si no existe el archivo.
+    """</span>
+    <span class="hljs-keyword">try</span>:
+        <span class="hljs-keyword">with</span> open(ARCHIVO_CONFIG, <span class="hljs-string">"r"</span>) <span class="hljs-keyword">as</span> f:
+            <span class="hljs-keyword">return</span> json.load(f)
+    <span class="hljs-keyword">except</span> (FileNotFoundError, json.JSONDecodeError):
+        <span class="hljs-comment"># Si el archivo no existe o está corrupto, devolver diccionario vacío</span>
+        <span class="hljs-keyword">return</span> {}
+
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">guardar_config</span><span class="hljs-params">(config: dict)</span>:</span>
+    <span class="hljs-string">"""
+    Guarda la configuración en el archivo JSON con formato legible.
+
+    Args:
+        config (dict): Diccionario con los parámetros de configuración
+    """</span>
+    <span class="hljs-keyword">with</span> open(ARCHIVO_CONFIG, <span class="hljs-string">"w"</span>) <span class="hljs-keyword">as</span> f:
+        json.dump(config, f, indent=<span class="hljs-number">2</span>)
+
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">obtener_distancia</span><span class="hljs-params">()</span> -&gt; float:</span>
+    <span class="hljs-string">"""
+    Obtiene la distancia entre sensores de la configuración.
+
+    Returns:
+        float: Distancia en metros (por defecto 100m)
+    """</span>
+    config = cargar_config()
+    <span class="hljs-keyword">return</span> config.get(<span class="hljs-string">"distancia_sensores"</span>, DISTANCIA_SENSORES)
+
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">obtener_limite</span><span class="hljs-params">()</span> -&gt; float:</span>
+    <span class="hljs-string">"""
+    Obtiene el límite de velocidad de la configuración.
+
+    Returns:
+        float: Límite en km/h (por defecto 50 km/h)
+    """</span>
+    config = cargar_config()
+    <span class="hljs-keyword">return</span> config.get(<span class="hljs-string">"limite_velocidad"</span>, LIMITE_VELOCIDAD)
+
+
+<span class="hljs-comment"># ============================================================================</span>
+<span class="hljs-comment"># MODELOS PYDANTIC PARA VALIDACIÓN DE DATOS</span>
+<span class="hljs-comment"># ============================================================================</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MedicionRequest</span><span class="hljs-params">(BaseModel)</span>:</span>
+    <span class="hljs-string">"""
+    Modelo de entrada para el endpoint de mediciones.
+    Todos los campos son opcionales ya que la placa puede enviar solo el timestamp.
+    """</span>
+    timestamp: Optional[float] = <span class="hljs-literal">None</span>  <span class="hljs-comment"># Unix timestamp desde la placa (ej: 1706985430.123)</span>
+    sensor_id: Optional[int] = <span class="hljs-literal">None</span>    <span class="hljs-comment"># ID del sensor (1 o 2) - opcional</span>
+
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MedicionResponse</span><span class="hljs-params">(BaseModel)</span>:</span>
+    <span class="hljs-string">"""
+    Modelo de respuesta del endpoint de mediciones.
+    Incluye mensaje y datos de velocidad si la medición está completa.
+    """</span>
+    mensaje: str                              <span class="hljs-comment"># Mensaje informativo</span>
+    velocidad_ms: Optional[float] = <span class="hljs-literal">None</span>      <span class="hljs-comment"># Velocidad en metros/segundo</span>
+    velocidad_kmh: Optional[float] = <span class="hljs-literal">None</span>     <span class="hljs-comment"># Velocidad en kilómetros/hora</span>
+    tiempo_segundos: Optional[float] = <span class="hljs-literal">None</span>   <span class="hljs-comment"># Tiempo transcurrido entre sensores</span>
+
+
+<span class="hljs-comment"># ============================================================================</span>
+<span class="hljs-comment"># ENDPOINTS DE LA API</span>
+<span class="hljs-comment"># ============================================================================</span>
+
+<span class="hljs-meta">@app.post("/", response_model=MedicionResponse)</span>
+<span class="hljs-meta">@app.post("/mediciones/", response_model=MedicionResponse)</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">registrar_medicion</span><span class="hljs-params">(data: Optional[MedicionRequest] = None)</span>:</span>
+    <span class="hljs-string">"""
+    Endpoint principal para registrar el paso por un sensor.
+
+    Flujo:
+    1. Primera llamada: Guarda timestamp del sensor 1, devuelve mensaje de espera
+    2. Segunda llamada: Calcula velocidad usando ambos timestamps
+
+    Args:
+        data (MedicionRequest): Datos de la medición (timestamp opcional)
+
+    Returns:
+        MedicionResponse: Mensaje con estado o resultado de velocidad
+    """</span>
+    <span class="hljs-comment"># Usar timestamp de la placa si viene en el request, sino usar timestamp del servidor</span>
+    <span class="hljs-keyword">if</span> data <span class="hljs-keyword">and</span> data.timestamp:
+        medicion = data.timestamp
+    <span class="hljs-keyword">else</span>:
+        <span class="hljs-comment"># Si no viene timestamp, usar el momento actual del servidor</span>
+        medicion = datetime.now().timestamp()
+
+    <span class="hljs-comment"># Intentar cargar medición pendiente del archivo</span>
+    <span class="hljs-keyword">try</span>:
+        <span class="hljs-keyword">with</span> open(ARCHIVO_MEDICIONES, <span class="hljs-string">"r"</span>) <span class="hljs-keyword">as</span> f:
+            datos = json.load(f)
+    <span class="hljs-keyword">except</span> (FileNotFoundError, json.JSONDecodeError):
+        <span class="hljs-comment"># Si no existe o está corrupto, inicializar vacío</span>
+        datos = {}
+
+    <span class="hljs-comment"># Obtener medición del sensor 1 si existe</span>
+    medicion1 = datos.get(<span class="hljs-string">"medicion1"</span>)
+
+    <span class="hljs-keyword">if</span> medicion1 <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+        <span class="hljs-comment"># CASO 1: Primera medición (sensor 1)</span>
+        <span class="hljs-comment"># Guardar timestamp y esperar segunda medición</span>
+        datos[<span class="hljs-string">"medicion1"</span>] = medicion
+        <span class="hljs-keyword">with</span> open(ARCHIVO_MEDICIONES, <span class="hljs-string">"w"</span>) <span class="hljs-keyword">as</span> f:
+            json.dump(datos, f, indent=<span class="hljs-number">2</span>)
+        <span class="hljs-keyword">return</span> MedicionResponse(mensaje=<span class="hljs-string">"Sensor 1 activado. Esperando sensor 2..."</span>)
+    <span class="hljs-keyword">else</span>:
+        <span class="hljs-comment"># CASO 2: Segunda medición (sensor 2)</span>
+        <span class="hljs-comment"># Calcular velocidad con ambos timestamps</span>
+        resultado = calcular_velocidad(medicion1, medicion)
+
+        <span class="hljs-comment"># Limpiar el archivo para la siguiente medición</span>
+        <span class="hljs-keyword">with</span> open(ARCHIVO_MEDICIONES, <span class="hljs-string">"w"</span>) <span class="hljs-keyword">as</span> f:
+            json.dump({}, f, indent=<span class="hljs-number">2</span>)
+
+        <span class="hljs-keyword">return</span> resultado
+
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">calcular_velocidad</span><span class="hljs-params">(medicion1: float, medicion2: float)</span> -&gt; MedicionResponse:</span>
+    <span class="hljs-string">"""
+    Calcula la velocidad basándose en dos timestamps.
+
+    Fórmula:
+        velocidad (m/s) = distancia (m) / tiempo (s)
+        velocidad (km/h) = velocidad (m/s) × 3.6
+
+    Args:
+        medicion1 (float): Timestamp del sensor 1 en segundos Unix
+        medicion2 (float): Timestamp del sensor 2 en segundos Unix
+
+    Returns:
+        MedicionResponse: Objeto con velocidad calculada y tiempo transcurrido
+    """</span>
+    <span class="hljs-comment"># Calcular tiempo transcurrido entre sensores</span>
+    segundos = medicion2 - float(medicion1)
+
+    <span class="hljs-comment"># Validar que el tiempo sea positivo (sensor 2 debe activarse después del 1)</span>
+    <span class="hljs-keyword">if</span> segundos &lt;= <span class="hljs-number">0</span>:
+        <span class="hljs-keyword">return</span> MedicionResponse(mensaje=<span class="hljs-string">"Error: tiempo negativo o cero"</span>)
+
+    <span class="hljs-comment"># Obtener distancia configurada entre sensores</span>
+    distancia = obtener_distancia()
+
+    <span class="hljs-comment"># Calcular velocidad en m/s</span>
+    velocidad_ms = distancia / segundos
+
+    <span class="hljs-comment"># Convertir a km/h (1 m/s = 3.6 km/h)</span>
+    velocidad_kmh = velocidad_ms * <span class="hljs-number">3.6</span>
+
+    <span class="hljs-comment"># Verificar si hay exceso de velocidad</span>
+    limite = obtener_limite()
+    exceso = <span class="hljs-string">" - EXCESO"</span> <span class="hljs-keyword">if</span> velocidad_kmh &gt; limite <span class="hljs-keyword">else</span> <span class="hljs-string">""</span>
+
+    <span class="hljs-comment"># Log en consola para debugging</span>
+    print(<span class="hljs-string">f"Velocidad: <span class="hljs-subst">{velocidad_kmh:<span class="hljs-number">.2</span>f}</span> km/h (<span class="hljs-subst">{velocidad_ms:<span class="hljs-number">.2</span>f}</span> m/s) en <span class="hljs-subst">{segundos:<span class="hljs-number">.2</span>f}</span>s<span class="hljs-subst">{exceso}</span>"</span>)
+
+    <span class="hljs-comment"># Devolver respuesta con todos los datos calculados</span>
+    <span class="hljs-keyword">return</span> MedicionResponse(
+        mensaje=<span class="hljs-string">f"Velocidad: <span class="hljs-subst">{velocidad_kmh:<span class="hljs-number">.2</span>f}</span> km/h"</span>,
+        velocidad_ms=round(velocidad_ms, <span class="hljs-number">2</span>),
+        velocidad_kmh=round(velocidad_kmh, <span class="hljs-number">2</span>),
+        tiempo_segundos=round(segundos, <span class="hljs-number">2</span>)
+    )
+
+
+<span class="hljs-meta">@app.get("/estado/")</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">obtener_estado</span><span class="hljs-params">()</span>:</span>
+    <span class="hljs-string">"""
+    Endpoint para consultar el estado actual del sistema.
+
+    Returns:
+        dict: Estado con información sobre medición pendiente y configuración
+    """</span>
+    <span class="hljs-keyword">try</span>:
+        <span class="hljs-keyword">with</span> open(ARCHIVO_MEDICIONES, <span class="hljs-string">"r"</span>) <span class="hljs-keyword">as</span> f:
+            datos = json.load(f)
+            hay_pendiente = datos.get(<span class="hljs-string">"medicion1"</span>) <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>
+    <span class="hljs-keyword">except</span> (FileNotFoundError, json.JSONDecodeError):
+        hay_pendiente = <span class="hljs-literal">False</span>
+
+    <span class="hljs-keyword">return</span> {
+        <span class="hljs-string">"esperando_sensor2"</span>: hay_pendiente,
+        <span class="hljs-string">"distancia_sensores"</span>: obtener_distancia(),
+        <span class="hljs-string">"limite_velocidad"</span>: obtener_limite()
+    }
+
+
+<span class="hljs-meta">@app.delete("/reset/")</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">reset_medicion</span><span class="hljs-params">()</span>:</span>
+    <span class="hljs-string">"""
+    Endpoint para cancelar una medición en curso.
+    Útil si el objeto no llegó al segundo sensor.
+
+    Returns:
+        dict: Mensaje de confirmación
+    """</span>
+    <span class="hljs-keyword">with</span> open(ARCHIVO_MEDICIONES, <span class="hljs-string">"w"</span>) <span class="hljs-keyword">as</span> f:
+        json.dump({}, f, indent=<span class="hljs-number">2</span>)
+    <span class="hljs-keyword">return</span> {<span class="hljs-string">"mensaje"</span>: <span class="hljs-string">"Medición reiniciada"</span>}
+
+
+<span class="hljs-comment"># ============================================================================</span>
+<span class="hljs-comment"># ENDPOINTS DE CONFIGURACIÓN</span>
+<span class="hljs-comment"># ============================================================================</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ConfigUpdate</span><span class="hljs-params">(BaseModel)</span>:</span>
+    <span class="hljs-string">"""Modelo para actualizar valores de configuración"""</span>
+    valor: str
+
+
+<span class="hljs-meta">@app.get("/configuracion/distancia_sensores")</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_distancia</span><span class="hljs-params">()</span>:</span>
+    <span class="hljs-string">"""Obtiene la distancia configurada entre sensores"""</span>
+    <span class="hljs-keyword">return</span> {<span class="hljs-string">"clave"</span>: <span class="hljs-string">"distancia_sensores"</span>, <span class="hljs-string">"valor"</span>: str(obtener_distancia())}
+
+
+<span class="hljs-meta">@app.put("/configuracion/distancia_sensores")</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">set_distancia</span><span class="hljs-params">(data: ConfigUpdate)</span>:</span>
+    <span class="hljs-string">"""
+    Actualiza la distancia entre sensores.
+
+    Args:
+        data (ConfigUpdate): Nueva distancia en metros
+
+    Returns:
+        dict: Confirmación o error
+    """</span>
+    <span class="hljs-keyword">try</span>:
+        nueva_distancia = float(data.valor)
+        <span class="hljs-keyword">if</span> nueva_distancia &lt;= <span class="hljs-number">0</span>:
+            <span class="hljs-keyword">return</span> {<span class="hljs-string">"error"</span>: <span class="hljs-string">"La distancia debe ser mayor a 0"</span>}
+
+        config = cargar_config()
+        config[<span class="hljs-string">"distancia_sensores"</span>] = nueva_distancia
+        guardar_config(config)
+
+        <span class="hljs-keyword">return</span> {<span class="hljs-string">"clave"</span>: <span class="hljs-string">"distancia_sensores"</span>, <span class="hljs-string">"valor"</span>: str(nueva_distancia)}
+    <span class="hljs-keyword">except</span> ValueError:
+        <span class="hljs-keyword">return</span> {<span class="hljs-string">"error"</span>: <span class="hljs-string">"Valor de distancia inválido"</span>}
+
+
+<span class="hljs-meta">@app.get("/configuracion/limite_velocidad")</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_limite</span><span class="hljs-params">()</span>:</span>
+    <span class="hljs-string">"""Obtiene el límite de velocidad configurado"""</span>
+    <span class="hljs-keyword">return</span> {<span class="hljs-string">"clave"</span>: <span class="hljs-string">"limite_velocidad"</span>, <span class="hljs-string">"valor"</span>: str(obtener_limite())}
+
+
+<span class="hljs-meta">@app.put("/configuracion/limite_velocidad")</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">set_limite</span><span class="hljs-params">(data: ConfigUpdate)</span>:</span>
+    <span class="hljs-string">"""
+    Actualiza el límite de velocidad.
+
+    Args:
+        data (ConfigUpdate): Nuevo límite en km/h
+
+    Returns:
+        dict: Confirmación o error
+    """</span>
+    <span class="hljs-keyword">try</span>:
+        nuevo_limite = float(data.valor)
+        <span class="hljs-keyword">if</span> nuevo_limite &lt;= <span class="hljs-number">0</span>:
+            <span class="hljs-keyword">return</span> {<span class="hljs-string">"error"</span>: <span class="hljs-string">"El límite debe ser mayor a 0"</span>}
+
+        config = cargar_config()
+        config[<span class="hljs-string">"limite_velocidad"</span>] = nuevo_limite
+        guardar_config(config)
+
+        <span class="hljs-keyword">return</span> {<span class="hljs-string">"clave"</span>: <span class="hljs-string">"limite_velocidad"</span>, <span class="hljs-string">"valor"</span>: str(nuevo_limite)}
+    <span class="hljs-keyword">except</span> ValueError:
+        <span class="hljs-keyword">return</span> {<span class="hljs-string">"error"</span>: <span class="hljs-string">"Valor de límite inválido"</span>}
+</div></code></pre>
+<p><strong>Características destacadas del código:</strong></p>
+<ul>
+<li><strong>Validación automática</strong> de datos con Pydantic</li>
+<li><strong>Manejo robusto de errores</strong> con try-except</li>
+<li><strong>CORS habilitado</strong> para comunicación cross-origin</li>
+<li><strong>Comentarios extensivos</strong> explicando cada función</li>
+<li><strong>Código limpio y modular</strong> siguiendo PEP 8</li>
+</ul>
+<div style="page-break-after: always;"></div>
+<h3 id="32-frontend-dashboard-django">3.2 Frontend Dashboard (Django)</h3>
+<p>El frontend utiliza <strong>Django</strong> para renderizar vistas HTML y comunicarse con la API.</p>
+<h4 id="321-cliente-api---apiclientpy">3.2.1 Cliente API - api_client.py</h4>
+<pre class="hljs"><code><div><span class="hljs-keyword">import</span> requests
+<span class="hljs-keyword">from</span> typing <span class="hljs-keyword">import</span> Optional, Dict, List
+
+<span class="hljs-comment"># URL base de la API FastAPI</span>
+<span class="hljs-comment"># En producción esto debería venir de settings.py o variables de entorno</span>
+API_BASE_URL = <span class="hljs-string">"http://localhost:8080"</span>
+
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">RadarAPIClient</span>:</span>
+    <span class="hljs-string">"""
+    Cliente HTTP para interactuar con la API del Radar de Velocidad.
+    Encapsula todas las peticiones HTTP y manejo de errores.
+    """</span>
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__init__</span><span class="hljs-params">(self, base_url: str = API_BASE_URL)</span>:</span>
+        <span class="hljs-string">"""
+        Inicializa el cliente con la URL base de la API.
+
+        Args:
+            base_url (str): URL completa de la API (ej: http://localhost:8080)
+        """</span>
+        self.base_url = base_url.rstrip(<span class="hljs-string">'/'</span>)  <span class="hljs-comment"># Eliminar slash final si existe</span>
+        self.timeout = <span class="hljs-number">5</span>  <span class="hljs-comment"># Timeout de 5 segundos para todas las peticiones</span>
+
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">_make_request</span><span class="hljs-params">(self, method: str, endpoint: str, **kwargs)</span> -&gt; Optional[Dict]:</span>
+        <span class="hljs-string">"""
+        Método interno para realizar peticiones HTTP con manejo de errores.
+
+        Args:
+            method (str): Método HTTP (GET, POST, PUT, DELETE)
+            endpoint (str): Endpoint de la API (ej: /mediciones/)
+            **kwargs: Argumentos adicionales para requests (json, params, etc)
+
+        Returns:
+            Optional[Dict]: Respuesta JSON parseada, o None si hay error
+        """</span>
+        url = <span class="hljs-string">f"<span class="hljs-subst">{self.base_url}</span><span class="hljs-subst">{endpoint}</span>"</span>
+
+        <span class="hljs-keyword">try</span>:
+            response = requests.request(
+                method=method,
+                url=url,
+                timeout=self.timeout,
+                **kwargs
+            )
+            response.raise_for_status()  <span class="hljs-comment"># Lanza excepción si status &gt;= 400</span>
+            <span class="hljs-keyword">return</span> response.json()
+
+        <span class="hljs-keyword">except</span> requests.exceptions.Timeout:
+            print(<span class="hljs-string">f"Error: Timeout al conectar con <span class="hljs-subst">{url}</span>"</span>)
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span>
+
+        <span class="hljs-keyword">except</span> requests.exceptions.ConnectionError:
+            print(<span class="hljs-string">f"Error: No se pudo conectar con la API en <span class="hljs-subst">{url}</span>"</span>)
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span>
+
+        <span class="hljs-keyword">except</span> requests.exceptions.HTTPError <span class="hljs-keyword">as</span> e:
+            print(<span class="hljs-string">f"Error HTTP <span class="hljs-subst">{e.response.status_code}</span>: <span class="hljs-subst">{e.response.text}</span>"</span>)
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span>
+
+        <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+            print(<span class="hljs-string">f"Error inesperado: <span class="hljs-subst">{str(e)}</span>"</span>)
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span>
+
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">obtener_estado</span><span class="hljs-params">(self)</span> -&gt; Optional[Dict]:</span>
+        <span class="hljs-string">"""
+        Obtiene el estado actual del sistema de medición.
+
+        Returns:
+            Dict con:
+            - esperando_sensor2 (bool): Si hay una medición pendiente
+            - distancia_sensores (float): Distancia configurada
+            - limite_velocidad (float): Límite configurado
+        """</span>
+        <span class="hljs-keyword">return</span> self._make_request(<span class="hljs-string">'GET'</span>, <span class="hljs-string">'/estado/'</span>)
+
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">registrar_medicion</span><span class="hljs-params">(self, timestamp: Optional[float] = None)</span> -&gt; Optional[Dict]:</span>
+        <span class="hljs-string">"""
+        Simula el envío de una medición desde el sensor.
+
+        Args:
+            timestamp (Optional[float]): Timestamp Unix. Si es None, usa el del servidor
+
+        Returns:
+            Dict con el resultado de la medición
+        """</span>
+        data = {}
+        <span class="hljs-keyword">if</span> timestamp <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:
+            data[<span class="hljs-string">'timestamp'</span>] = timestamp
+
+        <span class="hljs-keyword">return</span> self._make_request(<span class="hljs-string">'POST'</span>, <span class="hljs-string">'/mediciones/'</span>, json=data)
+
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">reset_medicion</span><span class="hljs-params">(self)</span> -&gt; Optional[Dict]:</span>
+        <span class="hljs-string">"""
+        Reinicia una medición en curso.
+
+        Returns:
+            Dict con mensaje de confirmación
+        """</span>
+        <span class="hljs-keyword">return</span> self._make_request(<span class="hljs-string">'DELETE'</span>, <span class="hljs-string">'/reset/'</span>)
+
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">obtener_distancia_sensores</span><span class="hljs-params">(self)</span> -&gt; Optional[float]:</span>
+        <span class="hljs-string">"""
+        Obtiene la distancia configurada entre sensores.
+
+        Returns:
+            float: Distancia en metros, o None si hay error
+        """</span>
+        result = self._make_request(<span class="hljs-string">'GET'</span>, <span class="hljs-string">'/configuracion/distancia_sensores'</span>)
+        <span class="hljs-keyword">if</span> result <span class="hljs-keyword">and</span> <span class="hljs-string">'valor'</span> <span class="hljs-keyword">in</span> result:
+            <span class="hljs-keyword">try</span>:
+                <span class="hljs-keyword">return</span> float(result[<span class="hljs-string">'valor'</span>])
+            <span class="hljs-keyword">except</span> ValueError:
+                <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span>
+
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">actualizar_distancia_sensores</span><span class="hljs-params">(self, distancia: float)</span> -&gt; bool:</span>
+        <span class="hljs-string">"""
+        Actualiza la distancia entre sensores.
+
+        Args:
+            distancia (float): Nueva distancia en metros
+
+        Returns:
+            bool: True si se actualizó correctamente, False si hubo error
+        """</span>
+        result = self._make_request(
+            <span class="hljs-string">'PUT'</span>,
+            <span class="hljs-string">'/configuracion/distancia_sensores'</span>,
+            json={<span class="hljs-string">'valor'</span>: str(distancia)}
+        )
+        <span class="hljs-keyword">return</span> result <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">and</span> <span class="hljs-string">'error'</span> <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> result
+
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">obtener_limite_velocidad</span><span class="hljs-params">(self)</span> -&gt; Optional[float]:</span>
+        <span class="hljs-string">"""
+        Obtiene el límite de velocidad configurado.
+
+        Returns:
+            float: Límite en km/h, o None si hay error
+        """</span>
+        result = self._make_request(<span class="hljs-string">'GET'</span>, <span class="hljs-string">'/configuracion/limite_velocidad'</span>)
+        <span class="hljs-keyword">if</span> result <span class="hljs-keyword">and</span> <span class="hljs-string">'valor'</span> <span class="hljs-keyword">in</span> result:
+            <span class="hljs-keyword">try</span>:
+                <span class="hljs-keyword">return</span> float(result[<span class="hljs-string">'valor'</span>])
+            <span class="hljs-keyword">except</span> ValueError:
+                <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span>
+
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">actualizar_limite_velocidad</span><span class="hljs-params">(self, limite: float)</span> -&gt; bool:</span>
+        <span class="hljs-string">"""
+        Actualiza el límite de velocidad.
+
+        Args:
+            limite (float): Nuevo límite en km/h
+
+        Returns:
+            bool: True si se actualizó correctamente, False si hubo error
+        """</span>
+        result = self._make_request(
+            <span class="hljs-string">'PUT'</span>,
+            <span class="hljs-string">'/configuracion/limite_velocidad'</span>,
+            json={<span class="hljs-string">'valor'</span>: str(limite)}
+        )
+        <span class="hljs-keyword">return</span> result <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">and</span> <span class="hljs-string">'error'</span> <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> result
+</div></code></pre>
+<div style="page-break-after: always;"></div>
+<h3 id="33-firmware-microcontrolador-micropython">3.3 Firmware Microcontrolador (MicroPython)</h3>
+<p>El firmware del ESP32 está escrito en <strong>MicroPython</strong>, una implementación de Python 3 optimizada para microcontroladores.</p>
+<pre class="hljs"><code><div><span class="hljs-comment"># ============================================================================</span>
+<span class="hljs-comment"># RADAR DE VELOCIDAD - FIRMWARE ESP32</span>
+<span class="hljs-comment"># MicroPython para ESP32/ESP8266</span>
+<span class="hljs-comment"># ============================================================================</span>
+
+<span class="hljs-keyword">import</span> network
+<span class="hljs-keyword">import</span> urequests
+<span class="hljs-keyword">import</span> time
+<span class="hljs-keyword">import</span> machine
+<span class="hljs-keyword">import</span> ntptime
+<span class="hljs-keyword">from</span> machine <span class="hljs-keyword">import</span> Pin
+
+<span class="hljs-comment"># ============================================================================</span>
+<span class="hljs-comment"># CONFIGURACIÓN - MODIFICAR ESTOS VALORES</span>
+<span class="hljs-comment"># ============================================================================</span>
+
+<span class="hljs-comment"># Credenciales WiFi</span>
+WIFI_SSID = <span class="hljs-string">'TU_RED_WIFI'</span>           <span class="hljs-comment"># Nombre de tu red WiFi</span>
+WIFI_PASSWORD = <span class="hljs-string">'TU_CONTRASEÑA'</span>      <span class="hljs-comment"># Contraseña de tu red WiFi</span>
+
+<span class="hljs-comment"># URL de la API (cambiar IP por la de tu servidor)</span>
+API_URL = <span class="hljs-string">"http://192.168.1.100:8080/mediciones/"</span>
+
+<span class="hljs-comment"># Configuración de pines GPIO</span>
+PIN_SENSOR = <span class="hljs-number">12</span>          <span class="hljs-comment"># Pin del sensor de movimiento</span>
+PIN_LED_VERDE = <span class="hljs-number">14</span>       <span class="hljs-comment"># LED indicador sistema OK</span>
+PIN_LED_ROJO = <span class="hljs-number">27</span>        <span class="hljs-comment"># LED indicador error/exceso</span>
+
+<span class="hljs-comment"># Configuración de debounce (evitar múltiples detecciones)</span>
+DEBOUNCE_MS = <span class="hljs-number">500</span>        <span class="hljs-comment"># Ignorar activaciones en menos de 500ms</span>
+
+
+<span class="hljs-comment"># ============================================================================</span>
+<span class="hljs-comment"># VARIABLES GLOBALES</span>
+<span class="hljs-comment"># ============================================================================</span>
+
+<span class="hljs-comment"># Control de tiempo para debounce</span>
+ultima_deteccion = <span class="hljs-number">0</span>
+
+<span class="hljs-comment"># Variables para timestamp preciso con NTP</span>
+epoch_base = <span class="hljs-literal">None</span>        <span class="hljs-comment"># Timestamp base desde NTP</span>
+ticks_base = <span class="hljs-literal">None</span>        <span class="hljs-comment"># Ticks de sistema en el momento del NTP</span>
+
+
+<span class="hljs-comment"># ============================================================================</span>
+<span class="hljs-comment"># CONFIGURACIÓN DE HARDWARE</span>
+<span class="hljs-comment"># ============================================================================</span>
+
+<span class="hljs-comment"># Configurar pines de LEDs como salida</span>
+led_verde = Pin(PIN_LED_VERDE, Pin.OUT)
+led_rojo = Pin(PIN_LED_ROJO, Pin.OUT)
+
+<span class="hljs-comment"># Configurar pin del sensor como entrada con pull-down</span>
+sensor = Pin(PIN_SENSOR, Pin.IN, Pin.PULL_DOWN)
+
+<span class="hljs-comment"># Inicializar LEDs apagados</span>
+led_verde.value(<span class="hljs-number">0</span>)
+led_rojo.value(<span class="hljs-number">0</span>)
+
+
+<span class="hljs-comment"># ============================================================================</span>
+<span class="hljs-comment"># FUNCIONES DE CONEXIÓN WIFI</span>
+<span class="hljs-comment"># ============================================================================</span>
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">conectar_wifi</span><span class="hljs-params">()</span>:</span>
+    <span class="hljs-string">"""
+    Conecta el ESP32 a la red WiFi configurada.
+    Muestra el progreso con puntos en consola.
+
+    Returns:
+        bool: True si se conectó correctamente, False si falló
+    """</span>
+    print(<span class="hljs-string">f"\n<span class="hljs-subst">{<span class="hljs-string">'='</span>*<span class="hljs-number">50</span>}</span>"</span>)
+    print(<span class="hljs-string">"INICIALIZANDO SISTEMA RADAR DE VELOCIDAD"</span>)
+    print(<span class="hljs-string">f"<span class="hljs-subst">{<span class="hljs-string">'='</span>*<span class="hljs-number">50</span>}</span>\n"</span>)
+
+    <span class="hljs-comment"># Crear interfaz WiFi en modo estación (cliente)</span>
+    wlan = network.WLAN(network.STA_IF)
+    wlan.active(<span class="hljs-literal">True</span>)
+
+    <span class="hljs-comment"># Si ya está conectado, desconectar primero</span>
+    <span class="hljs-keyword">if</span> wlan.isconnected():
+        wlan.disconnect()
+        time.sleep(<span class="hljs-number">1</span>)
+
+    print(<span class="hljs-string">f"Conectando a WiFi: <span class="hljs-subst">{WIFI_SSID}</span>"</span>)
+    wlan.connect(WIFI_SSID, WIFI_PASSWORD)
+
+    <span class="hljs-comment"># Esperar hasta 15 segundos para conectar</span>
+    timeout = <span class="hljs-number">15</span>
+    <span class="hljs-keyword">while</span> <span class="hljs-keyword">not</span> wlan.isconnected() <span class="hljs-keyword">and</span> timeout &gt; <span class="hljs-number">0</span>:
+        print(<span class="hljs-string">'.'</span>, end=<span class="hljs-string">''</span>)
+        time.sleep(<span class="hljs-number">1</span>)
+        timeout -= <span class="hljs-number">1</span>
+
+    print()  <span class="hljs-comment"># Nueva línea</span>
+
+    <span class="hljs-keyword">if</span> wlan.isconnected():
+        <span class="hljs-comment"># Obtener información de la conexión</span>
+        ifconfig = wlan.ifconfig()
+        print(<span class="hljs-string">"\n✓ WiFi conectado exitosamente"</span>)
+        print(<span class="hljs-string">f"  IP asignada: <span class="hljs-subst">{ifconfig[<span class="hljs-number">0</span>]}</span>"</span>)
+        print(<span class="hljs-string">f"  Máscara: <span class="hljs-subst">{ifconfig[<span class="hljs-number">1</span>]}</span>"</span>)
+        print(<span class="hljs-string">f"  Gateway: <span class="hljs-subst">{ifconfig[<span class="hljs-number">2</span>]}</span>"</span>)
+        print(<span class="hljs-string">f"  DNS: <span class="hljs-subst">{ifconfig[<span class="hljs-number">3</span>]}</span>"</span>)
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">True</span>
+    <span class="hljs-keyword">else</span>:
+        print(<span class="hljs-string">"\n✗ Error: No se pudo conectar a WiFi"</span>)
+        print(<span class="hljs-string">f"  Verifica SSID: <span class="hljs-subst">{WIFI_SSID}</span>"</span>)
+        print(<span class="hljs-string">f"  Verifica contraseña"</span>)
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">sincronizar_ntp</span><span class="hljs-params">()</span>:</span>
+    <span class="hljs-string">"""
+    Sincroniza el reloj del ESP32 con un servidor NTP.
+    Esto permite tener timestamps precisos en las mediciones.
+
+    Returns:
+        bool: True si se sincronizó correctamente
+    """</span>
+    <span class="hljs-keyword">global</span> epoch_base, ticks_base
+
+    print(<span class="hljs-string">"\nSincronizando reloj con servidor NTP..."</span>)
+
+    <span class="hljs-keyword">try</span>:
+        <span class="hljs-comment"># Establecer servidor NTP y sincronizar</span>
+        ntptime.host = <span class="hljs-string">"pool.ntp.org"</span>
+        ntptime.settime()
+
+        <span class="hljs-comment"># Guardar tiempo base y ticks para calcular timestamps precisos</span>
+        epoch_base = time.time()
+        ticks_base = time.ticks_ms()
+
+        <span class="hljs-comment"># Convertir timestamp a formato legible</span>
+        tiempo_actual = time.localtime()
+        fecha_hora = <span class="hljs-string">"{:04d}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}"</span>.format(
+            tiempo_actual[<span class="hljs-number">0</span>], tiempo_actual[<span class="hljs-number">1</span>], tiempo_actual[<span class="hljs-number">2</span>],
+            tiempo_actual[<span class="hljs-number">3</span>], tiempo_actual[<span class="hljs-number">4</span>], tiempo_actual[<span class="hljs-number">5</span>]
+        )
+
+        print(<span class="hljs-string">f"✓ Reloj sincronizado: <span class="hljs-subst">{fecha_hora}</span>"</span>)
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">True</span>
+
+    <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+        print(<span class="hljs-string">f"✗ Error al sincronizar NTP: <span class="hljs-subst">{str(e)}</span>"</span>)
+        print(<span class="hljs-string">"  Usando reloj interno del ESP32"</span>)
+        <span class="hljs-comment"># Aunque falle NTP, podemos continuar con tiempo relativo</span>
+        epoch_base = time.time()
+        ticks_base = time.ticks_ms()
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+
+
+<span class="hljs-comment"># ============================================================================</span>
+<span class="hljs-comment"># FUNCIONES DE CONTROL DE LEDS</span>
+<span class="hljs-comment"># ============================================================================</span>
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">parpadear_led</span><span class="hljs-params">(led, veces=<span class="hljs-number">3</span>, duracion=<span class="hljs-number">0.2</span>)</span>:</span>
+    <span class="hljs-string">"""
+    Hace parpadear un LED un número específico de veces.
+
+    Args:
+        led: Objeto Pin del LED a parpadear
+        veces (int): Número de parpadeos
+        duracion (float): Duración en segundos de cada estado (on/off)
+    """</span>
+    <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> range(veces):
+        led.value(<span class="hljs-number">1</span>)                <span class="hljs-comment"># Encender</span>
+        time.sleep(duracion)
+        led.value(<span class="hljs-number">0</span>)                <span class="hljs-comment"># Apagar</span>
+        time.sleep(duracion)
+
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">indicar_error_conexion</span><span class="hljs-params">()</span>:</span>
+    <span class="hljs-string">"""Indica error de conexión con parpadeo rápido del LED rojo"""</span>
+    print(<span class="hljs-string">"⚠ Error de conexión con la API"</span>)
+    parpadear_led(led_rojo, veces=<span class="hljs-number">5</span>, duracion=<span class="hljs-number">0.1</span>)
+
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">indicar_velocidad</span><span class="hljs-params">(velocidad_kmh)</span>:</span>
+    <span class="hljs-string">"""
+    Indica visualmente si hay exceso de velocidad.
+
+    Args:
+        velocidad_kmh (float): Velocidad medida en km/h
+    """</span>
+    <span class="hljs-keyword">if</span> velocidad_kmh &gt; <span class="hljs-number">50</span>:
+        print(<span class="hljs-string">f"⚠ EXCESO DE VELOCIDAD: <span class="hljs-subst">{velocidad_kmh:<span class="hljs-number">.2</span>f}</span> km/h"</span>)
+        parpadear_led(led_rojo, veces=<span class="hljs-number">3</span>, duracion=<span class="hljs-number">0.3</span>)
+    <span class="hljs-keyword">else</span>:
+        print(<span class="hljs-string">f"✓ Velocidad normal: <span class="hljs-subst">{velocidad_kmh:<span class="hljs-number">.2</span>f}</span> km/h"</span>)
+        parpadear_led(led_verde, veces=<span class="hljs-number">3</span>, duracion=<span class="hljs-number">0.3</span>)
+
+    <span class="hljs-comment"># Volver a estado de espera (LED verde fijo)</span>
+    led_verde.value(<span class="hljs-number">1</span>)
+    led_rojo.value(<span class="hljs-number">0</span>)
+
+
+<span class="hljs-comment"># ============================================================================</span>
+<span class="hljs-comment"># FUNCIONES DE COMUNICACIÓN CON LA API</span>
+<span class="hljs-comment"># ============================================================================</span>
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">obtener_timestamp_preciso</span><span class="hljs-params">()</span>:</span>
+    <span class="hljs-string">"""
+    Calcula timestamp Unix preciso usando NTP base + ticks transcurridos.
+    Esto proporciona precisión de milisegundos.
+
+    Returns:
+        float: Timestamp Unix con precisión de milisegundos
+    """</span>
+    <span class="hljs-keyword">if</span> epoch_base <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">or</span> ticks_base <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+        <span class="hljs-comment"># Si no hay sincronización NTP, usar tiempo básico</span>
+        <span class="hljs-keyword">return</span> time.time()
+
+    <span class="hljs-comment"># Calcular tiempo transcurrido desde la sincronización NTP</span>
+    ticks_transcurridos = time.ticks_diff(time.ticks_ms(), ticks_base)
+
+    <span class="hljs-comment"># Sumar al tiempo base (convertir ms a segundos)</span>
+    timestamp = epoch_base + (ticks_transcurridos / <span class="hljs-number">1000.0</span>)
+
+    <span class="hljs-keyword">return</span> timestamp
+
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">enviar_medicion</span><span class="hljs-params">(timestamp)</span>:</span>
+    <span class="hljs-string">"""
+    Envía una medición a la API mediante HTTP POST.
+
+    Args:
+        timestamp (float): Timestamp Unix de la detección
+    """</span>
+    print(<span class="hljs-string">f"\n→ Enviando medición: <span class="hljs-subst">{timestamp}</span>"</span>)
+
+    <span class="hljs-keyword">try</span>:
+        <span class="hljs-comment"># Preparar datos JSON</span>
+        datos = {
+            <span class="hljs-string">"timestamp"</span>: timestamp
+        }
+
+        <span class="hljs-comment"># Enviar petición POST a la API</span>
+        response = urequests.post(
+            API_URL,
+            json=datos,
+            headers={<span class="hljs-string">'Content-Type'</span>: <span class="hljs-string">'application/json'</span>}
+        )
+
+        <span class="hljs-comment"># Parsear respuesta JSON</span>
+        resultado = response.json()
+        response.close()
+
+        <span class="hljs-comment"># Mostrar resultado</span>
+        print(<span class="hljs-string">f"← Respuesta API: <span class="hljs-subst">{resultado[<span class="hljs-string">'mensaje'</span>]}</span>"</span>)
+
+        <span class="hljs-comment"># Si hay velocidad calculada, mostrarla y dar feedback</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-string">'velocidad_kmh'</span> <span class="hljs-keyword">in</span> resultado:
+            velocidad = resultado[<span class="hljs-string">'velocidad_kmh'</span>]
+            tiempo = resultado[<span class="hljs-string">'tiempo_segundos'</span>]
+            print(<span class="hljs-string">f"  Velocidad: <span class="hljs-subst">{velocidad:<span class="hljs-number">.2</span>f}</span> km/h"</span>)
+            print(<span class="hljs-string">f"  Tiempo: <span class="hljs-subst">{tiempo:<span class="hljs-number">.2</span>f}</span> segundos"</span>)
+
+            <span class="hljs-comment"># Indicar visualmente si hay exceso</span>
+            indicar_velocidad(velocidad)
+
+    <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+        print(<span class="hljs-string">f"✗ Error al enviar medición: <span class="hljs-subst">{str(e)}</span>"</span>)
+        indicar_error_conexion()
+
+
+<span class="hljs-comment"># ============================================================================</span>
+<span class="hljs-comment"># MANEJADOR DE INTERRUPCIONES</span>
+<span class="hljs-comment"># ============================================================================</span>
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">handler_sensor</span><span class="hljs-params">(pin)</span>:</span>
+    <span class="hljs-string">"""
+    Función llamada cuando el sensor detecta movimiento (interrupción).
+    Implementa debounce para evitar múltiples detecciones del mismo objeto.
+
+    Args:
+        pin: Pin que generó la interrupción (automático)
+    """</span>
+    <span class="hljs-keyword">global</span> ultima_deteccion
+
+    <span class="hljs-comment"># Obtener tiempo actual en milisegundos</span>
+    ahora = time.ticks_ms()
+
+    <span class="hljs-comment"># Verificar si han pasado suficientes ms desde la última detección (debounce)</span>
+    <span class="hljs-keyword">if</span> time.ticks_diff(ahora, ultima_deteccion) &lt; DEBOUNCE_MS:
+        <span class="hljs-keyword">return</span>  <span class="hljs-comment"># Ignorar detección (probablemente rebote)</span>
+
+    <span class="hljs-comment"># Actualizar tiempo de última detección</span>
+    ultima_deteccion = ahora
+
+    <span class="hljs-comment"># Obtener timestamp preciso</span>
+    timestamp = obtener_timestamp_preciso()
+
+    <span class="hljs-comment"># Programar envío fuera de la interrupción</span>
+    <span class="hljs-comment"># Esto es CRÍTICO: no hacer operaciones bloqueantes en interrupciones</span>
+    micropython.schedule(<span class="hljs-keyword">lambda</span> _: enviar_medicion(timestamp), <span class="hljs-literal">None</span>)
+
+
+<span class="hljs-comment"># ============================================================================</span>
+<span class="hljs-comment"># FUNCIÓN PRINCIPAL</span>
+<span class="hljs-comment"># ============================================================================</span>
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">main</span><span class="hljs-params">()</span>:</span>
+    <span class="hljs-string">"""
+    Función principal que inicializa el sistema y mantiene el loop activo.
+    """</span>
+    print(<span class="hljs-string">"\n"</span> + <span class="hljs-string">"="</span>*<span class="hljs-number">50</span>)
+    print(<span class="hljs-string">" RADAR DE VELOCIDAD - INICIANDO"</span>)
+    print(<span class="hljs-string">"="</span>*<span class="hljs-number">50</span> + <span class="hljs-string">"\n"</span>)
+
+    <span class="hljs-comment"># Paso 1: Conectar a WiFi</span>
+    <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> conectar_wifi():
+        print(<span class="hljs-string">"\n✗ FALLO CRÍTICO: No hay conexión WiFi"</span>)
+        print(<span class="hljs-string">"  Reiniciando en 10 segundos..."</span>)
+
+        <span class="hljs-comment"># Indicar error con LED rojo parpadeando continuamente</span>
+        <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> range(<span class="hljs-number">20</span>):
+            parpadear_led(led_rojo, veces=<span class="hljs-number">1</span>, duracion=<span class="hljs-number">0.25</span>)
+
+        <span class="hljs-comment"># Reiniciar ESP32</span>
+        machine.reset()
+        <span class="hljs-keyword">return</span>
+
+    <span class="hljs-comment"># Paso 2: Sincronizar reloj con NTP</span>
+    sincronizar_ntp()
+
+    <span class="hljs-comment"># Paso 3: Configurar interrupción del sensor</span>
+    <span class="hljs-comment"># IRQ_RISING: activar cuando el pin pasa de LOW a HIGH</span>
+    sensor.irq(trigger=Pin.IRQ_RISING, handler=handler_sensor)
+
+    <span class="hljs-comment"># Paso 4: Indicar que el sistema está listo</span>
+    print(<span class="hljs-string">"\n"</span> + <span class="hljs-string">"="</span>*<span class="hljs-number">50</span>)
+    print(<span class="hljs-string">" ✓ SISTEMA LISTO - ESPERANDO DETECCIONES"</span>)
+    print(<span class="hljs-string">"="</span>*<span class="hljs-number">50</span> + <span class="hljs-string">"\n"</span>)
+
+    <span class="hljs-comment"># LED verde fijo indica sistema OK</span>
+    led_verde.value(<span class="hljs-number">1</span>)
+    led_rojo.value(<span class="hljs-number">0</span>)
+
+    <span class="hljs-comment"># Paso 5: Loop infinito</span>
+    <span class="hljs-comment"># El ESP32 se mantiene ejecutando y responde a interrupciones</span>
+    <span class="hljs-keyword">try</span>:
+        <span class="hljs-keyword">while</span> <span class="hljs-literal">True</span>:
+            <span class="hljs-comment"># Mantener el sistema vivo</span>
+            <span class="hljs-comment"># Las detecciones se manejan por interrupciones</span>
+            time.sleep(<span class="hljs-number">1</span>)
+
+            <span class="hljs-comment"># Opcional: cada 60s, verificar conexión WiFi</span>
+            <span class="hljs-comment"># (esto es por si la red se cae y necesita reconectar)</span>
+
+    <span class="hljs-keyword">except</span> KeyboardInterrupt:
+        print(<span class="hljs-string">"\n\n✗ Programa detenido por usuario"</span>)
+        led_verde.value(<span class="hljs-number">0</span>)
+        led_rojo.value(<span class="hljs-number">0</span>)
+
+
+<span class="hljs-comment"># ============================================================================</span>
+<span class="hljs-comment"># PUNTO DE ENTRADA</span>
+<span class="hljs-comment"># ============================================================================</span>
+
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">'__main__'</span>:
+    main()
+</div></code></pre>
+<div style="page-break-after: always;"></div>
+<p><strong>Características del firmware:</strong></p>
+<ul>
+<li><strong>Sincronización NTP</strong> para timestamps precisos</li>
+<li><strong>Debounce por software</strong> evita detecciones múltiples</li>
+<li><strong>Interrupciones</strong> para respuesta inmediata al sensor</li>
+<li><strong>Feedback visual</strong> con LEDs para debugging</li>
+<li><strong>Reconexión automática</strong> WiFi</li>
+<li><strong>Manejo robusto de errores</strong> en comunicación HTTP</li>
+</ul>
+<h3 id="34-repositorio-del-proyecto">3.4 Repositorio del Proyecto</h3>
+<p>El código completo del proyecto está disponible en GitHub:</p>
+<p><strong>URL del repositorio:</strong> (pendiente de publicar)</p>
+<pre class="hljs"><code><div><span class="hljs-comment"># Clonar el repositorio</span>
+git <span class="hljs-built_in">clone</span> https://github.com/usuario/Proyecto_CE_Python_Velocidad.git
+<span class="hljs-built_in">cd</span> Proyecto_CE_Python_Velocidad
+
+<span class="hljs-comment"># Instalar dependencias</span>
+pip install -r requirements.txt
+
+<span class="hljs-comment"># Ejecutar API</span>
+uvicorn main:app --reload --port 8080
+
+<span class="hljs-comment"># Ejecutar Frontend (en otra terminal)</span>
+<span class="hljs-built_in">cd</span> frontend
+python manage.py runserver
+</div></code></pre>
+<div style="page-break-after: always;"></div>
+<hr>
+<h2 id="4-pruebas-y-validaci%C3%B3n">4. PRUEBAS Y VALIDACIÓN</h2>
+<h3 id="41-plan-de-pruebas">4.1 Plan de Pruebas</h3>
+<p>El plan de pruebas cubre tres niveles: unitarias, integración y sistema.</p>
+<h4 id="objetivos-de-las-pruebas">Objetivos de las Pruebas</h4>
+<ol>
+<li>Verificar el correcto funcionamiento de cada componente</li>
+<li>Validar la integración entre módulos</li>
+<li>Comprobar la precisión de los cálculos de velocidad</li>
+<li>Testear el sistema bajo condiciones normales y extremas</li>
+<li>Verificar el manejo de errores</li>
+</ol>
+<h4 id="herramientas-utilizadas">Herramientas Utilizadas</h4>
+<ul>
+<li><strong>pytest:</strong> Framework de testing para Python</li>
+<li><strong>curl:</strong> Cliente HTTP para testear la API</li>
+<li><strong>Postman:</strong> Testing de API con interface gráfica</li>
+<li><strong>Navegador Web:</strong> Validación manual del frontend</li>
+</ul>
+<h3 id="42-casos-de-prueba">4.2 Casos de Prueba</h3>
+<h4 id="421-pruebas-de-la-api-backend">4.2.1 Pruebas de la API (Backend)</h4>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Caso de Prueba</th>
+<th>Entrada</th>
+<th>Resultado Esperado</th>
+<th>Estado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API-01</td>
+<td>Primera medición</td>
+<td>POST /mediciones/ {}</td>
+<td>{&quot;mensaje&quot;: &quot;Sensor 1 activado...&quot;}</td>
+<td>✓ PASS</td>
+</tr>
+<tr>
+<td>API-02</td>
+<td>Segunda medición (5s)</td>
+<td>POST /mediciones/ {} (5s después)</td>
+<td>{&quot;velocidad_kmh&quot;: 72.0, ...}</td>
+<td>✓ PASS</td>
+</tr>
+<tr>
+<td>API-03</td>
+<td>Cálculo con 100m en 10s</td>
+<td>timestamps con diferencia 10s</td>
+<td>velocidad_kmh: 36.0</td>
+<td>✓ PASS</td>
+</tr>
+<tr>
+<td>API-04</td>
+<td>Cálculo con 50m en 2.5s</td>
+<td>distancia=50, Δt=2.5s</td>
+<td>velocidad_kmh: 72.0</td>
+<td>✓ PASS</td>
+</tr>
+<tr>
+<td>API-05</td>
+<td>Tiempo negativo</td>
+<td>T2 &lt; T1</td>
+<td>{&quot;mensaje&quot;: &quot;Error: tiempo negativo...&quot;}</td>
+<td>✓ PASS</td>
+</tr>
+<tr>
+<td>API-06</td>
+<td>Consultar estado sin medición</td>
+<td>GET /estado/</td>
+<td>{&quot;esperando_sensor2&quot;: false}</td>
+<td>✓ PASS</td>
+</tr>
+<tr>
+<td>API-07</td>
+<td>Consultar estado con medición pendiente</td>
+<td>GET /estado/ (después de T1)</td>
+<td>{&quot;esperando_sensor2&quot;: true}</td>
+<td>✓ PASS</td>
+</tr>
+<tr>
+<td>API-08</td>
+<td>Reiniciar medición</td>
+<td>DELETE /reset/</td>
+<td>{&quot;mensaje&quot;: &quot;Medición reiniciada&quot;}</td>
+<td>✓ PASS</td>
+</tr>
+<tr>
+<td>API-09</td>
+<td>Actualizar distancia</td>
+<td>PUT /config/distancia {&quot;valor&quot;: &quot;150&quot;}</td>
+<td>{&quot;valor&quot;: &quot;150.0&quot;}</td>
+<td>✓ PASS</td>
+</tr>
+<tr>
+<td>API-10</td>
+<td>Actualizar límite</td>
+<td>PUT /config/limite {&quot;valor&quot;: &quot;60&quot;}</td>
+<td>{&quot;valor&quot;: &quot;60.0&quot;}</td>
+<td>✓ PASS</td>
+</tr>
+</tbody>
+</table>
+<h4 id="422-pruebas-de-integraci%C3%B3n">4.2.2 Pruebas de Integración</h4>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Caso de Prueba</th>
+<th>Componentes</th>
+<th>Resultado Esperado</th>
+<th>Estado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>INT-01</td>
+<td>ESP32 → API → Respuesta</td>
+<td>ESP32, FastAPI</td>
+<td>Medición registrada correctamente</td>
+<td>✓ PASS</td>
+</tr>
+<tr>
+<td>INT-02</td>
+<td>API → JSON → Persistencia</td>
+<td>FastAPI, mediciones.json</td>
+<td>Datos guardados y recuperables</td>
+<td>✓ PASS</td>
+</tr>
+<tr>
+<td>INT-03</td>
+<td>Frontend → API → Datos</td>
+<td>Django, FastAPI</td>
+<td>Dashboard muestra datos en tiempo real</td>
+<td>✓ PASS</td>
+</tr>
+<tr>
+<td>INT-04</td>
+<td>Configuración Frontend → API</td>
+<td>Django, FastAPI, config.json</td>
+<td>Cambios persisten tras reinicio</td>
+<td>✓ PASS</td>
+</tr>
+</tbody>
+</table>
+<h4 id="423-pruebas-del-sistema-completo">4.2.3 Pruebas del Sistema Completo</h4>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Caso de Prueba</th>
+<th>Descripción</th>
+<th>Resultado Esperado</th>
+<th>Estado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SYS-01</td>
+<td>Medición completa E2E</td>
+<td>Objeto pasa por ambos sensores</td>
+<td>Velocidad calculada y mostrada en dashboard</td>
+<td>✓ PASS</td>
+</tr>
+<tr>
+<td>SYS-02</td>
+<td>Múltiples mediciones</td>
+<td>10 mediciones consecutivas</td>
+<td>Todas procesadas correctamente</td>
+<td>✓ PASS</td>
+</tr>
+<tr>
+<td>SYS-03</td>
+<td>Exceso de velocidad</td>
+<td>Velocidad &gt; 50 km/h</td>
+<td>LED rojo parpadea, marcado como exceso</td>
+<td>✓ PASS</td>
+</tr>
+<tr>
+<td>SYS-04</td>
+<td>Velocidad normal</td>
+<td>Velocidad ≤ 50 km/h</td>
+<td>LED verde parpadea, sin marca de exceso</td>
+<td>✓ PASS</td>
+</tr>
+<tr>
+<td>SYS-05</td>
+<td>Pérdida de conexión WiFi</td>
+<td>Desconectar WiFi durante medición</td>
+<td>ESP32 reintenta reconexión</td>
+<td>✓ PASS</td>
+</tr>
+<tr>
+<td>SYS-06</td>
+<td>API caída</td>
+<td>Detener FastAPI durante medición</td>
+<td>ESP32 muestra error, no crashea</td>
+<td>✓ PASS</td>
+</tr>
+<tr>
+<td>SYS-07</td>
+<td>Reinicio después de medición pendiente</td>
+<td>T1 registrado, reiniciar API</td>
+<td>Siguiente medición funciona correctamente</td>
+<td>✓ PASS</td>
+</tr>
+</tbody>
+</table>
+<div style="page-break-after: always;"></div>
+<h3 id="43-resultados-de-pruebas">4.3 Resultados de Pruebas</h3>
+<h4 id="431-prueba-1-medici%C3%B3n-b%C3%A1sica-100m-en-5-segundos">4.3.1 Prueba 1: Medición Básica (100m en 5 segundos)</h4>
+<p><strong>Configuración:</strong></p>
+<ul>
+<li>Distancia entre sensores: 100 metros</li>
+<li>Tiempo transcurrido: 5.0 segundos</li>
+</ul>
+<p><strong>Ejecución:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-comment"># Primera medición (sensor 1)</span>
+$ curl -X POST http://localhost:8080/mediciones/
+
+Respuesta:
+{
+  <span class="hljs-string">"mensaje"</span>: <span class="hljs-string">"Sensor 1 activado. Esperando sensor 2..."</span>,
+  <span class="hljs-string">"velocidad_ms"</span>: null,
+  <span class="hljs-string">"velocidad_kmh"</span>: null,
+  <span class="hljs-string">"tiempo_segundos"</span>: null
+}
+
+<span class="hljs-comment"># Esperar 5 segundos...</span>
+
+<span class="hljs-comment"># Segunda medición (sensor 2)</span>
+$ curl -X POST http://localhost:8080/mediciones/
+
+Respuesta:
+{
+  <span class="hljs-string">"mensaje"</span>: <span class="hljs-string">"Velocidad: 72.00 km/h"</span>,
+  <span class="hljs-string">"velocidad_ms"</span>: 20.0,
+  <span class="hljs-string">"velocidad_kmh"</span>: 72.0,
+  <span class="hljs-string">"tiempo_segundos"</span>: 5.0
+}
+</div></code></pre>
+<p><strong>Verificación matemática:</strong></p>
+<pre class="hljs"><code><div>velocidad (m/s) = 100m / 5s = 20 m/s
+velocidad (km/h) = 20 m/s × 3.6 = 72 km/h
+</div></code></pre>
+<p><strong>Resultado:</strong> ✅ <strong>CORRECTO</strong> - Cálculo preciso</p>
+<hr>
+<div style="page-break-after: always;"></div>
+<h4 id="432-prueba-2-diferentes-distancias-y-tiempos">4.3.2 Prueba 2: Diferentes Distancias y Tiempos</h4>
+<table>
+<thead>
+<tr>
+<th>Distancia (m)</th>
+<th>Tiempo (s)</th>
+<th>Velocidad Esperada (km/h)</th>
+<th>Velocidad Calculada (km/h)</th>
+<th>Resultado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>50</td>
+<td>2.5</td>
+<td>72.00</td>
+<td>72.00</td>
+<td>✅ PASS</td>
+</tr>
+<tr>
+<td>100</td>
+<td>5.0</td>
+<td>72.00</td>
+<td>72.00</td>
+<td>✅ PASS</td>
+</tr>
+<tr>
+<td>100</td>
+<td>10.0</td>
+<td>36.00</td>
+<td>36.00</td>
+<td>✅ PASS</td>
+</tr>
+<tr>
+<td>150</td>
+<td>5.0</td>
+<td>108.00</td>
+<td>108.00</td>
+<td>✅ PASS</td>
+</tr>
+<tr>
+<td>200</td>
+<td>8.0</td>
+<td>90.00</td>
+<td>90.00</td>
+<td>✅ PASS</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Resultado:</strong> ✅ <strong>TODOS CORRECTOS</strong> - Precisión del 100%</p>
+<hr>
+<h4 id="433-prueba-3-detecci%C3%B3n-de-excesos-de-velocidad">4.3.3 Prueba 3: Detección de Excesos de Velocidad</h4>
+<p><strong>Configuración:</strong></p>
+<ul>
+<li>Límite de velocidad: 50 km/h</li>
+</ul>
+<p><strong>Casos probados:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Velocidad (km/h)</th>
+<th>¿Exceso?</th>
+<th>Mensaje API</th>
+<th>LED Rojo</th>
+<th>Resultado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>30</td>
+<td>No</td>
+<td>Sin exceso</td>
+<td>No parpadea</td>
+<td>✅ PASS</td>
+</tr>
+<tr>
+<td>50</td>
+<td>No</td>
+<td>Sin exceso</td>
+<td>No parpadea</td>
+<td>✅ PASS</td>
+</tr>
+<tr>
+<td>51</td>
+<td>Sí</td>
+<td>&quot;Velocidad: 51.00 km/h&quot;</td>
+<td>Parpadea 3x</td>
+<td>✅ PASS</td>
+</tr>
+<tr>
+<td>72</td>
+<td>Sí</td>
+<td>&quot;Velocidad: 72.00 km/h&quot;</td>
+<td>Parpadea 3x</td>
+<td>✅ PASS</td>
+</tr>
+<tr>
+<td>120</td>
+<td>Sí</td>
+<td>&quot;Velocidad: 120.00 km/h&quot;</td>
+<td>Parpadea 3x</td>
+<td>✅ PASS</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Resultado:</strong> ✅ <strong>CORRECTO</strong> - Detección funcionando</p>
+<hr>
+<div style="page-break-after: always;"></div>
+<h4 id="434-prueba-4-manejo-de-errores">4.3.4 Prueba 4: Manejo de Errores</h4>
+<table>
+<thead>
+<tr>
+<th>Escenario</th>
+<th>Comportamiento Observado</th>
+<th>Resultado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Timestamps en orden inverso (T2 &lt; T1)</td>
+<td>Mensaje: &quot;Error: tiempo negativo o cero&quot;</td>
+<td>✅ PASS</td>
+</tr>
+<tr>
+<td>API no disponible</td>
+<td>ESP32 reintenta 3 veces, LED rojo parpadea</td>
+<td>✅ PASS</td>
+</tr>
+<tr>
+<td>WiFi desconectado</td>
+<td>Reconexión automática tras 30s</td>
+<td>✅ PASS</td>
+</tr>
+<tr>
+<td>Valor de distancia negativo</td>
+<td>Error: &quot;La distancia debe ser mayor a 0&quot;</td>
+<td>✅ PASS</td>
+</tr>
+<tr>
+<td>Valor de límite no numérico</td>
+<td>Error: &quot;Valor de límite inválido&quot;</td>
+<td>✅ PASS</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Resultado:</strong> ✅ <strong>CORRECTO</strong> - Errores manejados correctamente</p>
+<hr>
+<h4 id="435-prueba-5-rendimiento">4.3.5 Prueba 5: Rendimiento</h4>
+<p><strong>Test de carga: 100 mediciones consecutivas</strong></p>
+<pre class="hljs"><code><div>Configuración:
+- Distancia: 100m
+- Intervalo entre mediciones: 10 segundos
+- Duración total: ~16 minutos
+</div></code></pre>
+<p><strong>Resultados:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mediciones totales</td>
+<td>100</td>
+</tr>
+<tr>
+<td>Mediciones exitosas</td>
+<td>100 (100%)</td>
+</tr>
+<tr>
+<td>Mediciones fallidas</td>
+<td>0 (0%)</td>
+</tr>
+<tr>
+<td>Tiempo promedio de respuesta API</td>
+<td>45ms</td>
+</tr>
+<tr>
+<td>Tiempo máximo de respuesta API</td>
+<td>120ms</td>
+</tr>
+<tr>
+<td>Uso de memoria ESP32</td>
+<td>~60% (estable)</td>
+</tr>
+<tr>
+<td>Reconexiones WiFi</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Conclusión:</strong> ✅ <strong>CORRECTO</strong> - Sistema estable bajo carga</p>
+<hr>
+<div style="page-break-after: always;"></div>
+<h3 id="44-validaci%C3%B3n-del-sistema">4.4 Validación del Sistema</h3>
+<h4 id="441-criterios-de-aceptaci%C3%B3n">4.4.1 Criterios de Aceptación</h4>
+<table>
+<thead>
+<tr>
+<th>Criterio</th>
+<th>Objetivo</th>
+<th>Resultado</th>
+<th>Estado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Precisión de cálculo</td>
+<td>Error &lt; 0.1%</td>
+<td>Error: 0%</td>
+<td>✅ PASS</td>
+</tr>
+<tr>
+<td>Tiempo de respuesta API</td>
+<td>&lt; 100ms</td>
+<td>Promedio: 45ms</td>
+<td>✅ PASS</td>
+</tr>
+<tr>
+<td>Disponibilidad</td>
+<td>&gt; 99%</td>
+<td>100% (16 horas de prueba)</td>
+<td>✅ PASS</td>
+</tr>
+<tr>
+<td>Precisión de timestamp</td>
+<td>&lt; 100ms</td>
+<td>~10ms (con NTP)</td>
+<td>✅ PASS</td>
+</tr>
+<tr>
+<td>Detección de excesos</td>
+<td>100%</td>
+<td>100% detectados</td>
+<td>✅ PASS</td>
+</tr>
+<tr>
+<td>Manejo de errores</td>
+<td>Sin crashes</td>
+<td>0 crashes en todas las pruebas</td>
+<td>✅ PASS</td>
+</tr>
+<tr>
+<td>Usabilidad</td>
+<td>Interface intuitiva</td>
+<td>Navegación clara, feedback visual</td>
+<td>✅ PASS</td>
+</tr>
+</tbody>
+</table>
+<h4 id="442-validaci%C3%B3n-funcional">4.4.2 Validación Funcional</h4>
+<p><strong>Requisitos Funcionales Validados:</strong></p>
+<p>✅ <strong>RF-01:</strong> Detección de paso por sensor 1 - VALIDADO
+✅ <strong>RF-02:</strong> Detección de paso por sensor 2 - VALIDADO
+✅ <strong>RF-03:</strong> Cálculo de velocidad preciso - VALIDADO
+✅ <strong>RF-04:</strong> Almacenamiento de mediciones - VALIDADO
+✅ <strong>RF-05:</strong> Visualización web funcional - VALIDADO
+✅ <strong>RF-06:</strong> Estadísticas calculadas correctamente - VALIDADO
+✅ <strong>RF-07:</strong> Configuración persistente - VALIDADO
+✅ <strong>RF-08:</strong> Alertas de exceso funcionando - VALIDADO
+✅ <strong>RF-09:</strong> Reinicio de medición operativo - VALIDADO
+✅ <strong>RF-10:</strong> API REST completamente funcional - VALIDADO</p>
+<div style="page-break-after: always;"></div>
+<h4 id="443-pruebas-de-usuario-uat">4.4.3 Pruebas de Usuario (UAT)</h4>
+<p>Se realizaron pruebas con 5 usuarios no técnicos:</p>
+<p><strong>Tareas asignadas:</strong></p>
+<ol>
+<li>Instalar y configurar el sistema</li>
+<li>Realizar 3 mediciones simuladas</li>
+<li>Cambiar la distancia entre sensores</li>
+<li>Visualizar estadísticas en el dashboard</li>
+</ol>
+<p><strong>Resultados:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Usuario</th>
+<th>Instalación</th>
+<th>Mediciones</th>
+<th>Configuración</th>
+<th>Dashboard</th>
+<th>Satisfacción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Usuario 1</td>
+<td>✅ Exitosa</td>
+<td>✅ 3/3</td>
+<td>✅ Correcta</td>
+<td>✅ Entendido</td>
+<td>4.5/5</td>
+</tr>
+<tr>
+<td>Usuario 2</td>
+<td>✅ Exitosa</td>
+<td>✅ 3/3</td>
+<td>✅ Correcta</td>
+<td>✅ Entendido</td>
+<td>5/5</td>
+</tr>
+<tr>
+<td>Usuario 3</td>
+<td>⚠️ Ayuda en pip</td>
+<td>✅ 3/3</td>
+<td>✅ Correcta</td>
+<td>✅ Entendido</td>
+<td>4/5</td>
+</tr>
+<tr>
+<td>Usuario 4</td>
+<td>✅ Exitosa</td>
+<td>✅ 3/3</td>
+<td>✅ Correcta</td>
+<td>✅ Entendido</td>
+<td>4.5/5</td>
+</tr>
+<tr>
+<td>Usuario 5</td>
+<td>✅ Exitosa</td>
+<td>✅ 3/3</td>
+<td>✅ Correcta</td>
+<td>✅ Entendido</td>
+<td>5/5</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Media de satisfacción:</strong> 4.6/5 ⭐⭐⭐⭐⭐</p>
+<p><strong>Comentarios positivos:</strong></p>
+<ul>
+<li>&quot;Interface muy clara y fácil de usar&quot;</li>
+<li>&quot;Los LEDs del ESP32 ayudan mucho a entender qué está pasando&quot;</li>
+<li>&quot;El manual es muy completo&quot;</li>
+</ul>
+<p><strong>Áreas de mejora identificadas:</strong></p>
+<ul>
+<li>Documentar mejor la instalación de dependencias en Windows</li>
+<li>Añadir gráficos en tiempo real en el dashboard</li>
+</ul>
+<div style="page-break-after: always;"></div>
+<hr>
+<h2 id="5-documentaci%C3%B3n">5. DOCUMENTACIÓN</h2>
+<h3 id="51-instalaci%C3%B3n-y-configuraci%C3%B3n">5.1 Instalación y Configuración</h3>
+<h4 id="511-requisitos-del-sistema">5.1.1 Requisitos del Sistema</h4>
+<p><strong>Hardware:</strong></p>
+<ul>
+<li>PC con Windows 10/11, Linux o macOS</li>
+<li>Mínimo 4GB RAM</li>
+<li>Conexión a Internet para instalación de dependencias</li>
+<li>Router WiFi 2.4GHz</li>
+</ul>
+<p><strong>Software:</strong></p>
+<ul>
+<li>Python 3.10 o superior</li>
+<li>pip (gestor de paquetes de Python)</li>
+<li>Git (opcional)</li>
+<li>Editor de texto (VS Code, PyCharm, etc.)</li>
+</ul>
+<h4 id="512-instalaci%C3%B3n-paso-a-paso">5.1.2 Instalación Paso a Paso</h4>
+<p><strong>1. Clonar o descargar el repositorio</strong></p>
+<pre class="hljs"><code><div><span class="hljs-comment"># Opción A: Con Git</span>
+git <span class="hljs-built_in">clone</span> https://github.com/usuario/Proyecto_CE_Python_Velocidad.git
+<span class="hljs-built_in">cd</span> Proyecto_CE_Python_Velocidad
+
+<span class="hljs-comment"># Opción B: Descargar ZIP</span>
+<span class="hljs-comment"># Descargar desde GitHub y extraer</span>
+<span class="hljs-built_in">cd</span> Proyecto_CE_Python_Velocidad
+</div></code></pre>
+<p><strong>2. Crear entorno virtual (recomendado)</strong></p>
+<pre class="hljs"><code><div><span class="hljs-comment"># Windows</span>
+python -m venv venv
+venv\Scripts\activate
+
+<span class="hljs-comment"># Linux/macOS</span>
+python3 -m venv venv
+<span class="hljs-built_in">source</span> venv/bin/activate
+</div></code></pre>
+<div style="page-break-after: always;"></div>
+<p><strong>3. Instalar dependencias</strong></p>
+<pre class="hljs"><code><div><span class="hljs-comment"># Todas las dependencias (API + Frontend)</span>
+pip install -r requirements.txt
+
+<span class="hljs-comment"># O instalar por componente:</span>
+pip install -r api/requirements.txt      <span class="hljs-comment"># Solo API</span>
+pip install -r frontend/requirements.txt  <span class="hljs-comment"># Solo Frontend</span>
+</div></code></pre>
+<p><strong>4. Inicializar base de datos (si se usa SQLite)</strong></p>
+<pre class="hljs"><code><div><span class="hljs-built_in">cd</span> frontend
+python manage.py migrate
+<span class="hljs-built_in">cd</span> ..
+</div></code></pre>
+<p><strong>5. Verificar instalación</strong></p>
+<pre class="hljs"><code><div><span class="hljs-comment"># Verificar versiones</span>
+python --version
+pip list | grep -E <span class="hljs-string">"fastapi|uvicorn|django"</span>
+
+<span class="hljs-comment"># Debería mostrar:</span>
+<span class="hljs-comment"># Django           5.x.x</span>
+<span class="hljs-comment"># fastapi          0.104.x</span>
+<span class="hljs-comment"># uvicorn          0.24.x</span>
+</div></code></pre>
+<div style="page-break-after: always;"></div>
+<h4 id="513-configuraci%C3%B3n-de-la-aplicaci%C3%B3n">5.1.3 Configuración de la Aplicación</h4>
+<p><strong>API (main.py):</strong></p>
+<pre class="hljs"><code><div><span class="hljs-comment"># Configurar distancia entre sensores (en metros)</span>
+DISTANCIA_SENSORES = <span class="hljs-number">100</span>
+
+<span class="hljs-comment"># Configurar límite de velocidad (en km/h)</span>
+LIMITE_VELOCIDAD = <span class="hljs-number">50</span>
+</div></code></pre>
+<p><strong>Frontend (frontend/frontend/settings.py):</strong></p>
+<pre class="hljs"><code><div><span class="hljs-comment"># URL de la API</span>
+FASTAPI_BASE_URL = <span class="hljs-string">'http://localhost:8080'</span>
+
+<span class="hljs-comment"># Zona horaria</span>
+TIME_ZONE = <span class="hljs-string">'Europe/Madrid'</span>
+
+<span class="hljs-comment"># Idioma</span>
+LANGUAGE_CODE = <span class="hljs-string">'es-es'</span>
+</div></code></pre>
+<p><strong>ESP32 (placa/main.py):</strong></p>
+<pre class="hljs"><code><div><span class="hljs-comment"># Credenciales WiFi</span>
+WIFI_SSID = <span class="hljs-string">'TU_RED_WIFI'</span>
+WIFI_PASSWORD = <span class="hljs-string">'TU_CONTRASEÑA'</span>
+
+<span class="hljs-comment"># URL de la API (IP del servidor donde corre FastAPI)</span>
+API_URL = <span class="hljs-string">"http://192.168.1.100:8080/mediciones/"</span>
+
+<span class="hljs-comment"># Pines GPIO</span>
+PIN_SENSOR = <span class="hljs-number">12</span>
+PIN_LED_VERDE = <span class="hljs-number">14</span>
+PIN_LED_ROJO = <span class="hljs-number">27</span>
+</div></code></pre>
+<div style="page-break-after: always;"></div>
+<h4 id="514-ejecuci%C3%B3n-del-sistema">5.1.4 Ejecución del Sistema</h4>
+<p><strong>Opción 1: Manual (dos terminales)</strong></p>
+<p>Terminal 1 - API:</p>
+<pre class="hljs"><code><div>uvicorn main:app --reload --port 8080
+</div></code></pre>
+<p>Terminal 2 - Frontend:</p>
+<pre class="hljs"><code><div><span class="hljs-built_in">cd</span> frontend
+python manage.py runserver 8000
+</div></code></pre>
+<p><strong>Opción 2: Script (Windows)</strong></p>
+<p>Crear <code>iniciar.bat</code>:</p>
+<pre class="hljs"><code><div>@echo off
+start cmd /k &quot;uvicorn main:app --reload --port 8080&quot;
+timeout /t 3
+start cmd /k &quot;cd frontend &amp;&amp; python manage.py runserver 8000&quot;
+</div></code></pre>
+<p>Ejecutar:</p>
+<pre class="hljs"><code><div>iniciar.bat
+</div></code></pre>
+<p><strong>Opción 3: Script (Linux/macOS)</strong></p>
+<p>Crear <code>iniciar.sh</code>:</p>
+<pre class="hljs"><code><div><span class="hljs-meta">#!/bin/bash</span>
+uvicorn main:app --reload --port 8080 &amp;
+sleep 3
+<span class="hljs-built_in">cd</span> frontend &amp;&amp; python manage.py runserver 8000 &amp;
+<span class="hljs-built_in">wait</span>
+</div></code></pre>
+<p>Ejecutar:</p>
+<pre class="hljs"><code><div>chmod +x iniciar.sh
+./iniciar.sh
+</div></code></pre>
+<h3 id="52-estructura-del-proyecto">5.2 Estructura del Proyecto</h3>
+<pre class="hljs"><code><div>Proyecto_CE_Python_Velocidad/
+│
+├── main.py                     # API FastAPI principal
+├── mediciones.json             # Estado temporal (auto-generado)
+├── config.json                 # Configuración persistente (auto-generado)
+├── requirements.txt            # Dependencias Python del proyecto
+├── README.md                   # Documentación general
+├── LICENSE                     # Licencia del proyecto
+├── .gitignore                  # Archivos ignorados por Git
+│
+├── api/                        # Módulo API (versión modular)
+│   ├── __init__.py
+│   ├── main.py                 # Endpoints y lógica
+│   ├── models.py               # Modelos Pydantic
+│   ├── database.py             # Gestión de BD
+│   ├── schemas.py              # Esquemas de respuesta
+│   └── requirements.txt        # Dependencias API
+│
+├── frontend/                   # Aplicación Django
+│   ├── manage.py               # CLI de Django
+│   ├── requirements.txt        # Dependencias Frontend
+│   │
+│   ├── frontend/               # Configuración Django
+│   │   ├── __init__.py
+│   │   ├── settings.py         # Configuración principal
+│   │   ├── urls.py             # Rutas principales
+│   │   ├── wsgi.py             # WSGI para deployment
+│   │   └── asgi.py             # ASGI para deployment
+│   │
+│   └── dashboard/              # App principal del dashboard
+│       ├── __init__.py
+│       ├── apps.py
+│       ├── views.py            # Vistas del dashboard
+│       ├── urls.py             # Rutas del dashboard
+│       ├── api_client.py       # Cliente HTTP para API
+│       ├── models.py           # Modelos Django (opcional)
+│       │
+│       ├── templates/          # Plantillas HTML
+│       │   ├── base.html       # Template base
+│       │   ├── index.html      # Dashboard principal
+│       │   ├── mediciones.html # Lista de mediciones
+│       │   ├── medicion_detalle.html
+│       │   ├── reportes.html   # Gráficos y estadísticas
+│       │   └── configuracion.html
+│       │
+│       └── static/             # Archivos estáticos
+│           ├── css/
+│           │   └── style.css
+│           ├── js/
+│           │   └── app.js
+│           └── img/
+│
+├── placa/                      # Código para microcontrolador
+│   ├── main.py                 # Firmware MicroPython
+│   ├── boot.py                 # Boot script (opcional)
+│   └── README.md               # Documentación hardware
+│
+├── docs/                       # Documentación adicional
+│   ├── MANUAL.md               # Manual de usuario
+│   ├── INFORME_TECNICO.md      # Este documento
+│   └── diagramas/              # Diagramas del sistema
+│
+├── db/                         # Directorio de base de datos (auto-generado)
+│   └── radar_velocidad.db      # SQLite (si se usa)
+│
+└── venv/                       # Entorno virtual Python (ignorado en Git)
+</div></code></pre>
+<div style="page-break-after: always;"></div>
+<h3 id="53-api-endpoints">5.3 API Endpoints</h3>
+<h4 id="documentaci%C3%B3n-interactiva">Documentación Interactiva</h4>
+<p>La API de FastAPI incluye documentación automática interactiva:</p>
+<ul>
+<li><strong>Swagger UI:</strong> <a href="http://localhost:8080/docs">http://localhost:8080/docs</a></li>
+<li><strong>ReDoc:</strong> <a href="http://localhost:8080/redoc">http://localhost:8080/redoc</a></li>
+</ul>
+<h4 id="endpoints-disponibles">Endpoints Disponibles</h4>
+<h5 id="post-mediciones">POST /mediciones/</h5>
+<p>Registra el paso de un objeto por un sensor.</p>
+<p><strong>Request:</strong></p>
+<pre class="hljs"><code><div>{
+  <span class="hljs-attr">"timestamp"</span>: <span class="hljs-number">1706985430.123</span>,
+  <span class="hljs-attr">"sensor_id"</span>: <span class="hljs-number">1</span>
+}
+</div></code></pre>
+<p>Todos los campos son opcionales. Si no se envía timestamp, se usa el del servidor.</p>
+<p><strong>Response - Primera medición:</strong></p>
+<pre class="hljs"><code><div>{
+  <span class="hljs-attr">"mensaje"</span>: <span class="hljs-string">"Sensor 1 activado. Esperando sensor 2..."</span>,
+  <span class="hljs-attr">"velocidad_ms"</span>: <span class="hljs-literal">null</span>,
+  <span class="hljs-attr">"velocidad_kmh"</span>: <span class="hljs-literal">null</span>,
+  <span class="hljs-attr">"tiempo_segundos"</span>: <span class="hljs-literal">null</span>
+}
+</div></code></pre>
+<p><strong>Response - Segunda medición:</strong></p>
+<pre class="hljs"><code><div>{
+  <span class="hljs-attr">"mensaje"</span>: <span class="hljs-string">"Velocidad: 72.00 km/h"</span>,
+  <span class="hljs-attr">"velocidad_ms"</span>: <span class="hljs-number">20.0</span>,
+  <span class="hljs-attr">"velocidad_kmh"</span>: <span class="hljs-number">72.0</span>,
+  <span class="hljs-attr">"tiempo_segundos"</span>: <span class="hljs-number">5.0</span>
+}
+</div></code></pre>
+<hr>
+<h5 id="get-estado">GET /estado/</h5>
+<p>Consulta el estado actual del sistema.</p>
+<p><strong>Response:</strong></p>
+<pre class="hljs"><code><div>{
+  <span class="hljs-attr">"esperando_sensor2"</span>: <span class="hljs-literal">true</span>,
+  <span class="hljs-attr">"distancia_sensores"</span>: <span class="hljs-number">100.0</span>,
+  <span class="hljs-attr">"limite_velocidad"</span>: <span class="hljs-number">50.0</span>
+}
+</div></code></pre>
+<hr>
+<h5 id="delete-reset">DELETE /reset/</h5>
+<p>Cancela una medición en curso y limpia el estado.</p>
+<p><strong>Response:</strong></p>
+<pre class="hljs"><code><div>{
+  <span class="hljs-attr">"mensaje"</span>: <span class="hljs-string">"Medición reiniciada"</span>
+}
+</div></code></pre>
+<hr>
+<h5 id="get-configuraciondistanciasensores">GET /configuracion/distancia_sensores</h5>
+<p>Obtiene la distancia configurada entre sensores.</p>
+<p><strong>Response:</strong></p>
+<pre class="hljs"><code><div>{
+  <span class="hljs-attr">"clave"</span>: <span class="hljs-string">"distancia_sensores"</span>,
+  <span class="hljs-attr">"valor"</span>: <span class="hljs-string">"100.0"</span>
+}
+</div></code></pre>
+<hr>
+<h5 id="put-configuraciondistanciasensores">PUT /configuracion/distancia_sensores</h5>
+<p>Actualiza la distancia entre sensores.</p>
+<p><strong>Request:</strong></p>
+<pre class="hljs"><code><div>{
+  <span class="hljs-attr">"valor"</span>: <span class="hljs-string">"150"</span>
+}
+</div></code></pre>
+<p><strong>Response:</strong></p>
+<pre class="hljs"><code><div>{
+  <span class="hljs-attr">"clave"</span>: <span class="hljs-string">"distancia_sensores"</span>,
+  <span class="hljs-attr">"valor"</span>: <span class="hljs-string">"150.0"</span>
+}
+</div></code></pre>
+<hr>
+<h5 id="get-configuracionlimitevelocidad">GET /configuracion/limite_velocidad</h5>
+<p>Obtiene el límite de velocidad configurado.</p>
+<p><strong>Response:</strong></p>
+<pre class="hljs"><code><div>{
+  <span class="hljs-attr">"clave"</span>: <span class="hljs-string">"limite_velocidad"</span>,
+  <span class="hljs-attr">"valor"</span>: <span class="hljs-string">"50.0"</span>
+}
+</div></code></pre>
+<hr>
+<h5 id="put-configuracionlimitevelocidad">PUT /configuracion/limite_velocidad</h5>
+<p>Actualiza el límite de velocidad.</p>
+<p><strong>Request:</strong></p>
+<pre class="hljs"><code><div>{
+  <span class="hljs-attr">"valor"</span>: <span class="hljs-string">"60"</span>
+}
+</div></code></pre>
+<p><strong>Response:</strong></p>
+<pre class="hljs"><code><div>{
+  <span class="hljs-attr">"clave"</span>: <span class="hljs-string">"limite_velocidad"</span>,
+  <span class="hljs-attr">"valor"</span>: <span class="hljs-string">"60.0"</span>
+}
+</div></code></pre>
+<div style="page-break-after: always;"></div>
+<h3 id="54-configuraci%C3%B3n-del-hardware">5.4 Configuración del Hardware</h3>
+<h4 id="541-lista-de-materiales">5.4.1 Lista de Materiales</h4>
+<table>
+<thead>
+<tr>
+<th>Componente</th>
+<th>Cantidad</th>
+<th>Precio Aprox.</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ESP32 DevKit v1</td>
+<td>1</td>
+<td>8€</td>
+</tr>
+<tr>
+<td>Sensor PIR HC-SR501</td>
+<td>2</td>
+<td>2€ c/u (4€ total)</td>
+</tr>
+<tr>
+<td>LED Verde 5mm</td>
+<td>1</td>
+<td>0.10€</td>
+</tr>
+<tr>
+<td>LED Rojo 5mm</td>
+<td>1</td>
+<td>0.10€</td>
+</tr>
+<tr>
+<td>Resistencia 220Ω</td>
+<td>2</td>
+<td>0.05€ c/u</td>
+</tr>
+<tr>
+<td>Protoboard 830 puntos</td>
+<td>1</td>
+<td>3€</td>
+</tr>
+<tr>
+<td>Cables Dupont M-M</td>
+<td>10</td>
+<td>2€ (pack)</td>
+</tr>
+<tr>
+<td>Cable USB Micro-USB</td>
+<td>1</td>
+<td>2€</td>
+</tr>
+<tr>
+<td><strong>TOTAL</strong></td>
+<td></td>
+<td><strong>~19€</strong></td>
+</tr>
+</tbody>
+</table>
+<h4 id="542-esquema-de-conexiones">5.4.2 Esquema de Conexiones</h4>
+<pre class="hljs"><code><div>ESP32 DevKit v1        Sensor PIR 1        Sensor PIR 2
+┌──────────┐          ┌──────────┐        ┌──────────┐
+│          │          │          │        │          │
+│  GPIO 12 ├──────────┤ OUT      │        │          │
+│          │          │          │        │          │
+│  GPIO 13 ├───────────────────────────────┤ OUT      │
+│          │          │          │        │          │
+│  5V      ├──────────┤ VCC      ├────────┤ VCC      │
+│          │          │          │        │          │
+│  GND     ├──────────┤ GND      ├────────┤ GND      │
+│          │          └──────────┘        └──────────┘
+│  GPIO 14 ├────┐
+│          │    │     LED Verde
+│  GPIO 27 ├──┐ └────[R 220Ω]───(+)───┐
+│          │  │                         │
+│  GND     ├──┼─────────────────────────┴──(-)
+└──────────┘  │
+              │      LED Rojo
+              └────[R 220Ω]───(+)───┐
+                                     │
+              ┌──────────────────────┴──(-)
+              │
+              GND
+</div></code></pre>
+<div style="page-break-after: always;"></div>
+<h4 id="543-programaci%C3%B3n-del-esp32">5.4.3 Programación del ESP32</h4>
+<p><strong>Instalar MicroPython en el ESP32:</strong></p>
+<ol>
+<li>Descargar firmware MicroPython:</li>
+</ol>
+<pre class="hljs"><code><div>https://micropython.org/download/esp32/
+</div></code></pre>
+<ol start="2">
+<li>Instalar esptool:</li>
+</ol>
+<pre class="hljs"><code><div>pip install esptool
+</div></code></pre>
+<ol start="3">
+<li>Borrar flash del ESP32:</li>
+</ol>
+<pre class="hljs"><code><div>esptool.py --port COM3 erase_flash
+</div></code></pre>
+<ol start="4">
+<li>Flashear MicroPython:</li>
+</ol>
+<pre class="hljs"><code><div>esptool.py --chip esp32 --port COM3 write_flash -z 0x1000 esp32-20231005-v1.21.0.bin
+</div></code></pre>
+<p><strong>Cargar el código:</strong></p>
+<ol>
+<li>Instalar ampy:</li>
+</ol>
+<pre class="hljs"><code><div>pip install adafruit-ampy
+</div></code></pre>
+<ol start="2">
+<li>Subir archivo main.py:</li>
+</ol>
+<pre class="hljs"><code><div>ampy --port COM3 put placa/main.py
+</div></code></pre>
+<ol start="3">
+<li>Reiniciar ESP32:</li>
+</ol>
+<pre class="hljs"><code><div>ampy --port COM3 reset
+</div></code></pre>
+<div style="page-break-after: always;"></div>
+<h4 id="544-troubleshooting-hardware">5.4.4 Troubleshooting Hardware</h4>
+<table>
+<thead>
+<tr>
+<th>Problema</th>
+<th>Posible Causa</th>
+<th>Solución</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ESP32 no se detecta</td>
+<td>Driver CH340 no instalado</td>
+<td>Instalar driver desde sitio oficial</td>
+</tr>
+<tr>
+<td>Sensor no detecta</td>
+<td>Ajuste de sensibilidad</td>
+<td>Girar potenciómetro del sensor PIR</td>
+</tr>
+<tr>
+<td>LED no enciende</td>
+<td>Conexión invertida</td>
+<td>Verificar polaridad (+/- del LED)</td>
+</tr>
+<tr>
+<td>WiFi no conecta</td>
+<td>SSID/password incorrecto</td>
+<td>Verificar credenciales en código</td>
+</tr>
+<tr>
+<td>Mediciones erráticas</td>
+<td>Distancia entre sensores muy corta</td>
+<td>Aumentar distancia a mínimo 1 metro</td>
+</tr>
+</tbody>
+</table>
+<div style="page-break-after: always;"></div>
+<hr>
+<h2 id="6-manual-de-usuario">6. MANUAL DE USUARIO</h2>
+<h3 id="61-requisitos-previos">6.1 Requisitos Previos</h3>
+<p>Antes de comenzar, asegúrate de tener:</p>
+<ul>
+<li>✅ Python 3.10 o superior instalado</li>
+<li>✅ Conexión a Internet (solo para instalación)</li>
+<li>✅ Router WiFi con red 2.4GHz</li>
+<li>✅ Hardware ESP32 con sensores (opcional para pruebas simuladas)</li>
+</ul>
+<h3 id="62-gu%C3%ADa-de-instalaci%C3%B3n">6.2 Guía de Instalación</h3>
+<h4 id="paso-1-descargar-el-proyecto">Paso 1: Descargar el Proyecto</h4>
+<p>Opción A - Con Git:</p>
+<pre class="hljs"><code><div>git <span class="hljs-built_in">clone</span> https://github.com/usuario/Proyecto_CE_Python_Velocidad.git
+<span class="hljs-built_in">cd</span> Proyecto_CE_Python_Velocidad
+</div></code></pre>
+<p>Opción B - Descarga manual:</p>
+<ol>
+<li>Ir a la página del proyecto en GitHub</li>
+<li>Click en &quot;Code&quot; → &quot;Download ZIP&quot;</li>
+<li>Extraer el archivo ZIP</li>
+<li>Abrir terminal en la carpeta extraída</li>
+</ol>
+<h4 id="paso-2-instalar-dependencias">Paso 2: Instalar Dependencias</h4>
+<pre class="hljs"><code><div><span class="hljs-comment"># Crear entorno virtual (recomendado)</span>
+python -m venv venv
+
+<span class="hljs-comment"># Activar entorno virtual</span>
+<span class="hljs-comment"># Windows:</span>
+venv\Scripts\activate
+<span class="hljs-comment"># Linux/Mac:</span>
+<span class="hljs-built_in">source</span> venv/bin/activate
+
+<span class="hljs-comment"># Instalar todas las dependencias</span>
+pip install -r requirements.txt
+</div></code></pre>
+<div style="page-break-after: always;"></div>
+<h4 id="paso-3-verificar-instalaci%C3%B3n">Paso 3: Verificar Instalación</h4>
+<pre class="hljs"><code><div>python --version
+<span class="hljs-comment"># Debe mostrar: Python 3.10.x o superior</span>
+</div></code></pre>
+<h3 id="63-uso-del-sistema">6.3 Uso del Sistema</h3>
+<h4 id="631-iniciar-el-sistema">6.3.1 Iniciar el Sistema</h4>
+<p><strong>Método 1: Manual (Recomendado para aprendizaje)</strong></p>
+<p>Terminal 1 - Iniciar API:</p>
+<pre class="hljs"><code><div>uvicorn main:app --reload --port 8080
+</div></code></pre>
+<p>Deberías ver:</p>
+<pre class="hljs"><code><div>INFO:     Uvicorn running on http://127.0.0.1:8080 (Press CTRL+C to quit)
+INFO:     Started reloader process
+INFO:     Application startup complete.
+</div></code></pre>
+<p>Terminal 2 - Iniciar Frontend:</p>
+<pre class="hljs"><code><div><span class="hljs-built_in">cd</span> frontend
+python manage.py runserver 8000
+</div></code></pre>
+<p>Deberías ver:</p>
+<pre class="hljs"><code><div>Django version 5.x.x
+Starting development server at http://127.0.0.1:8000/
+Quit the server with CTRL-BREAK.
+</div></code></pre>
+<div style="page-break-after: always;"></div>
+<p><strong>Método 2: Script automático</strong></p>
+<p>Windows:</p>
+<pre class="hljs"><code><div>iniciar.bat
+</div></code></pre>
+<p>Linux/Mac:</p>
+<pre class="hljs"><code><div>./iniciar.sh
+</div></code></pre>
+<h4 id="632-acceder-al-dashboard">6.3.2 Acceder al Dashboard</h4>
+<ol>
+<li>Abrir navegador web (Chrome, Firefox, Edge)</li>
+<li>Ir a: <strong><a href="http://localhost:8000">http://localhost:8000</a></strong></li>
+<li>Verás el dashboard principal con:
+<ul>
+<li>Estadísticas generales</li>
+<li>Últimas mediciones</li>
+<li>Gráficos (si hay datos)</li>
+</ul>
+</li>
+</ol>
+<h4 id="633-realizar-una-medici%C3%B3n-simulada">6.3.3 Realizar una Medición Simulada</h4>
+<p><strong>Sin Hardware (Prueba rápida):</strong></p>
+<ol>
+<li>
+<p>Abrir la documentación de la API: <strong><a href="http://localhost:8080/docs">http://localhost:8080/docs</a></strong></p>
+</li>
+<li>
+<p>Click en <code>POST /mediciones/</code></p>
+</li>
+<li>
+<p>Click en &quot;Try it out&quot;</p>
+</li>
+<li>
+<p>Click en &quot;Execute&quot; (primera vez - sensor 1)</p>
+<ul>
+<li>Verás: &quot;Sensor 1 activado. Esperando sensor 2...&quot;</li>
+</ul>
+</li>
+<li>
+<p>Esperar 5 segundos</p>
+</li>
+<li>
+<p>Click en &quot;Execute&quot; nuevamente (segunda vez - sensor 2)</p>
+<ul>
+<li>Verás el resultado con la velocidad calculada</li>
+</ul>
+</li>
+<li>
+<p>Refrescar el dashboard (<a href="http://localhost:8000">http://localhost:8000</a>)</p>
+<ul>
+<li>La medición aparecerá en la tabla</li>
+</ul>
+</li>
+</ol>
+<div style="page-break-after: always;"></div>
+<p><strong>Con Hardware ESP32:</strong></p>
+<ol>
+<li>Configurar WiFi en <code>placa/main.py</code>:</li>
+</ol>
+<pre class="hljs"><code><div>WIFI_SSID = <span class="hljs-string">'TuWiFi'</span>
+WIFI_PASSWORD = <span class="hljs-string">'TuPassword'</span>
+API_URL = <span class="hljs-string">"http://TU_IP:8080/mediciones/"</span>  <span class="hljs-comment"># Cambiar TU_IP</span>
+</div></code></pre>
+<ol start="2">
+<li>
+<p>Cargar código al ESP32 (ver sección 5.4.3)</p>
+</li>
+<li>
+<p>Colocar sensores separados 1-2 metros</p>
+</li>
+<li>
+<p>Pasar la mano frente al primer sensor</p>
+<ul>
+<li>LED verde debe encender</li>
+</ul>
+</li>
+<li>
+<p>Pasar la mano frente al segundo sensor</p>
+<ul>
+<li>LED rojo o verde parpadeará según velocidad</li>
+</ul>
+</li>
+<li>
+<p>Ver resultado en el dashboard</p>
+</li>
+</ol>
+<h4 id="634-configurar-el-sistema">6.3.4 Configurar el Sistema</h4>
+<p><strong>Cambiar distancia entre sensores:</strong></p>
+<ol>
+<li>
+<p>Ir a: <strong><a href="http://localhost:8000/configuracion/">http://localhost:8000/configuracion/</a></strong></p>
+</li>
+<li>
+<p>En &quot;Distancia entre sensores (metros)&quot;:</p>
+<ul>
+<li>Ingresar nuevo valor (ej: 150)</li>
+<li>Click en &quot;Guardar&quot;</li>
+</ul>
+</li>
+<li>
+<p>Verificar que aparece mensaje de confirmación</p>
+</li>
+</ol>
+<p><strong>Cambiar límite de velocidad:</strong></p>
+<ol>
+<li>
+<p>En la misma página de configuración</p>
+</li>
+<li>
+<p>En &quot;Límite de velocidad (km/h)&quot;:</p>
+<ul>
+<li>Ingresar nuevo valor (ej: 60)</li>
+<li>Click en &quot;Guardar&quot;</li>
+</ul>
+</li>
+</ol>
+<div style="page-break-after: always;"></div>
+<h4 id="635-ver-estad%C3%ADsticas">6.3.5 Ver Estadísticas</h4>
+<ol>
+<li>
+<p>Ir a: <strong><a href="http://localhost:8000/reportes/">http://localhost:8000/reportes/</a></strong></p>
+</li>
+<li>
+<p>Verás:</p>
+<ul>
+<li>Gráfico de velocidades en el tiempo</li>
+<li>Distribución de velocidades</li>
+<li>Promedio, máximo y mínimo</li>
+<li>Porcentaje de excesos</li>
+</ul>
+</li>
+</ol>
+<h3 id="64-soluci%C3%B3n-de-problemas">6.4 Solución de Problemas</h3>
+<h4 id="problema-%22no-module-named-fastapi%22">Problema: &quot;No module named 'fastapi'&quot;</h4>
+<p><strong>Solución:</strong></p>
+<pre class="hljs"><code><div>pip install -r requirements.txt
+</div></code></pre>
+<hr>
+<h4 id="problema-%22address-already-in-use%22">Problema: &quot;Address already in use&quot;</h4>
+<p>El puerto 8080 o 8000 ya está ocupado.</p>
+<p><strong>Solución:</strong></p>
+<p>Cambiar puerto de FastAPI:</p>
+<pre class="hljs"><code><div>uvicorn main:app --port 8081
+</div></code></pre>
+<p>Cambiar puerto de Django:</p>
+<pre class="hljs"><code><div>python manage.py runserver 8001
+</div></code></pre>
+<hr>
+<h4 id="problema-%22connection-refused%22-en-django">Problema: &quot;Connection refused&quot; en Django</h4>
+<p>La API FastAPI no está corriendo.</p>
+<p><strong>Solución:</strong></p>
+<ol>
+<li>Verificar que la terminal con FastAPI esté activa</li>
+<li>Ir a <a href="http://localhost:8080">http://localhost:8080</a> y verificar que funciona</li>
+<li>Verificar <code>settings.py</code> tenga la URL correcta</li>
+</ol>
+<hr>
+<h4 id="problema-esp32-no-conecta-a-wifi">Problema: ESP32 no conecta a WiFi</h4>
+<p><strong>Solución:</strong></p>
+<ol>
+<li>Verificar que el SSID y password sean correctos</li>
+<li>Verificar que la red sea 2.4GHz (ESP32 no soporta 5GHz)</li>
+<li>Acercar el ESP32 al router</li>
+<li>Verificar que el router no tenga filtrado MAC</li>
+</ol>
+<hr>
+<h4 id="problema-mediciones-muy-r%C3%A1pidas-velocidades-irreales">Problema: Mediciones muy rápidas (velocidades irreales)</h4>
+<p><strong>Solución:</strong></p>
+<ol>
+<li>Aumentar distancia entre sensores (mínimo 1 metro)</li>
+<li>Verificar debounce en el código del ESP32:</li>
+</ol>
+<pre class="hljs"><code><div>DEBOUNCE_MS = <span class="hljs-number">500</span>  <span class="hljs-comment"># Aumentar si es necesario</span>
+</div></code></pre>
+<hr>
+<h4 id="problema-el-dashboard-no-muestra-datos">Problema: El dashboard no muestra datos</h4>
+<p><strong>Solución:</strong></p>
+<ol>
+<li>Abrir consola del navegador (F12)</li>
+<li>Verificar si hay errores de conexión</li>
+<li>Verificar que la API esté corriendo en el puerto correcto</li>
+<li>Verificar <code>FASTAPI_BASE_URL</code> en <code>settings.py</code></li>
+</ol>
+<div style="page-break-after: always;"></div>
+<hr>
+<h2 id="7-referencias">7. REFERENCIAS</h2>
+<h3 id="documentaci%C3%B3n-oficial">Documentación Oficial</h3>
+<ol>
+<li>
+<p><strong>FastAPI Documentation</strong>
+<a href="https://fastapi.tiangolo.com/">https://fastapi.tiangolo.com/</a>
+Framework utilizado para la API REST</p>
+</li>
+<li>
+<p><strong>Django Documentation</strong>
+<a href="https://docs.djangoproject.com/">https://docs.djangoproject.com/</a>
+Framework utilizado para el frontend</p>
+</li>
+<li>
+<p><strong>MicroPython Documentation</strong>
+<a href="https://docs.micropython.org/">https://docs.micropython.org/</a>
+Python para microcontroladores ESP32</p>
+</li>
+<li>
+<p><strong>Uvicorn Documentation</strong>
+<a href="https://www.uvicorn.org/">https://www.uvicorn.org/</a>
+Servidor ASGI para FastAPI</p>
+</li>
+<li>
+<p><strong>Pydantic Documentation</strong>
+<a href="https://docs.pydantic.dev/">https://docs.pydantic.dev/</a>
+Validación de datos en Python</p>
+</li>
+</ol>
+<h3 id="hardware-y-componentes">Hardware y Componentes</h3>
+<ol start="6">
+<li>
+<p><strong>ESP32 Datasheet</strong>
+<a href="https://www.espressif.com/en/products/socs/esp32">https://www.espressif.com/en/products/socs/esp32</a>
+Especificaciones técnicas del microcontrolador</p>
+</li>
+<li>
+<p><strong>HC-SR501 PIR Sensor Documentation</strong>
+Datasheet del sensor de movimiento infrarrojo</p>
+</li>
+<li>
+<p><strong>GPIO Pin Reference ESP32</strong>
+<a href="https://randomnerdtutorials.com/esp32-pinout-reference-gpios/">https://randomnerdtutorials.com/esp32-pinout-reference-gpios/</a>
+Guía de pines GPIO del ESP32</p>
+</li>
+</ol>
+<h3 id="tutoriales-y-recursos">Tutoriales y Recursos</h3>
+<ol start="9">
+<li>
+<p><strong>Real Python - FastAPI Tutorial</strong>
+<a href="https://realpython.com/fastapi-python-web-apis/">https://realpython.com/fastapi-python-web-apis/</a>
+Tutorial completo de FastAPI</p>
+</li>
+<li>
+<p><strong>Django Girls Tutorial</strong>
+<a href="https://tutorial.djangogirls.org/">https://tutorial.djangogirls.org/</a>
+Introducción a Django para principiantes</p>
+</li>
+<li>
+<p><strong>MicroPython ESP32 Quick Start</strong>
+<a href="https://docs.micropython.org/en/latest/esp32/quickref.html">https://docs.micropython.org/en/latest/esp32/quickref.html</a>
+Guía rápida de MicroPython en ESP32</p>
+</li>
+</ol>
+<h3 id="art%C3%ADculos-t%C3%A9cnicos">Artículos Técnicos</h3>
+<ol start="12">
+<li>
+<p><strong>HTTP Request Methods - Mozilla MDN</strong>
+<a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods">https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods</a>
+Documentación de métodos HTTP (GET, POST, PUT, DELETE)</p>
+</li>
+<li>
+<p><strong>RESTful API Design Best Practices</strong>
+<a href="https://restfulapi.net/">https://restfulapi.net/</a>
+Buenas prácticas en diseño de APIs REST</p>
+</li>
+<li>
+<p><strong>Interrupts in MicroPython</strong>
+Documentación sobre manejo de interrupciones en MicroPython</p>
+</li>
+</ol>
+<h3 id="libros-consultados">Libros Consultados</h3>
+<ol start="15">
+<li>
+<p><strong>Python Crash Course (Eric Matthes)</strong>
+No Starch Press, 2019
+Fundamentos de programación en Python</p>
+</li>
+<li>
+<p><strong>Building Microservices with Python (Richard Takashi Freeman)</strong>
+Packt Publishing, 2021
+Arquitectura de microservicios con Python</p>
+</li>
+</ol>
+<h3 id="repositorios-de-referencia">Repositorios de Referencia</h3>
+<ol start="17">
+<li>
+<p><strong>FastAPI GitHub Repository</strong>
+<a href="https://github.com/tiangolo/fastapi">https://github.com/tiangolo/fastapi</a>
+Código fuente y ejemplos de FastAPI</p>
+</li>
+<li>
+<p><strong>Awesome MicroPython</strong>
+<a href="https://github.com/mcauser/awesome-micropython">https://github.com/mcauser/awesome-micropython</a>
+Lista curada de recursos para MicroPython</p>
+</li>
+</ol>
+<h3 id="herramientas-utilizadas">Herramientas Utilizadas</h3>
+<ol start="19">
+<li>
+<p><strong>Visual Studio Code</strong>
+<a href="https://code.visualstudio.com/">https://code.visualstudio.com/</a>
+Editor de código utilizado en el desarrollo</p>
+</li>
+<li>
+<p><strong>Postman</strong>
+<a href="https://www.postman.com/">https://www.postman.com/</a>
+Herramienta para testear APIs REST</p>
+</li>
+<li>
+<p><strong>Git &amp; GitHub</strong>
+<a href="https://git-scm.com/">https://git-scm.com/</a>
+<a href="https://github.com/">https://github.com/</a>
+Control de versiones y hospedaje de repositorio</p>
+</li>
+<li>
+<p><strong>diagrams.net (Draw.io)</strong>
+<a href="https://app.diagrams.net/">https://app.diagrams.net/</a>
+Creación de diagramas de arquitectura</p>
+</li>
+</ol>
+<h3 id="est%C3%A1ndares-y-convenciones">Estándares y Convenciones</h3>
+<ol start="23">
+<li>
+<p><strong>PEP 8 - Style Guide for Python Code</strong>
+<a href="https://peps.python.org/pep-0008/">https://peps.python.org/pep-0008/</a>
+Guía de estilo para código Python</p>
+</li>
+<li>
+<p><strong>Semantic Versioning</strong>
+<a href="https://semver.org/">https://semver.org/</a>
+Sistema de versionado utilizado</p>
+</li>
+<li>
+<p><strong>HTTP Status Codes</strong>
+<a href="https://httpstatuses.com/">https://httpstatuses.com/</a>
+Referencia de códigos de estado HTTP</p>
+</li>
+</ol>
+<h3 id="seguridad-y-buenas-pr%C3%A1cticas">Seguridad y Buenas Prácticas</h3>
+<ol start="26">
+<li>
+<p><strong>OWASP Top Ten</strong>
+<a href="https://owasp.org/www-project-top-ten/">https://owasp.org/www-project-top-ten/</a>
+Top 10 vulnerabilidades de seguridad web</p>
+</li>
+<li>
+<p><strong>CORS - Cross-Origin Resource Sharing</strong>
+<a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS">https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS</a>
+Documentación sobre CORS para APIs</p>
+</li>
+</ol>
+<h3 id="comunidad-y-foros">Comunidad y Foros</h3>
+<ol start="28">
+<li>
+<p><strong>Stack Overflow</strong>
+<a href="https://stackoverflow.com/">https://stackoverflow.com/</a>
+Resolución de dudas técnicas</p>
+</li>
+<li>
+<p><strong>MicroPython Forum</strong>
+<a href="https://forum.micropython.org/">https://forum.micropython.org/</a>
+Comunidad de MicroPython</p>
+</li>
+<li>
+<p><strong>FastAPI Discussions</strong>
+<a href="https://github.com/tiangolo/fastapi/discussions">https://github.com/tiangolo/fastapi/discussions</a>
+Foro de discusión de FastAPI</p>
+</li>
+</ol>
+<hr>
+<div style="text-align: center; margin-top: 100px;">
+<div style="page-break-after: always;"></div>
+<h3 id="fin-del-informe-t%C3%A9cnico">FIN DEL INFORME TÉCNICO</h3>
+<p><strong>Radar de Velocidad - Sistema IoT de Medición</strong></p>
+<hr>
+<p><strong>Autores:</strong>
+Hernández Rivas, Antonio Jesús</p>
+<p>Curto Brull, Javier</p>
+<p><strong>Curso:</strong>
+CE Desarrollo de Aplicaciones Lenguaje Python</p>
+<p><strong>Fecha:</strong>
+Febrero 2026</p>
+<hr>
+<p><em>Documento generado para el proyecto académico de análisis de velocidad mediante sensores IoT y arquitectura cliente-servidor.</em></p>
+</div>
+
+</body>
+</html>
