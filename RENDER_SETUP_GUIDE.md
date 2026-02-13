@@ -40,7 +40,7 @@ En la sección **"Environment Variables"**, añade:
 
 | Key | Value |
 |-----|-------|
-| `PYTHON_VERSION` | `3.11` |
+| `PYTHON_VERSION` | `3.11.0` |
 | `DATABASE_URL` | `sqlite:///./radar_velocidad.db` |
 
 ### 1.4 Finalizar API
@@ -83,7 +83,7 @@ En la sección **"Environment Variables"**, añade:
 
 | Key | Value |
 |-----|-------|
-| `PYTHON_VERSION` | `3.11` |
+| `PYTHON_VERSION` | `3.11.0` |
 | `DEBUG` | `False` |
 | `SECRET_KEY` | `tu-clave-secreta-muy-segura-cambiar-en-produccion` |
 | `API_URL` | `https://radar-velocidad-api-abc123.onrender.com` |

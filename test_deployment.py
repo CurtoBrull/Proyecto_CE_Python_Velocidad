@@ -10,19 +10,19 @@ import json
 import sys
 
 # ⚠️ ACTUALIZA ESTAS URLs CON LAS DE TU DESPLIEGUE REAL
-API_URL = "https://radar-velocidad-api-xxxx.onrender.com"  # Cambiar por tu URL del API
+API_URL = "https://radar-velocidad-api.onrender.com"  # ✅ URL real del API
 FRONTEND_URL = "https://radar-velocidad-frontend-yyyy.onrender.com"  # Cambiar por tu URL del frontend
 
 def check_urls():
     """Verifica que las URLs estén actualizadas."""
-    if "xxxx" in API_URL or "yyyy" in FRONTEND_URL:
-        print("❌ ERROR: Debes actualizar las URLs en este script")
-        print(f"API_URL actual: {API_URL}")
-        print(f"FRONTEND_URL actual: {FRONTEND_URL}")
+    if "yyyy" in FRONTEND_URL:
+        print("❌ ERROR: Debes actualizar la URL del FRONTEND en este script")
+        print(f"API_URL: {API_URL} ✅")
+        print(f"FRONTEND_URL actual: {FRONTEND_URL} ❌")
         print("\n📝 Instrucciones:")
         print("1. Ve a tu dashboard de Render")
-        print("2. Copia las URLs reales de tus servicios")
-        print("3. Actualiza las variables API_URL y FRONTEND_URL en este script")
+        print("2. Copia la URL real de tu servicio frontend")
+        print("3. Actualiza la variable FRONTEND_URL en este script")
         return False
     return True
 

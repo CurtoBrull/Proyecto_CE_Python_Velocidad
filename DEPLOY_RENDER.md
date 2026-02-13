@@ -49,7 +49,7 @@ Asegúrate de que tienes todos los archivos necesarios:
 - **Plan**: `Free`
 
 **Variables de Entorno del API:**
-- `PYTHON_VERSION`: `3.11`
+- `PYTHON_VERSION`: `3.11.0`
 - `DATABASE_URL`: `sqlite:///./radar_velocidad.db`
 
 6. Haz clic en "Create Web Service"
@@ -70,7 +70,7 @@ Asegúrate de que tienes todos los archivos necesarios:
 - **Plan**: `Free`
 
 **Variables de Entorno del Frontend:**
-- `PYTHON_VERSION`: `3.11`
+- `PYTHON_VERSION`: `3.11.0`
 - `DEBUG`: `False`
 - `SECRET_KEY`: `tu-clave-secreta-muy-segura-aqui-cambiar-en-produccion`
 - `API_URL`: `https://radar-velocidad-api-xxxx.onrender.com` (URL del paso anterior)
