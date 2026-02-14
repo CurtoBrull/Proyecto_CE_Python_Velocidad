@@ -1269,378 +1269,172 @@ API_BASE_URL = <span class="hljs-string">"http://localhost:8080"</span>
 <div style="page-break-after: always;"></div>
 <h3 id="33-firmware-microcontrolador-micropython">3.3 Firmware Microcontrolador (MicroPython)</h3>
 <p>El firmware del ESP32 está escrito en <strong>MicroPython</strong>, una implementación de Python 3 optimizada para microcontroladores.</p>
-<pre class="hljs"><code><div><span class="hljs-comment"># ============================================================================</span>
-<span class="hljs-comment"># RADAR DE VELOCIDAD - FIRMWARE ESP32</span>
-<span class="hljs-comment"># MicroPython para ESP32/ESP8266</span>
-<span class="hljs-comment"># ============================================================================</span>
-
-<span class="hljs-keyword">import</span> network
-<span class="hljs-keyword">import</span> urequests
-<span class="hljs-keyword">import</span> time
-<span class="hljs-keyword">import</span> machine
-<span class="hljs-keyword">import</span> ntptime
+<h4 id="arquitectura-de-dos-detectores">Arquitectura de Dos Detectores</h4>
+<p>El sistema utiliza <strong>dos placas ESP32 independientes</strong>, cada una con su propio sensor PIR:</p>
+<ul>
+<li><strong>placa/detector1.py</strong>: Primera placa que detecta el paso inicial</li>
+<li><strong>placa/detector2.py</strong>: Segunda placa que detecta el paso final</li>
+</ul>
+<p>Cada placa envía su timestamp de detección a la API con el formato:</p>
+<ul>
+<li>Detector 1 envía: <code>{&quot;detector1&quot;: timestamp_ms}</code></li>
+<li>Detector 2 envía: <code>{&quot;detector2&quot;: timestamp_ms}</code></li>
+</ul>
+<p>La API calcula la velocidad cuando recibe ambas detecciones.</p>
+<h4 id="c%C3%B3digo-detector-1-placadetector1py">Código Detector 1 (placa/detector1.py)</h4>
+<pre class="hljs"><code><div><span class="hljs-comment">#--------DETECTOR 1----------------------</span>
 <span class="hljs-keyword">from</span> machine <span class="hljs-keyword">import</span> Pin
-
-<span class="hljs-comment"># ============================================================================</span>
-<span class="hljs-comment"># CONFIGURACIÓN - MODIFICAR ESTOS VALORES</span>
-<span class="hljs-comment"># ============================================================================</span>
-
-<span class="hljs-comment"># Credenciales WiFi</span>
-WIFI_SSID = <span class="hljs-string">'TU_RED_WIFI'</span>           <span class="hljs-comment"># Nombre de tu red WiFi</span>
-WIFI_PASSWORD = <span class="hljs-string">'TU_CONTRASEÑA'</span>      <span class="hljs-comment"># Contraseña de tu red WiFi</span>
-
-<span class="hljs-comment"># URL de la API (cambiar IP por la de tu servidor)</span>
-API_URL = <span class="hljs-string">"http://192.168.1.100:8080/mediciones/"</span>
-
-<span class="hljs-comment"># Configuración de pines GPIO</span>
-PIN_SENSOR = <span class="hljs-number">12</span>          <span class="hljs-comment"># Pin del sensor de movimiento</span>
-PIN_LED_VERDE = <span class="hljs-number">14</span>       <span class="hljs-comment"># LED indicador sistema OK</span>
-PIN_LED_ROJO = <span class="hljs-number">27</span>        <span class="hljs-comment"># LED indicador error/exceso</span>
-
-<span class="hljs-comment"># Configuración de debounce (evitar múltiples detecciones)</span>
-DEBOUNCE_MS = <span class="hljs-number">500</span>        <span class="hljs-comment"># Ignorar activaciones en menos de 500ms</span>
-
-
-<span class="hljs-comment"># ============================================================================</span>
-<span class="hljs-comment"># VARIABLES GLOBALES</span>
-<span class="hljs-comment"># ============================================================================</span>
-
-<span class="hljs-comment"># Control de tiempo para debounce</span>
-ultima_deteccion = <span class="hljs-number">0</span>
-
-<span class="hljs-comment"># Variables para timestamp preciso con NTP</span>
-epoch_base = <span class="hljs-literal">None</span>        <span class="hljs-comment"># Timestamp base desde NTP</span>
-ticks_base = <span class="hljs-literal">None</span>        <span class="hljs-comment"># Ticks de sistema en el momento del NTP</span>
-
-
-<span class="hljs-comment"># ============================================================================</span>
-<span class="hljs-comment"># CONFIGURACIÓN DE HARDWARE</span>
-<span class="hljs-comment"># ============================================================================</span>
-
-<span class="hljs-comment"># Configurar pines de LEDs como salida</span>
-led_verde = Pin(PIN_LED_VERDE, Pin.OUT)
-led_rojo = Pin(PIN_LED_ROJO, Pin.OUT)
-
-<span class="hljs-comment"># Configurar pin del sensor como entrada con pull-down</span>
-sensor = Pin(PIN_SENSOR, Pin.IN, Pin.PULL_DOWN)
-
-<span class="hljs-comment"># Inicializar LEDs apagados</span>
-led_verde.value(<span class="hljs-number">0</span>)
-led_rojo.value(<span class="hljs-number">0</span>)
-
-
-<span class="hljs-comment"># ============================================================================</span>
-<span class="hljs-comment"># FUNCIONES DE CONEXIÓN WIFI</span>
-<span class="hljs-comment"># ============================================================================</span>
-
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">conectar_wifi</span><span class="hljs-params">()</span>:</span>
-    <span class="hljs-string">"""
-    Conecta el ESP32 a la red WiFi configurada.
-    Muestra el progreso con puntos en consola.
-
-    Returns:
-        bool: True si se conectó correctamente, False si falló
-    """</span>
-    print(<span class="hljs-string">f"\n<span class="hljs-subst">{<span class="hljs-string">'='</span>*<span class="hljs-number">50</span>}</span>"</span>)
-    print(<span class="hljs-string">"INICIALIZANDO SISTEMA RADAR DE VELOCIDAD"</span>)
-    print(<span class="hljs-string">f"<span class="hljs-subst">{<span class="hljs-string">'='</span>*<span class="hljs-number">50</span>}</span>\n"</span>)
-
-    <span class="hljs-comment"># Crear interfaz WiFi en modo estación (cliente)</span>
-    wlan = network.WLAN(network.STA_IF)
-    wlan.active(<span class="hljs-literal">True</span>)
-
-    <span class="hljs-comment"># Si ya está conectado, desconectar primero</span>
-    <span class="hljs-keyword">if</span> wlan.isconnected():
-        wlan.disconnect()
-        time.sleep(<span class="hljs-number">1</span>)
-
-    print(<span class="hljs-string">f"Conectando a WiFi: <span class="hljs-subst">{WIFI_SSID}</span>"</span>)
-    wlan.connect(WIFI_SSID, WIFI_PASSWORD)
-
-    <span class="hljs-comment"># Esperar hasta 15 segundos para conectar</span>
-    timeout = <span class="hljs-number">15</span>
-    <span class="hljs-keyword">while</span> <span class="hljs-keyword">not</span> wlan.isconnected() <span class="hljs-keyword">and</span> timeout &gt; <span class="hljs-number">0</span>:
-        print(<span class="hljs-string">'.'</span>, end=<span class="hljs-string">''</span>)
-        time.sleep(<span class="hljs-number">1</span>)
-        timeout -= <span class="hljs-number">1</span>
-
-    print()  <span class="hljs-comment"># Nueva línea</span>
-
-    <span class="hljs-keyword">if</span> wlan.isconnected():
-        <span class="hljs-comment"># Obtener información de la conexión</span>
-        ifconfig = wlan.ifconfig()
-        print(<span class="hljs-string">"\n✓ WiFi conectado exitosamente"</span>)
-        print(<span class="hljs-string">f"  IP asignada: <span class="hljs-subst">{ifconfig[<span class="hljs-number">0</span>]}</span>"</span>)
-        print(<span class="hljs-string">f"  Máscara: <span class="hljs-subst">{ifconfig[<span class="hljs-number">1</span>]}</span>"</span>)
-        print(<span class="hljs-string">f"  Gateway: <span class="hljs-subst">{ifconfig[<span class="hljs-number">2</span>]}</span>"</span>)
-        print(<span class="hljs-string">f"  DNS: <span class="hljs-subst">{ifconfig[<span class="hljs-number">3</span>]}</span>"</span>)
-        <span class="hljs-keyword">return</span> <span class="hljs-literal">True</span>
-    <span class="hljs-keyword">else</span>:
-        print(<span class="hljs-string">"\n✗ Error: No se pudo conectar a WiFi"</span>)
-        print(<span class="hljs-string">f"  Verifica SSID: <span class="hljs-subst">{WIFI_SSID}</span>"</span>)
-        print(<span class="hljs-string">f"  Verifica contraseña"</span>)
-        <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
-
-
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">sincronizar_ntp</span><span class="hljs-params">()</span>:</span>
-    <span class="hljs-string">"""
-    Sincroniza el reloj del ESP32 con un servidor NTP.
-    Esto permite tener timestamps precisos en las mediciones.
-
-    Returns:
-        bool: True si se sincronizó correctamente
-    """</span>
-    <span class="hljs-keyword">global</span> epoch_base, ticks_base
-
-    print(<span class="hljs-string">"\nSincronizando reloj con servidor NTP..."</span>)
-
-    <span class="hljs-keyword">try</span>:
-        <span class="hljs-comment"># Establecer servidor NTP y sincronizar</span>
-        ntptime.host = <span class="hljs-string">"pool.ntp.org"</span>
-        ntptime.settime()
-
-        <span class="hljs-comment"># Guardar tiempo base y ticks para calcular timestamps precisos</span>
-        epoch_base = time.time()
-        ticks_base = time.ticks_ms()
-
-        <span class="hljs-comment"># Convertir timestamp a formato legible</span>
-        tiempo_actual = time.localtime()
-        fecha_hora = <span class="hljs-string">"{:04d}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}"</span>.format(
-            tiempo_actual[<span class="hljs-number">0</span>], tiempo_actual[<span class="hljs-number">1</span>], tiempo_actual[<span class="hljs-number">2</span>],
-            tiempo_actual[<span class="hljs-number">3</span>], tiempo_actual[<span class="hljs-number">4</span>], tiempo_actual[<span class="hljs-number">5</span>]
-        )
-
-        print(<span class="hljs-string">f"✓ Reloj sincronizado: <span class="hljs-subst">{fecha_hora}</span>"</span>)
-        <span class="hljs-keyword">return</span> <span class="hljs-literal">True</span>
-
-    <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
-        print(<span class="hljs-string">f"✗ Error al sincronizar NTP: <span class="hljs-subst">{str(e)}</span>"</span>)
-        print(<span class="hljs-string">"  Usando reloj interno del ESP32"</span>)
-        <span class="hljs-comment"># Aunque falle NTP, podemos continuar con tiempo relativo</span>
-        epoch_base = time.time()
-        ticks_base = time.ticks_ms()
-        <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
-
-
-<span class="hljs-comment"># ============================================================================</span>
-<span class="hljs-comment"># FUNCIONES DE CONTROL DE LEDS</span>
-<span class="hljs-comment"># ============================================================================</span>
-
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">parpadear_led</span><span class="hljs-params">(led, veces=<span class="hljs-number">3</span>, duracion=<span class="hljs-number">0.2</span>)</span>:</span>
-    <span class="hljs-string">"""
-    Hace parpadear un LED un número específico de veces.
-
-    Args:
-        led: Objeto Pin del LED a parpadear
-        veces (int): Número de parpadeos
-        duracion (float): Duración en segundos de cada estado (on/off)
-    """</span>
-    <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> range(veces):
-        led.value(<span class="hljs-number">1</span>)                <span class="hljs-comment"># Encender</span>
-        time.sleep(duracion)
-        led.value(<span class="hljs-number">0</span>)                <span class="hljs-comment"># Apagar</span>
-        time.sleep(duracion)
-
-
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">indicar_error_conexion</span><span class="hljs-params">()</span>:</span>
-    <span class="hljs-string">"""Indica error de conexión con parpadeo rápido del LED rojo"""</span>
-    print(<span class="hljs-string">"⚠ Error de conexión con la API"</span>)
-    parpadear_led(led_rojo, veces=<span class="hljs-number">5</span>, duracion=<span class="hljs-number">0.1</span>)
-
-
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">indicar_velocidad</span><span class="hljs-params">(velocidad_kmh)</span>:</span>
-    <span class="hljs-string">"""
-    Indica visualmente si hay exceso de velocidad.
-
-    Args:
-        velocidad_kmh (float): Velocidad medida en km/h
-    """</span>
-    <span class="hljs-keyword">if</span> velocidad_kmh &gt; <span class="hljs-number">50</span>:
-        print(<span class="hljs-string">f"⚠ EXCESO DE VELOCIDAD: <span class="hljs-subst">{velocidad_kmh:<span class="hljs-number">.2</span>f}</span> km/h"</span>)
-        parpadear_led(led_rojo, veces=<span class="hljs-number">3</span>, duracion=<span class="hljs-number">0.3</span>)
-    <span class="hljs-keyword">else</span>:
-        print(<span class="hljs-string">f"✓ Velocidad normal: <span class="hljs-subst">{velocidad_kmh:<span class="hljs-number">.2</span>f}</span> km/h"</span>)
-        parpadear_led(led_verde, veces=<span class="hljs-number">3</span>, duracion=<span class="hljs-number">0.3</span>)
-
-    <span class="hljs-comment"># Volver a estado de espera (LED verde fijo)</span>
-    led_verde.value(<span class="hljs-number">1</span>)
-    led_rojo.value(<span class="hljs-number">0</span>)
-
-
-<span class="hljs-comment"># ============================================================================</span>
-<span class="hljs-comment"># FUNCIONES DE COMUNICACIÓN CON LA API</span>
-<span class="hljs-comment"># ============================================================================</span>
-
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">obtener_timestamp_preciso</span><span class="hljs-params">()</span>:</span>
-    <span class="hljs-string">"""
-    Calcula timestamp Unix preciso usando NTP base + ticks transcurridos.
-    Esto proporciona precisión de milisegundos.
-
-    Returns:
-        float: Timestamp Unix con precisión de milisegundos
-    """</span>
-    <span class="hljs-keyword">if</span> epoch_base <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">or</span> ticks_base <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
-        <span class="hljs-comment"># Si no hay sincronización NTP, usar tiempo básico</span>
-        <span class="hljs-keyword">return</span> time.time()
-
-    <span class="hljs-comment"># Calcular tiempo transcurrido desde la sincronización NTP</span>
-    ticks_transcurridos = time.ticks_diff(time.ticks_ms(), ticks_base)
-
-    <span class="hljs-comment"># Sumar al tiempo base (convertir ms a segundos)</span>
-    timestamp = epoch_base + (ticks_transcurridos / <span class="hljs-number">1000.0</span>)
-
-    <span class="hljs-keyword">return</span> timestamp
-
-
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">enviar_medicion</span><span class="hljs-params">(timestamp)</span>:</span>
-    <span class="hljs-string">"""
-    Envía una medición a la API mediante HTTP POST.
-
-    Args:
-        timestamp (float): Timestamp Unix de la detección
-    """</span>
-    print(<span class="hljs-string">f"\n→ Enviando medición: <span class="hljs-subst">{timestamp}</span>"</span>)
-
-    <span class="hljs-keyword">try</span>:
-        <span class="hljs-comment"># Preparar datos JSON</span>
-        datos = {
-            <span class="hljs-string">"timestamp"</span>: timestamp
-        }
-
-        <span class="hljs-comment"># Enviar petición POST a la API</span>
-        response = urequests.post(
-            API_URL,
-            json=datos,
-            headers={<span class="hljs-string">'Content-Type'</span>: <span class="hljs-string">'application/json'</span>}
-        )
-
-        <span class="hljs-comment"># Parsear respuesta JSON</span>
-        resultado = response.json()
-        response.close()
-
-        <span class="hljs-comment"># Mostrar resultado</span>
-        print(<span class="hljs-string">f"← Respuesta API: <span class="hljs-subst">{resultado[<span class="hljs-string">'mensaje'</span>]}</span>"</span>)
-
-        <span class="hljs-comment"># Si hay velocidad calculada, mostrarla y dar feedback</span>
-        <span class="hljs-keyword">if</span> <span class="hljs-string">'velocidad_kmh'</span> <span class="hljs-keyword">in</span> resultado:
-            velocidad = resultado[<span class="hljs-string">'velocidad_kmh'</span>]
-            tiempo = resultado[<span class="hljs-string">'tiempo_segundos'</span>]
-            print(<span class="hljs-string">f"  Velocidad: <span class="hljs-subst">{velocidad:<span class="hljs-number">.2</span>f}</span> km/h"</span>)
-            print(<span class="hljs-string">f"  Tiempo: <span class="hljs-subst">{tiempo:<span class="hljs-number">.2</span>f}</span> segundos"</span>)
-
-            <span class="hljs-comment"># Indicar visualmente si hay exceso</span>
-            indicar_velocidad(velocidad)
-
-    <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
-        print(<span class="hljs-string">f"✗ Error al enviar medición: <span class="hljs-subst">{str(e)}</span>"</span>)
-        indicar_error_conexion()
-
-
-<span class="hljs-comment"># ============================================================================</span>
-<span class="hljs-comment"># MANEJADOR DE INTERRUPCIONES</span>
-<span class="hljs-comment"># ============================================================================</span>
-
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">handler_sensor</span><span class="hljs-params">(pin)</span>:</span>
-    <span class="hljs-string">"""
-    Función llamada cuando el sensor detecta movimiento (interrupción).
-    Implementa debounce para evitar múltiples detecciones del mismo objeto.
-
-    Args:
-        pin: Pin que generó la interrupción (automático)
-    """</span>
-    <span class="hljs-keyword">global</span> ultima_deteccion
-
-    <span class="hljs-comment"># Obtener tiempo actual en milisegundos</span>
-    ahora = time.ticks_ms()
-
-    <span class="hljs-comment"># Verificar si han pasado suficientes ms desde la última detección (debounce)</span>
-    <span class="hljs-keyword">if</span> time.ticks_diff(ahora, ultima_deteccion) &lt; DEBOUNCE_MS:
-        <span class="hljs-keyword">return</span>  <span class="hljs-comment"># Ignorar detección (probablemente rebote)</span>
-
-    <span class="hljs-comment"># Actualizar tiempo de última detección</span>
-    ultima_deteccion = ahora
-
-    <span class="hljs-comment"># Obtener timestamp preciso</span>
-    timestamp = obtener_timestamp_preciso()
-
-    <span class="hljs-comment"># Programar envío fuera de la interrupción</span>
-    <span class="hljs-comment"># Esto es CRÍTICO: no hacer operaciones bloqueantes en interrupciones</span>
-    micropython.schedule(<span class="hljs-keyword">lambda</span> _: enviar_medicion(timestamp), <span class="hljs-literal">None</span>)
-
-
-<span class="hljs-comment"># ============================================================================</span>
-<span class="hljs-comment"># FUNCIÓN PRINCIPAL</span>
-<span class="hljs-comment"># ============================================================================</span>
-
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">main</span><span class="hljs-params">()</span>:</span>
-    <span class="hljs-string">"""
-    Función principal que inicializa el sistema y mantiene el loop activo.
-    """</span>
-    print(<span class="hljs-string">"\n"</span> + <span class="hljs-string">"="</span>*<span class="hljs-number">50</span>)
-    print(<span class="hljs-string">" RADAR DE VELOCIDAD - INICIANDO"</span>)
-    print(<span class="hljs-string">"="</span>*<span class="hljs-number">50</span> + <span class="hljs-string">"\n"</span>)
-
-    <span class="hljs-comment"># Paso 1: Conectar a WiFi</span>
-    <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> conectar_wifi():
-        print(<span class="hljs-string">"\n✗ FALLO CRÍTICO: No hay conexión WiFi"</span>)
-        print(<span class="hljs-string">"  Reiniciando en 10 segundos..."</span>)
-
-        <span class="hljs-comment"># Indicar error con LED rojo parpadeando continuamente</span>
-        <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> range(<span class="hljs-number">20</span>):
-            parpadear_led(led_rojo, veces=<span class="hljs-number">1</span>, duracion=<span class="hljs-number">0.25</span>)
-
-        <span class="hljs-comment"># Reiniciar ESP32</span>
-        machine.reset()
-        <span class="hljs-keyword">return</span>
-
-    <span class="hljs-comment"># Paso 2: Sincronizar reloj con NTP</span>
-    sincronizar_ntp()
-
-    <span class="hljs-comment"># Paso 3: Configurar interrupción del sensor</span>
-    <span class="hljs-comment"># IRQ_RISING: activar cuando el pin pasa de LOW a HIGH</span>
-    sensor.irq(trigger=Pin.IRQ_RISING, handler=handler_sensor)
-
-    <span class="hljs-comment"># Paso 4: Indicar que el sistema está listo</span>
-    print(<span class="hljs-string">"\n"</span> + <span class="hljs-string">"="</span>*<span class="hljs-number">50</span>)
-    print(<span class="hljs-string">" ✓ SISTEMA LISTO - ESPERANDO DETECCIONES"</span>)
-    print(<span class="hljs-string">"="</span>*<span class="hljs-number">50</span> + <span class="hljs-string">"\n"</span>)
-
-    <span class="hljs-comment"># LED verde fijo indica sistema OK</span>
-    led_verde.value(<span class="hljs-number">1</span>)
-    led_rojo.value(<span class="hljs-number">0</span>)
-
-    <span class="hljs-comment"># Paso 5: Loop infinito</span>
-    <span class="hljs-comment"># El ESP32 se mantiene ejecutando y responde a interrupciones</span>
-    <span class="hljs-keyword">try</span>:
-        <span class="hljs-keyword">while</span> <span class="hljs-literal">True</span>:
-            <span class="hljs-comment"># Mantener el sistema vivo</span>
-            <span class="hljs-comment"># Las detecciones se manejan por interrupciones</span>
-            time.sleep(<span class="hljs-number">1</span>)
-
-            <span class="hljs-comment"># Opcional: cada 60s, verificar conexión WiFi</span>
-            <span class="hljs-comment"># (esto es por si la red se cae y necesita reconectar)</span>
-
-    <span class="hljs-keyword">except</span> KeyboardInterrupt:
-        print(<span class="hljs-string">"\n\n✗ Programa detenido por usuario"</span>)
-        led_verde.value(<span class="hljs-number">0</span>)
-        led_rojo.value(<span class="hljs-number">0</span>)
-
-
-<span class="hljs-comment"># ============================================================================</span>
-<span class="hljs-comment"># PUNTO DE ENTRADA</span>
-<span class="hljs-comment"># ============================================================================</span>
-
-<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">'__main__'</span>:
-    main()
+<span class="hljs-keyword">import</span> time
+<span class="hljs-keyword">import</span> network
+<span class="hljs-keyword">import</span> ujson
+<span class="hljs-keyword">import</span> urequests
+<span class="hljs-keyword">import</span> ntptime
+
+url_servicio=<span class="hljs-string">"https://radarpythonapi.onrender.com/mediciones/"</span>
+UNIX_OFFSET = <span class="hljs-number">946684800</span>
+
+print(<span class="hljs-string">"Conectando a la wifi"</span>, end=<span class="hljs-string">""</span>)
+sta_if = network.WLAN(network.STA_IF)
+sta_if.active(<span class="hljs-literal">True</span>)
+sta_if.connect(<span class="hljs-string">'Wokwi-GUEST'</span>, <span class="hljs-string">''</span>)
+<span class="hljs-keyword">while</span> <span class="hljs-keyword">not</span> sta_if.isconnected():
+    print(<span class="hljs-string">"."</span>, end=<span class="hljs-string">""</span>)
+    time.sleep(<span class="hljs-number">0.1</span>)
+print(<span class="hljs-string">" Conectada!"</span>)
+
+ntptime.settime()
+
+epoch_base = time.time() + UNIX_OFFSET
+ticks_base = time.ticks_ms()
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">epoch_unix_ms</span><span class="hljs-params">()</span>:</span>
+    <span class="hljs-string">"""Timestamp Unix en milisegundos (entero, sin pérdida de precisión)."""</span>
+    <span class="hljs-keyword">return</span> (epoch_base * <span class="hljs-number">1000</span>) + time.ticks_diff(time.ticks_ms(), ticks_base)
+
+
+<span class="hljs-comment"># ---------------- SENSOR ----------------</span>
+motion_pin = <span class="hljs-number">12</span>
+sensor = Pin(motion_pin, Pin.IN)   <span class="hljs-comment"># SIN PULL_UP</span>
+
+COOLDOWN_MS = <span class="hljs-number">4000</span>      <span class="hljs-comment"># tiempo mínimo entre eventos</span>
+CONFIRM_MS = <span class="hljs-number">50</span>         <span class="hljs-comment"># validación anti-ruido</span>
+
+last_event = <span class="hljs-number">0</span>
+armed = <span class="hljs-literal">True</span>
+<span class="hljs-comment"># ---------------------------------------</span>
+
+<span class="hljs-keyword">while</span> <span class="hljs-literal">True</span>:
+    val = sensor.value()
+
+    <span class="hljs-comment"># Detección</span>
+    <span class="hljs-keyword">if</span> val == <span class="hljs-number">1</span> <span class="hljs-keyword">and</span> armed:
+        time.sleep_ms(CONFIRM_MS)
+        <span class="hljs-keyword">if</span> sensor.value() == <span class="hljs-number">1</span>:
+            now = time.ticks_ms()
+            <span class="hljs-keyword">if</span> time.ticks_diff(now, last_event) &gt; COOLDOWN_MS:
+                last_event = now
+                armed = <span class="hljs-literal">False</span>
+
+                datos = {<span class="hljs-string">"detector1"</span>: epoch_unix_ms()}
+                print(<span class="hljs-string">"Medición válida:"</span>, datos[<span class="hljs-string">"detector1"</span>])
+
+                <span class="hljs-keyword">try</span>:
+                    r = urequests.post(
+                        url_servicio,
+                        data=ujson.dumps(datos),
+                        headers={<span class="hljs-string">"Content-Type"</span>: <span class="hljs-string">"application/json"</span>}
+                    )
+                    r.close()
+                <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+                    print(<span class="hljs-string">"Error enviando:"</span>, e)
+
+    <span class="hljs-comment"># Rearme cuando el sensor vuelve a reposo</span>
+    <span class="hljs-keyword">if</span> val == <span class="hljs-number">0</span>:
+        armed = <span class="hljs-literal">True</span>
+
+    time.sleep_ms(<span class="hljs-number">20</span>)
+</div></code></pre>
+<h4 id="c%C3%B3digo-detector-2-placadetector2py">Código Detector 2 (placa/detector2.py)</h4>
+<pre class="hljs"><code><div><span class="hljs-comment">#--------DETECTOR 2----------------------</span>
+<span class="hljs-keyword">from</span> machine <span class="hljs-keyword">import</span> Pin
+<span class="hljs-keyword">import</span> time
+<span class="hljs-keyword">import</span> network
+<span class="hljs-keyword">import</span> ujson
+<span class="hljs-keyword">import</span> urequests
+<span class="hljs-keyword">import</span> ntptime
+
+url_servicio=<span class="hljs-string">"https://radarpythonapi.onrender.com/mediciones/"</span>
+UNIX_OFFSET = <span class="hljs-number">946684800</span>
+
+print(<span class="hljs-string">"Conectando a la wifi"</span>, end=<span class="hljs-string">""</span>)
+sta_if = network.WLAN(network.STA_IF)
+sta_if.active(<span class="hljs-literal">True</span>)
+sta_if.connect(<span class="hljs-string">'Wokwi-GUEST'</span>, <span class="hljs-string">''</span>)
+<span class="hljs-keyword">while</span> <span class="hljs-keyword">not</span> sta_if.isconnected():
+    print(<span class="hljs-string">"."</span>, end=<span class="hljs-string">""</span>)
+    time.sleep(<span class="hljs-number">0.1</span>)
+print(<span class="hljs-string">" Conectada!"</span>)
+
+ntptime.settime()
+
+epoch_base = time.time() + UNIX_OFFSET
+ticks_base = time.ticks_ms()
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">epoch_unix_ms</span><span class="hljs-params">()</span>:</span>
+    <span class="hljs-string">"""Timestamp Unix en milisegundos (entero, sin pérdida de precisión)."""</span>
+    <span class="hljs-keyword">return</span> (epoch_base * <span class="hljs-number">1000</span>) + time.ticks_diff(time.ticks_ms(), ticks_base)
+
+
+<span class="hljs-comment"># ---------------- SENSOR ----------------</span>
+motion_pin = <span class="hljs-number">12</span>
+sensor = Pin(motion_pin, Pin.IN)   <span class="hljs-comment"># SIN PULL_UP</span>
+
+COOLDOWN_MS = <span class="hljs-number">4000</span>      <span class="hljs-comment"># tiempo mínimo entre eventos</span>
+CONFIRM_MS = <span class="hljs-number">50</span>         <span class="hljs-comment"># validación anti-ruido</span>
+
+last_event = <span class="hljs-number">0</span>
+armed = <span class="hljs-literal">True</span>
+<span class="hljs-comment"># ---------------------------------------</span>
+
+<span class="hljs-keyword">while</span> <span class="hljs-literal">True</span>:
+    val = sensor.value()
+
+    <span class="hljs-comment"># Detección</span>
+    <span class="hljs-keyword">if</span> val == <span class="hljs-number">1</span> <span class="hljs-keyword">and</span> armed:
+        time.sleep_ms(CONFIRM_MS)
+        <span class="hljs-keyword">if</span> sensor.value() == <span class="hljs-number">1</span>:
+            now = time.ticks_ms()
+            <span class="hljs-keyword">if</span> time.ticks_diff(now, last_event) &gt; COOLDOWN_MS:
+                last_event = now
+                armed = <span class="hljs-literal">False</span>
+
+                datos = {<span class="hljs-string">"detector2"</span>: epoch_unix_ms()}
+                print(<span class="hljs-string">"Medición válida:"</span>, datos[<span class="hljs-string">"detector2"</span>])
+
+                <span class="hljs-keyword">try</span>:
+                    r = urequests.post(
+                        url_servicio,
+                        data=ujson.dumps(datos),
+                        headers={<span class="hljs-string">"Content-Type"</span>: <span class="hljs-string">"application/json"</span>}
+                    )
+                    r.close()
+                <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+                    print(<span class="hljs-string">"Error enviando:"</span>, e)
+
+    <span class="hljs-comment"># Rearme cuando el sensor vuelve a reposo</span>
+    <span class="hljs-keyword">if</span> val == <span class="hljs-number">0</span>:
+        armed = <span class="hljs-literal">True</span>
+
+    time.sleep_ms(<span class="hljs-number">20</span>)
 </div></code></pre>
 <div style="page-break-after: always;"></div>
 <p><strong>Características del firmware:</strong></p>
 <ul>
-<li><strong>Sincronización NTP</strong> para timestamps precisos</li>
-<li><strong>Debounce por software</strong> evita detecciones múltiples</li>
-<li><strong>Interrupciones</strong> para respuesta inmediata al sensor</li>
-<li><strong>Feedback visual</strong> con LEDs para debugging</li>
-<li><strong>Reconexión automática</strong> WiFi</li>
+<li><strong>Sincronización NTP</strong> para timestamps precisos en milisegundos</li>
+<li><strong>Cooldown de 4 segundos</strong> evita detecciones múltiples del mismo objeto</li>
+<li><strong>Confirmación anti-ruido</strong> (50ms) para validar detecciones reales</li>
+<li><strong>Sistema de rearme</strong> automático cuando el sensor vuelve a reposo</li>
+<li><strong>Conexión directa a Render</strong> para enviar mediciones a la API en producción</li>
 <li><strong>Manejo robusto de errores</strong> en comunicación HTTP</li>
 </ul>
 <h3 id="34-repositorio-del-proyecto">3.4 Repositorio del Proyecto</h3>
@@ -2345,19 +2139,19 @@ TIME_ZONE = <span class="hljs-string">'Europe/Madrid'</span>
 <span class="hljs-comment"># Idioma</span>
 LANGUAGE_CODE = <span class="hljs-string">'es-es'</span>
 </div></code></pre>
-<p><strong>ESP32 (placa/main.py):</strong></p>
-<pre class="hljs"><code><div><span class="hljs-comment"># Credenciales WiFi</span>
-WIFI_SSID = <span class="hljs-string">'TU_RED_WIFI'</span>
-WIFI_PASSWORD = <span class="hljs-string">'TU_CONTRASEÑA'</span>
+<p><strong>ESP32 (placa/detector1.py y placa/detector2.py):</strong></p>
+<pre class="hljs"><code><div><span class="hljs-comment"># URL del servicio (apunta a Render en producción)</span>
+url_servicio = <span class="hljs-string">"https://radarpythonapi.onrender.com/mediciones/"</span>
 
-<span class="hljs-comment"># URL de la API (IP del servidor donde corre FastAPI)</span>
-API_URL = <span class="hljs-string">"http://192.168.1.100:8080/mediciones/"</span>
+<span class="hljs-comment"># Credenciales WiFi (modificar según tu red)</span>
+sta_if.connect(<span class="hljs-string">'Wokwi-GUEST'</span>, <span class="hljs-string">''</span>)  <span class="hljs-comment"># Cambiar por tu SSID y contraseña</span>
 
-<span class="hljs-comment"># Pines GPIO</span>
-PIN_SENSOR = <span class="hljs-number">12</span>
-PIN_LED_VERDE = <span class="hljs-number">14</span>
-PIN_LED_ROJO = <span class="hljs-number">27</span>
+<span class="hljs-comment"># Configuración del sensor</span>
+motion_pin = <span class="hljs-number">12</span>                    <span class="hljs-comment"># Pin GPIO del sensor PIR</span>
+COOLDOWN_MS = <span class="hljs-number">4000</span>                 <span class="hljs-comment"># Tiempo entre detecciones (4 segundos)</span>
+CONFIRM_MS = <span class="hljs-number">50</span>                    <span class="hljs-comment"># Validación anti-ruido (50 milisegundos)</span>
 </div></code></pre>
+<p><strong>Nota:</strong> Ambos archivos tienen la misma configuración, la única diferencia es el nombre del campo JSON que envían (<code>detector1</code> vs <code>detector2</code>).</p>
 <div style="page-break-after: always;"></div>
 <h4 id="514-ejecuci%C3%B3n-del-sistema">5.1.4 Ejecución del Sistema</h4>
 <p><strong>Opción 1: Manual (dos terminales)</strong></p>
@@ -2581,16 +2375,20 @@ sleep 3
 <pre class="hljs"><code><div>pip install adafruit-ampy
 </div></code></pre>
 <ol start="2">
-<li>Subir archivo main.py:</li>
+<li>Subir código al primer ESP32 (Detector 1):</li>
 </ol>
-<pre class="hljs"><code><div>ampy --port COM3 put placa/main.py
+<pre class="hljs"><code><div><span class="hljs-comment"># Conectar primer ESP32 al puerto COM3</span>
+ampy --port COM3 put placa/detector1.py main.py
+ampy --port COM3 reset
 </div></code></pre>
 <ol start="3">
-<li>Reiniciar ESP32:</li>
+<li>Subir código al segundo ESP32 (Detector 2):</li>
 </ol>
-<pre class="hljs"><code><div>ampy --port COM3 reset
+<pre class="hljs"><code><div><span class="hljs-comment"># Conectar segundo ESP32 al puerto COM4 (o el puerto correspondiente)</span>
+ampy --port COM4 put placa/detector2.py main.py
+ampy --port COM4 reset
 </div></code></pre>
-<div style="page-break-after: always;"></div>
+<p><strong>Nota:</strong> El archivo se sube como <code>main.py</code> en el ESP32 para que se ejecute automáticamente al arrancar.</p>
 <h4 id="544-troubleshooting-hardware">5.4.4 Troubleshooting Hardware</h4>
 <table>
 <thead>
@@ -2701,7 +2499,6 @@ python manage.py runserver 8000
 Starting development server at http://127.0.0.1:8000/
 Quit the server with CTRL-BREAK.
 </div></code></pre>
-<div style="page-break-after: always;"></div>
 <p><strong>Método 2: Script automático</strong></p>
 <p>Windows:</p>
 <pre class="hljs"><code><div>iniciar.bat
@@ -2755,7 +2552,6 @@ Quit the server with CTRL-BREAK.
 </ul>
 </li>
 </ol>
-<div style="page-break-after: always;"></div>
 <p><strong>Con Hardware ESP32:</strong></p>
 <ol>
 <li>Configurar WiFi en <code>placa/main.py</code>:</li>

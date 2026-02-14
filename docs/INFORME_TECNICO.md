@@ -858,381 +858,181 @@ class RadarAPIClient:
 
 El firmware del ESP32 está escrito en **MicroPython**, una implementación de Python 3 optimizada para microcontroladores.
 
+#### Arquitectura de Dos Detectores
+
+El sistema utiliza **dos placas ESP32 independientes**, cada una con su propio sensor PIR:
+
+- **placa/detector1.py**: Primera placa que detecta el paso inicial
+- **placa/detector2.py**: Segunda placa que detecta el paso final
+
+Cada placa envía su timestamp de detección a la API con el formato:
+
+- Detector 1 envía: `{"detector1": timestamp_ms}`
+- Detector 2 envía: `{"detector2": timestamp_ms}`
+
+La API calcula la velocidad cuando recibe ambas detecciones.
+
+#### Código Detector 1 (placa/detector1.py)
+
 ```python
-# ============================================================================
-# RADAR DE VELOCIDAD - FIRMWARE ESP32
-# MicroPython para ESP32/ESP8266
-# ============================================================================
-
-import network
-import urequests
-import time
-import machine
-import ntptime
+#--------DETECTOR 1----------------------
 from machine import Pin
-
-# ============================================================================
-# CONFIGURACIÓN - MODIFICAR ESTOS VALORES
-# ============================================================================
-
-# Credenciales WiFi
-WIFI_SSID = 'TU_RED_WIFI'           # Nombre de tu red WiFi
-WIFI_PASSWORD = 'TU_CONTRASEÑA'      # Contraseña de tu red WiFi
-
-# URL de la API (cambiar IP por la de tu servidor)
-API_URL = "http://192.168.1.100:8080/mediciones/"
-
-# Configuración de pines GPIO
-PIN_SENSOR = 12          # Pin del sensor de movimiento
-PIN_LED_VERDE = 14       # LED indicador sistema OK
-PIN_LED_ROJO = 27        # LED indicador error/exceso
-
-# Configuración de debounce (evitar múltiples detecciones)
-DEBOUNCE_MS = 500        # Ignorar activaciones en menos de 500ms
-
-
-# ============================================================================
-# VARIABLES GLOBALES
-# ============================================================================
-
-# Control de tiempo para debounce
-ultima_deteccion = 0
-
-# Variables para timestamp preciso con NTP
-epoch_base = None        # Timestamp base desde NTP
-ticks_base = None        # Ticks de sistema en el momento del NTP
-
-
-# ============================================================================
-# CONFIGURACIÓN DE HARDWARE
-# ============================================================================
-
-# Configurar pines de LEDs como salida
-led_verde = Pin(PIN_LED_VERDE, Pin.OUT)
-led_rojo = Pin(PIN_LED_ROJO, Pin.OUT)
-
-# Configurar pin del sensor como entrada con pull-down
-sensor = Pin(PIN_SENSOR, Pin.IN, Pin.PULL_DOWN)
-
-# Inicializar LEDs apagados
-led_verde.value(0)
-led_rojo.value(0)
-
-
-# ============================================================================
-# FUNCIONES DE CONEXIÓN WIFI
-# ============================================================================
-
-def conectar_wifi():
-    """
-    Conecta el ESP32 a la red WiFi configurada.
-    Muestra el progreso con puntos en consola.
-
-    Returns:
-        bool: True si se conectó correctamente, False si falló
-    """
-    print(f"\n{'='*50}")
-    print("INICIALIZANDO SISTEMA RADAR DE VELOCIDAD")
-    print(f"{'='*50}\n")
-
-    # Crear interfaz WiFi en modo estación (cliente)
-    wlan = network.WLAN(network.STA_IF)
-    wlan.active(True)
-
-    # Si ya está conectado, desconectar primero
-    if wlan.isconnected():
-        wlan.disconnect()
-        time.sleep(1)
-
-    print(f"Conectando a WiFi: {WIFI_SSID}")
-    wlan.connect(WIFI_SSID, WIFI_PASSWORD)
-
-    # Esperar hasta 15 segundos para conectar
-    timeout = 15
-    while not wlan.isconnected() and timeout > 0:
-        print('.', end='')
-        time.sleep(1)
-        timeout -= 1
-
-    print()  # Nueva línea
-
-    if wlan.isconnected():
-        # Obtener información de la conexión
-        ifconfig = wlan.ifconfig()
-        print("\n✓ WiFi conectado exitosamente")
-        print(f"  IP asignada: {ifconfig[0]}")
-        print(f"  Máscara: {ifconfig[1]}")
-        print(f"  Gateway: {ifconfig[2]}")
-        print(f"  DNS: {ifconfig[3]}")
-        return True
-    else:
-        print("\n✗ Error: No se pudo conectar a WiFi")
-        print(f"  Verifica SSID: {WIFI_SSID}")
-        print(f"  Verifica contraseña")
-        return False
-
-
-def sincronizar_ntp():
-    """
-    Sincroniza el reloj del ESP32 con un servidor NTP.
-    Esto permite tener timestamps precisos en las mediciones.
-
-    Returns:
-        bool: True si se sincronizó correctamente
-    """
-    global epoch_base, ticks_base
-
-    print("\nSincronizando reloj con servidor NTP...")
-
-    try:
-        # Establecer servidor NTP y sincronizar
-        ntptime.host = "pool.ntp.org"
-        ntptime.settime()
-
-        # Guardar tiempo base y ticks para calcular timestamps precisos
-        epoch_base = time.time()
-        ticks_base = time.ticks_ms()
-
-        # Convertir timestamp a formato legible
-        tiempo_actual = time.localtime()
-        fecha_hora = "{:04d}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}".format(
-            tiempo_actual[0], tiempo_actual[1], tiempo_actual[2],
-            tiempo_actual[3], tiempo_actual[4], tiempo_actual[5]
-        )
-
-        print(f"✓ Reloj sincronizado: {fecha_hora}")
-        return True
-
-    except Exception as e:
-        print(f"✗ Error al sincronizar NTP: {str(e)}")
-        print("  Usando reloj interno del ESP32")
-        # Aunque falle NTP, podemos continuar con tiempo relativo
-        epoch_base = time.time()
-        ticks_base = time.ticks_ms()
-        return False
-
-
-# ============================================================================
-# FUNCIONES DE CONTROL DE LEDS
-# ============================================================================
-
-def parpadear_led(led, veces=3, duracion=0.2):
-    """
-    Hace parpadear un LED un número específico de veces.
-
-    Args:
-        led: Objeto Pin del LED a parpadear
-        veces (int): Número de parpadeos
-        duracion (float): Duración en segundos de cada estado (on/off)
-    """
-    for _ in range(veces):
-        led.value(1)                # Encender
-        time.sleep(duracion)
-        led.value(0)                # Apagar
-        time.sleep(duracion)
-
-
-def indicar_error_conexion():
-    """Indica error de conexión con parpadeo rápido del LED rojo"""
-    print("⚠ Error de conexión con la API")
-    parpadear_led(led_rojo, veces=5, duracion=0.1)
-
-
-def indicar_velocidad(velocidad_kmh):
-    """
-    Indica visualmente si hay exceso de velocidad.
-
-    Args:
-        velocidad_kmh (float): Velocidad medida en km/h
-    """
-    if velocidad_kmh > 50:
-        print(f"⚠ EXCESO DE VELOCIDAD: {velocidad_kmh:.2f} km/h")
-        parpadear_led(led_rojo, veces=3, duracion=0.3)
-    else:
-        print(f"✓ Velocidad normal: {velocidad_kmh:.2f} km/h")
-        parpadear_led(led_verde, veces=3, duracion=0.3)
-
-    # Volver a estado de espera (LED verde fijo)
-    led_verde.value(1)
-    led_rojo.value(0)
-
-
-# ============================================================================
-# FUNCIONES DE COMUNICACIÓN CON LA API
-# ============================================================================
-
-def obtener_timestamp_preciso():
-    """
-    Calcula timestamp Unix preciso usando NTP base + ticks transcurridos.
-    Esto proporciona precisión de milisegundos.
-
-    Returns:
-        float: Timestamp Unix con precisión de milisegundos
-    """
-    if epoch_base is None or ticks_base is None:
-        # Si no hay sincronización NTP, usar tiempo básico
-        return time.time()
-
-    # Calcular tiempo transcurrido desde la sincronización NTP
-    ticks_transcurridos = time.ticks_diff(time.ticks_ms(), ticks_base)
-
-    # Sumar al tiempo base (convertir ms a segundos)
-    timestamp = epoch_base + (ticks_transcurridos / 1000.0)
-
-    return timestamp
-
-
-def enviar_medicion(timestamp):
-    """
-    Envía una medición a la API mediante HTTP POST.
-
-    Args:
-        timestamp (float): Timestamp Unix de la detección
-    """
-    print(f"\n→ Enviando medición: {timestamp}")
-
-    try:
-        # Preparar datos JSON
-        datos = {
-            "timestamp": timestamp
-        }
-
-        # Enviar petición POST a la API
-        response = urequests.post(
-            API_URL,
-            json=datos,
-            headers={'Content-Type': 'application/json'}
-        )
-
-        # Parsear respuesta JSON
-        resultado = response.json()
-        response.close()
-
-        # Mostrar resultado
-        print(f"← Respuesta API: {resultado['mensaje']}")
-
-        # Si hay velocidad calculada, mostrarla y dar feedback
-        if 'velocidad_kmh' in resultado:
-            velocidad = resultado['velocidad_kmh']
-            tiempo = resultado['tiempo_segundos']
-            print(f"  Velocidad: {velocidad:.2f} km/h")
-            print(f"  Tiempo: {tiempo:.2f} segundos")
-
-            # Indicar visualmente si hay exceso
-            indicar_velocidad(velocidad)
-
-    except Exception as e:
-        print(f"✗ Error al enviar medición: {str(e)}")
-        indicar_error_conexion()
-
-
-# ============================================================================
-# MANEJADOR DE INTERRUPCIONES
-# ============================================================================
-
-def handler_sensor(pin):
-    """
-    Función llamada cuando el sensor detecta movimiento (interrupción).
-    Implementa debounce para evitar múltiples detecciones del mismo objeto.
-
-    Args:
-        pin: Pin que generó la interrupción (automático)
-    """
-    global ultima_deteccion
-
-    # Obtener tiempo actual en milisegundos
-    ahora = time.ticks_ms()
-
-    # Verificar si han pasado suficientes ms desde la última detección (debounce)
-    if time.ticks_diff(ahora, ultima_deteccion) < DEBOUNCE_MS:
-        return  # Ignorar detección (probablemente rebote)
-
-    # Actualizar tiempo de última detección
-    ultima_deteccion = ahora
-
-    # Obtener timestamp preciso
-    timestamp = obtener_timestamp_preciso()
-
-    # Programar envío fuera de la interrupción
-    # Esto es CRÍTICO: no hacer operaciones bloqueantes en interrupciones
-    micropython.schedule(lambda _: enviar_medicion(timestamp), None)
-
-
-# ============================================================================
-# FUNCIÓN PRINCIPAL
-# ============================================================================
-
-def main():
-    """
-    Función principal que inicializa el sistema y mantiene el loop activo.
-    """
-    print("\n" + "="*50)
-    print(" RADAR DE VELOCIDAD - INICIANDO")
-    print("="*50 + "\n")
-
-    # Paso 1: Conectar a WiFi
-    if not conectar_wifi():
-        print("\n✗ FALLO CRÍTICO: No hay conexión WiFi")
-        print("  Reiniciando en 10 segundos...")
-
-        # Indicar error con LED rojo parpadeando continuamente
-        for _ in range(20):
-            parpadear_led(led_rojo, veces=1, duracion=0.25)
-
-        # Reiniciar ESP32
-        machine.reset()
-        return
-
-    # Paso 2: Sincronizar reloj con NTP
-    sincronizar_ntp()
-
-    # Paso 3: Configurar interrupción del sensor
-    # IRQ_RISING: activar cuando el pin pasa de LOW a HIGH
-    sensor.irq(trigger=Pin.IRQ_RISING, handler=handler_sensor)
-
-    # Paso 4: Indicar que el sistema está listo
-    print("\n" + "="*50)
-    print(" ✓ SISTEMA LISTO - ESPERANDO DETECCIONES")
-    print("="*50 + "\n")
-
-    # LED verde fijo indica sistema OK
-    led_verde.value(1)
-    led_rojo.value(0)
-
-    # Paso 5: Loop infinito
-    # El ESP32 se mantiene ejecutando y responde a interrupciones
-    try:
-        while True:
-            # Mantener el sistema vivo
-            # Las detecciones se manejan por interrupciones
-            time.sleep(1)
-
-            # Opcional: cada 60s, verificar conexión WiFi
-            # (esto es por si la red se cae y necesita reconectar)
-
-    except KeyboardInterrupt:
-        print("\n\n✗ Programa detenido por usuario")
-        led_verde.value(0)
-        led_rojo.value(0)
-
-
-# ============================================================================
-# PUNTO DE ENTRADA
-# ============================================================================
-
-if __name__ == '__main__':
-    main()
+import time
+import network
+import ujson
+import urequests
+import ntptime
+
+url_servicio="https://radarpythonapi.onrender.com/mediciones/"
+UNIX_OFFSET = 946684800
+
+print("Conectando a la wifi", end="")
+sta_if = network.WLAN(network.STA_IF)
+sta_if.active(True)
+sta_if.connect('Wokwi-GUEST', '')
+while not sta_if.isconnected():
+    print(".", end="")
+    time.sleep(0.1)
+print(" Conectada!")
+
+ntptime.settime()
+
+epoch_base = time.time() + UNIX_OFFSET
+ticks_base = time.ticks_ms()
+
+def epoch_unix_ms():
+    """Timestamp Unix en milisegundos (entero, sin pérdida de precisión)."""
+    return (epoch_base * 1000) + time.ticks_diff(time.ticks_ms(), ticks_base)
+
+
+# ---------------- SENSOR ----------------
+motion_pin = 12
+sensor = Pin(motion_pin, Pin.IN)   # SIN PULL_UP
+
+COOLDOWN_MS = 4000      # tiempo mínimo entre eventos
+CONFIRM_MS = 50         # validación anti-ruido
+
+last_event = 0
+armed = True
+# ---------------------------------------
+
+while True:
+    val = sensor.value()
+
+    # Detección
+    if val == 1 and armed:
+        time.sleep_ms(CONFIRM_MS)
+        if sensor.value() == 1:
+            now = time.ticks_ms()
+            if time.ticks_diff(now, last_event) > COOLDOWN_MS:
+                last_event = now
+                armed = False
+
+                datos = {"detector1": epoch_unix_ms()}
+                print("Medición válida:", datos["detector1"])
+
+                try:
+                    r = urequests.post(
+                        url_servicio,
+                        data=ujson.dumps(datos),
+                        headers={"Content-Type": "application/json"}
+                    )
+                    r.close()
+                except Exception as e:
+                    print("Error enviando:", e)
+
+    # Rearme cuando el sensor vuelve a reposo
+    if val == 0:
+        armed = True
+
+    time.sleep_ms(20)
+```
+
+#### Código Detector 2 (placa/detector2.py)
+
+```python
+#--------DETECTOR 2----------------------
+from machine import Pin
+import time
+import network
+import ujson
+import urequests
+import ntptime
+
+url_servicio="https://radarpythonapi.onrender.com/mediciones/"
+UNIX_OFFSET = 946684800
+
+print("Conectando a la wifi", end="")
+sta_if = network.WLAN(network.STA_IF)
+sta_if.active(True)
+sta_if.connect('Wokwi-GUEST', '')
+while not sta_if.isconnected():
+    print(".", end="")
+    time.sleep(0.1)
+print(" Conectada!")
+
+ntptime.settime()
+
+epoch_base = time.time() + UNIX_OFFSET
+ticks_base = time.ticks_ms()
+
+def epoch_unix_ms():
+    """Timestamp Unix en milisegundos (entero, sin pérdida de precisión)."""
+    return (epoch_base * 1000) + time.ticks_diff(time.ticks_ms(), ticks_base)
+
+
+# ---------------- SENSOR ----------------
+motion_pin = 12
+sensor = Pin(motion_pin, Pin.IN)   # SIN PULL_UP
+
+COOLDOWN_MS = 4000      # tiempo mínimo entre eventos
+CONFIRM_MS = 50         # validación anti-ruido
+
+last_event = 0
+armed = True
+# ---------------------------------------
+
+while True:
+    val = sensor.value()
+
+    # Detección
+    if val == 1 and armed:
+        time.sleep_ms(CONFIRM_MS)
+        if sensor.value() == 1:
+            now = time.ticks_ms()
+            if time.ticks_diff(now, last_event) > COOLDOWN_MS:
+                last_event = now
+                armed = False
+
+                datos = {"detector2": epoch_unix_ms()}
+                print("Medición válida:", datos["detector2"])
+
+                try:
+                    r = urequests.post(
+                        url_servicio,
+                        data=ujson.dumps(datos),
+                        headers={"Content-Type": "application/json"}
+                    )
+                    r.close()
+                except Exception as e:
+                    print("Error enviando:", e)
+
+    # Rearme cuando el sensor vuelve a reposo
+    if val == 0:
+        armed = True
+
+    time.sleep_ms(20)
 ```
 
 <div style="page-break-after: always;"></div>
 
 **Características del firmware:**
 
-- **Sincronización NTP** para timestamps precisos
-- **Debounce por software** evita detecciones múltiples
-- **Interrupciones** para respuesta inmediata al sensor
-- **Feedback visual** con LEDs para debugging
-- **Reconexión automática** WiFi
+- **Sincronización NTP** para timestamps precisos en milisegundos
+- **Cooldown de 4 segundos** evita detecciones múltiples del mismo objeto
+- **Confirmación anti-ruido** (50ms) para validar detecciones reales
+- **Sistema de rearme** automático cuando el sensor vuelve a reposo
+- **Conexión directa a Render** para enviar mediciones a la API en producción
 - **Manejo robusto de errores** en comunicación HTTP
 
 ### 3.4 Repositorio del Proyecto
@@ -1643,21 +1443,22 @@ TIME_ZONE = 'Europe/Madrid'
 LANGUAGE_CODE = 'es-es'
 ```
 
-**ESP32 (placa/main.py):**
+**ESP32 (placa/detector1.py y placa/detector2.py):**
 
 ```python
-# Credenciales WiFi
-WIFI_SSID = 'TU_RED_WIFI'
-WIFI_PASSWORD = 'TU_CONTRASEÑA'
+# URL del servicio (apunta a Render en producción)
+url_servicio = "https://radarpythonapi.onrender.com/mediciones/"
 
-# URL de la API (IP del servidor donde corre FastAPI)
-API_URL = "http://192.168.1.100:8080/mediciones/"
+# Credenciales WiFi (modificar según tu red)
+sta_if.connect('Wokwi-GUEST', '')  # Cambiar por tu SSID y contraseña
 
-# Pines GPIO
-PIN_SENSOR = 12
-PIN_LED_VERDE = 14
-PIN_LED_ROJO = 27
+# Configuración del sensor
+motion_pin = 12                    # Pin GPIO del sensor PIR
+COOLDOWN_MS = 4000                 # Tiempo entre detecciones (4 segundos)
+CONFIRM_MS = 50                    # Validación anti-ruido (50 milisegundos)
 ```
+
+**Nota:** Ambos archivos tienen la misma configuración, la única diferencia es el nombre del campo JSON que envían (`detector1` vs `detector2`).
 
 <div style="page-break-after: always;"></div>
 
@@ -1934,19 +1735,23 @@ esptool.py --chip esp32 --port COM3 write_flash -z 0x1000 esp32-20231005-v1.21.0
 pip install adafruit-ampy
 ```
 
-2. Subir archivo main.py:
+2. Subir código al primer ESP32 (Detector 1):
 
 ```bash
-ampy --port COM3 put placa/main.py
-```
-
-3. Reiniciar ESP32:
-
-```bash
+# Conectar primer ESP32 al puerto COM3
+ampy --port COM3 put placa/detector1.py main.py
 ampy --port COM3 reset
 ```
 
-<div style="page-break-after: always;"></div>
+3. Subir código al segundo ESP32 (Detector 2):
+
+```bash
+# Conectar segundo ESP32 al puerto COM4 (o el puerto correspondiente)
+ampy --port COM4 put placa/detector2.py main.py
+ampy --port COM4 reset
+```
+
+**Nota:** El archivo se sube como `main.py` en el ESP32 para que se ejecute automáticamente al arrancar.
 
 #### 5.4.4 Troubleshooting Hardware
 
@@ -2067,8 +1872,6 @@ Starting development server at http://127.0.0.1:8000/
 Quit the server with CTRL-BREAK.
 ```
 
-<div style="page-break-after: always;"></div>
-
 **Método 2: Script automático**
 
 Windows:
@@ -2112,8 +1915,6 @@ Linux/Mac:
 
 7. Refrescar el dashboard (<http://localhost:8000>)
    - La medición aparecerá en la tabla
-
-<div style="page-break-after: always;"></div>
 
 **Con Hardware ESP32:**
 
