@@ -606,61 +606,7 @@ code {
 <h2 id="2-dise%C3%B1o-del-sistema">2. DISEÑO DEL SISTEMA</h2>
 <h3 id="21-arquitectura-general">2.1 Arquitectura General</h3>
 <p>El sistema implementa una arquitectura de <strong>tres capas</strong> con comunicación HTTP:</p>
-<pre class="hljs"><code><div>┌─────────────────────────────────────────────────────────────────┐
-│                         CAPA DE PRESENTACIÓN                     │
-│                                                                   │
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │          Frontend Django (Puerto 8000)                   │   │
-│  │  - Dashboard con estadísticas                            │   │
-│  │  - Lista de mediciones                                   │   │
-│  │  - Configuración del sistema                             │   │
-│  │  - Gráficos y reportes                                   │   │
-│  └──────────────────────┬──────────────────────────────────┘   │
-└─────────────────────────┼────────────────────────────────────────┘
-                          │ HTTP GET/POST
-                          ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                         CAPA DE LÓGICA                           │
-│                                                                   │
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │          API FastAPI (Puerto 8080)                       │   │
-│  │  - Endpoints REST                                        │   │
-│  │  - Cálculo de velocidad                                  │   │
-│  │  - Validación de datos                                   │   │
-│  │  - Gestión de configuración                              │   │
-│  └──────────────────────┬──────────────────────────────────┘   │
-└─────────────────────────┼────────────────────────────────────────┘
-                          │ Lectura/Escritura
-                          ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                        CAPA DE DATOS                             │
-│                                                                   │
-│  ┌──────────────────┐         ┌──────────────────┐             │
-│  │ mediciones.json  │         │   config.json    │             │
-│  │ - medicion1      │         │ - distancia      │             │
-│  │ - timestamp      │         │ - limite_vel     │             │
-│  └──────────────────┘         └──────────────────┘             │
-└─────────────────────────────────────────────────────────────────┘
-                          ▲
-                          │ HTTP POST
-                          │
-┌─────────────────────────────────────────────────────────────────┐
-│                        CAPA DE HARDWARE                          │
-│                                                                   │
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │            ESP32/ESP8266 (MicroPython)                   │   │
-│  │                                                           │   │
-│  │  ┌──────────┐    ┌──────────┐    ┌──────────┐          │   │
-│  │  │ Sensor 1 │    │ Sensor 2 │    │   LEDs   │          │   │
-│  │  │  (GPIO)  │    │  (GPIO)  │    │ Verde/Rojo│         │   │
-│  │  └──────────┘    └──────────┘    └──────────┘          │   │
-│  │                                                           │   │
-│  │  - Detección por interrupción                            │   │
-│  │  - Timestamp preciso con NTP                             │   │
-│  │  - Feedback visual con LEDs                              │   │
-│  └─────────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────────┘
-</div></code></pre>
+<p><img src="diagramas/2.1 Arquitectura General.png" alt="Arquitectura General del Sistema"></p>
 <p><strong>Características de la arquitectura:</strong></p>
 <ul>
 <li><strong>Desacoplamiento:</strong> Cada capa puede desarrollarse y probarse independientemente</li>
@@ -668,35 +614,10 @@ code {
 <li><strong>Modularidad:</strong> Componentes reemplazables (ej: cambiar Django por React)</li>
 <li><strong>Comunicación HTTP:</strong> Protocolo estándar, fácil de debuggear y mantener</li>
 </ul>
+<div style="page-break-after: always;"></div>
 <h3 id="22-componentes-hardware">2.2 Componentes Hardware</h3>
 <h4 id="esquema-de-conexiones-esp32">Esquema de Conexiones ESP32</h4>
-<pre class="hljs"><code><div>                    ESP32 DevKit v1
-                   ┌─────────────────┐
-                   │                 │
-    Sensor 1  ────▶│ GPIO 12         │
-    (Señal)        │                 │
-                   │                 │
-    Sensor 2  ────▶│ GPIO 13         │
-    (Señal)        │                 │
-                   │                 │
-    LED Verde ◀────│ GPIO 14         │
-                   │                 │
-    LED Rojo  ◀────│ GPIO 27         │
-                   │                 │
-    5V        ────▶│ VIN             │
-                   │                 │
-    GND       ────▶│ GND             │
-                   │                 │
-                   └─────────────────┘
-                          │
-                          │ WiFi 2.4GHz
-                          │
-                          ▼
-                    [Router WiFi]
-                          │
-                          ▼
-                    [Servidor API]
-</div></code></pre>
+<p><img src="diagramas/2.2 Componentes Hardware.png" alt="Componentes Hardware - Esquema de Conexiones ESP32"></p>
 <h4 id="lista-de-componentes">Lista de Componentes</h4>
 <table>
 <thead>
@@ -758,15 +679,11 @@ code {
 </tr>
 </tbody>
 </table>
+<div style="page-break-after: always;"></div>
 <h3 id="23-componentes-software">2.3 Componentes Software</h3>
 <h4 id="231-api-backend---fastapi">2.3.1 API Backend - FastAPI</h4>
 <p><strong>Módulos principales:</strong></p>
-<pre class="hljs"><code><div>api/
-├── main.py              # Aplicación FastAPI, endpoints, lógica
-├── models.py            # Modelos Pydantic para validación
-├── database.py          # Conexión y gestión de base de datos
-└── schemas.py           # Esquemas de respuesta
-</div></code></pre>
+<p><img src="diagramas/2.3.1 API Backend - FastAPI.png" alt="API Backend - FastAPI Estructura de Módulos"></p>
 <p><strong>Tecnologías:</strong></p>
 <ul>
 <li><strong>FastAPI:</strong> Framework web moderno y rápido</li>
@@ -777,22 +694,7 @@ code {
 <div style="page-break-after: always;"></div>
 <h4 id="232-frontend---django">2.3.2 Frontend - Django</h4>
 <p><strong>Módulos principales:</strong></p>
-<pre class="hljs"><code><div>frontend/
-├── manage.py
-├── frontend/
-│   ├── settings.py      # Configuración Django
-│   ├── urls.py          # Rutas principales
-│   └── wsgi.py          # WSGI para deployment
-└── dashboard/
-    ├── views.py         # Vistas y lógica del dashboard
-    ├── urls.py          # Rutas del dashboard
-    ├── api_client.py    # Cliente HTTP para la API
-    └── templates/       # Plantillas HTML
-        ├── base.html
-        ├── index.html
-        ├── mediciones.html
-        └── configuracion.html
-</div></code></pre>
+<p><img src="diagramas/2.3.2 Frontend - Django.png" alt="Frontend Django - Estructura de Módulos"></p>
 <p><strong>Tecnologías:</strong></p>
 <ul>
 <li><strong>Django 5.0:</strong> Framework web full-stack</li>
@@ -800,13 +702,10 @@ code {
 <li><strong>Bootstrap 5:</strong> Framework CSS para UI responsive</li>
 <li><strong>Chart.js:</strong> Librería para gráficos interactivos</li>
 </ul>
+<div style="page-break-after: always;"></div>
 <h4 id="233-firmware---micropython">2.3.3 Firmware - MicroPython</h4>
-<p><strong>Archivo principal:</strong></p>
-<pre class="hljs"><code><div>placa/
-├── main.py              # Código principal del ESP32
-├── boot.py              # Configuración inicial (opcional)
-└── README.md            # Documentación de hardware
-</div></code></pre>
+<p><strong>Estructura del firmware:</strong></p>
+<p><img src="diagramas/2.3.3 Firmware - MicroPython.png" alt="Firmware MicroPython - Estructura y Librerías"></p>
 <p><strong>Librerías utilizadas:</strong></p>
 <ul>
 <li><strong>network:</strong> Gestión de conexión WiFi</li>
@@ -817,126 +716,7 @@ code {
 </ul>
 <div style="page-break-after: always;"></div>
 <h3 id="24-flujo-de-datos">2.4 Flujo de Datos</h3>
-<pre class="hljs"><code><div>┌─────────────────────────────────────────────────────────────────────┐
-│                     FLUJO COMPLETO DE MEDICIÓN                       │
-└─────────────────────────────────────────────────────────────────────┘
-
-1. DETECCIÓN SENSOR 1
-   ┌──────────────┐
-   │   Objeto     │ ──────▶ Sensor 1 detecta movimiento
-   │  en movmto   │         │
-   └──────────────┘         │
-                            ▼
-                   ┌─────────────────┐
-                   │  ESP32          │
-                   │  GPIO 12 = HIGH │
-                   │  Interrupción   │
-                   └────────┬────────┘
-                            │
-                            ▼
-                   timestamp1 = time.time()
-                            │
-                            ▼
-                   POST /mediciones/
-                   {&quot;timestamp&quot;: 1706985430.123}
-                            │
-                            ▼
-                   ┌─────────────────┐
-                   │  FastAPI        │
-                   │  - Guarda T1    │
-                   │  - Estado:      │
-                   │    &quot;Esperando   │
-                   │     sensor 2&quot;   │
-                   └─────────────────┘
-
-   [Objeto viajando entre sensores]
-   [Distancia: 100 metros]
-   [Tiempo transcurrido: 5 segundos]
-
-2. DETECCIÓN SENSOR 2
-   ┌──────────────┐
-   │   Objeto     │ ──────▶ Sensor 2 detecta movimiento
-   │  en movmto   │         │
-   └──────────────┘         │
-                            ▼
-                   ┌─────────────────┐
-                   │  ESP32          │
-                   │  GPIO 13 = HIGH │
-                   │  Interrupción   │
-                   └────────┬────────┘
-                            │
-                            ▼
-                   timestamp2 = time.time()
-                            │
-                            ▼
-                   POST /mediciones/
-                   {&quot;timestamp&quot;: 1706985435.123}
-                            │
-                            ▼
-                   ┌─────────────────────────────────┐
-                   │  FastAPI                        │
-                   │  - Lee T1: 1706985430.123       │
-                   │  - Recibe T2: 1706985435.123    │
-                   │  - Calcula:                     │
-                   │    Δt = T2 - T1 = 5.0s          │
-                   │    v = 100m / 5.0s = 20 m/s     │
-                   │    v = 20 * 3.6 = 72 km/h       │
-                   │  - Guarda en DB                 │
-                   │  - Limpia estado                │
-                   └────────┬────────────────────────┘
-                            │
-                            ▼
-                   Response:
-                   {
-                     &quot;mensaje&quot;: &quot;Velocidad: 72.00 km/h&quot;,
-                     &quot;velocidad_ms&quot;: 20.0,
-                     &quot;velocidad_kmh&quot;: 72.0,
-                     &quot;tiempo_segundos&quot;: 5.0
-                   }
-                            │
-                            ▼
-                   ┌─────────────────┐
-                   │  ESP32          │
-                   │  - Parsea JSON  │
-                   │  - Si &gt;50 km/h: │
-                   │    LED Rojo ON  │
-                   │  - Si ≤50 km/h: │
-                   │    LED Verde ON │
-                   └─────────────────┘
-
-3. VISUALIZACIÓN
-                   ┌─────────────────┐
-                   │  Usuario        │
-                   │  Abre navegador │
-                   │  localhost:8000 │
-                   └────────┬────────┘
-                            │
-                            ▼
-                   ┌─────────────────┐
-                   │  Django         │
-                   │  GET /          │
-                   └────────┬────────┘
-                            │
-                            ▼
-                   GET http://localhost:8080/mediciones/
-                            │
-                            ▼
-                   ┌─────────────────┐
-                   │  FastAPI        │
-                   │  - Lee DB       │
-                   │  - Devuelve     │
-                   │    mediciones   │
-                   └────────┬────────┘
-                            │
-                            ▼
-                   ┌─────────────────────────────┐
-                   │  Django                     │
-                   │  - Recibe datos JSON        │
-                   │  - Renderiza template       │
-                   │  - Muestra en tabla:        │
-                   │    72 km/h | 5.0s | EXCESO │
-                   └─────────────────────────────┘
-</div></code></pre>
+<p><img src="diagramas/2.4 Flujo de Datos.png" alt="Flujo de Datos - Proceso Completo de Medición"></p>
 <h3 id="25-diagrama-de-base-de-datos">2.5 Diagrama de Base de Datos</h3>
 <h4 id="modelo-de-datos-json">Modelo de Datos (JSON)</h4>
 <p><strong>mediciones.json</strong> (estado temporal)</p>
@@ -981,70 +761,7 @@ code {
 </div></code></pre>
 <div style="page-break-after: always;"></div>
 <h3 id="26-diagrama-de-secuencia">2.6 Diagrama de Secuencia</h3>
-<pre class="hljs"><code><div>Actor: Objeto     ESP32        API FastAPI       JSON Storage      Django Frontend
-  │                │                │                  │                  │
-  │                │                │                  │                  │
-  │  Pasa por S1   │                │                  │                  │
-  ├───────────────▶│                │                  │                  │
-  │                │ POST /mediciones/                 │                  │
-  │                │  {timestamp: T1}                  │                  │
-  │                ├───────────────▶│                  │                  │
-  │                │                │  write(T1)       │                  │
-  │                │                ├─────────────────▶│                  │
-  │                │                │                  │                  │
-  │                │  Response:     │                  │                  │
-  │                │  &quot;Esperando    │                  │                  │
-  │                │   sensor 2&quot;    │                  │                  │
-  │                │◀───────────────┤                  │                  │
-  │                │                │                  │                  │
-  │                │ LED Verde ON   │                  │                  │
-  │                │                │                  │                  │
-  │                │                │                  │                  │
-  │ [viajando...]  │                │                  │                  │
-  │ [100 metros]   │                │                  │                  │
-  │ [5 segundos]   │                │                  │                  │
-  │                │                │                  │                  │
-  │  Pasa por S2   │                │                  │                  │
-  ├───────────────▶│                │                  │                  │
-  │                │ POST /mediciones/                 │                  │
-  │                │  {timestamp: T2}                  │                  │
-  │                ├───────────────▶│                  │                  │
-  │                │                │  read(T1)        │                  │
-  │                │                ├─────────────────▶│                  │
-  │                │                │  return T1       │                  │
-  │                │                │◀─────────────────┤                  │
-  │                │                │                  │                  │
-  │                │                │ calc_velocity()  │                  │
-  │                │                │ v=100m/5s=72km/h │                  │
-  │                │                │                  │                  │
-  │                │                │  clear()         │                  │
-  │                │                ├─────────────────▶│                  │
-  │                │                │                  │                  │
-  │                │  Response:     │                  │                  │
-  │                │  {velocidad:   │                  │                  │
-  │                │   72 km/h}     │                  │                  │
-  │                │◀───────────────┤                  │                  │
-  │                │                │                  │                  │
-  │                │ LED Rojo ON    │                  │                  │
-  │                │ (exceso &gt;50)   │                  │                  │
-  │                │                │                  │                  │
-  │                │                │                  │    GET /        │
-  │                │                │                  │◀─────────────────┤
-  │                │                │  GET /mediciones/│                  │
-  │                │                │◀─────────────────┼──────────────────┤
-  │                │                │                  │                  │
-  │                │                │  read_all()      │                  │
-  │                │                ├─────────────────▶│                  │
-  │                │                │  return data     │                  │
-  │                │                │◀─────────────────┤                  │
-  │                │                │                  │                  │
-  │                │                │  JSON response   │                  │
-  │                │                ├──────────────────┼─────────────────▶│
-  │                │                │                  │                  │
-  │                │                │                  │  Render HTML    │
-  │                │                │                  │  con mediciones │
-  │                │                │                  │                  │
-</div></code></pre>
+<p><img src="diagramas/2.6 Diagrama de Secuencia.png" alt="Diagrama de Secuencia - Interacción entre Componentes"></p>
 <div style="page-break-after: always;"></div>
 <hr>
 <h2 id="3-implementaci%C3%B3n">3. IMPLEMENTACIÓN</h2>
@@ -2661,73 +2378,7 @@ sleep 3
 ./iniciar.sh
 </div></code></pre>
 <h3 id="52-estructura-del-proyecto">5.2 Estructura del Proyecto</h3>
-<pre class="hljs"><code><div>Proyecto_CE_Python_Velocidad/
-│
-├── main.py                     # API FastAPI principal
-├── mediciones.json             # Estado temporal (auto-generado)
-├── config.json                 # Configuración persistente (auto-generado)
-├── requirements.txt            # Dependencias Python del proyecto
-├── README.md                   # Documentación general
-├── LICENSE                     # Licencia del proyecto
-├── .gitignore                  # Archivos ignorados por Git
-│
-├── api/                        # Módulo API (versión modular)
-│   ├── __init__.py
-│   ├── main.py                 # Endpoints y lógica
-│   ├── models.py               # Modelos Pydantic
-│   ├── database.py             # Gestión de BD
-│   ├── schemas.py              # Esquemas de respuesta
-│   └── requirements.txt        # Dependencias API
-│
-├── frontend/                   # Aplicación Django
-│   ├── manage.py               # CLI de Django
-│   ├── requirements.txt        # Dependencias Frontend
-│   │
-│   ├── frontend/               # Configuración Django
-│   │   ├── __init__.py
-│   │   ├── settings.py         # Configuración principal
-│   │   ├── urls.py             # Rutas principales
-│   │   ├── wsgi.py             # WSGI para deployment
-│   │   └── asgi.py             # ASGI para deployment
-│   │
-│   └── dashboard/              # App principal del dashboard
-│       ├── __init__.py
-│       ├── apps.py
-│       ├── views.py            # Vistas del dashboard
-│       ├── urls.py             # Rutas del dashboard
-│       ├── api_client.py       # Cliente HTTP para API
-│       ├── models.py           # Modelos Django (opcional)
-│       │
-│       ├── templates/          # Plantillas HTML
-│       │   ├── base.html       # Template base
-│       │   ├── index.html      # Dashboard principal
-│       │   ├── mediciones.html # Lista de mediciones
-│       │   ├── medicion_detalle.html
-│       │   ├── reportes.html   # Gráficos y estadísticas
-│       │   └── configuracion.html
-│       │
-│       └── static/             # Archivos estáticos
-│           ├── css/
-│           │   └── style.css
-│           ├── js/
-│           │   └── app.js
-│           └── img/
-│
-├── placa/                      # Código para microcontrolador
-│   ├── main.py                 # Firmware MicroPython
-│   ├── boot.py                 # Boot script (opcional)
-│   └── README.md               # Documentación hardware
-│
-├── docs/                       # Documentación adicional
-│   ├── MANUAL.md               # Manual de usuario
-│   ├── INFORME_TECNICO.md      # Este documento
-│   └── diagramas/              # Diagramas del sistema
-│
-├── db/                         # Directorio de base de datos (auto-generado)
-│   └── radar_velocidad.db      # SQLite (si se usa)
-│
-└── venv/                       # Entorno virtual Python (ignorado en Git)
-</div></code></pre>
+<p><img src="diagramas/5.2 Estructura del Proyecto.png" alt="Estructura del Proyecto - Árbol de Directorios"></p>
 <div style="page-break-after: always;"></div>
 <h3 id="53-api-endpoints">5.3 API Endpoints</h3>
 <h4 id="documentaci%C3%B3n-interactiva">Documentación Interactiva</h4>
@@ -2886,30 +2537,7 @@ sleep 3
 </tbody>
 </table>
 <h4 id="542-esquema-de-conexiones">5.4.2 Esquema de Conexiones</h4>
-<pre class="hljs"><code><div>ESP32 DevKit v1        Sensor PIR 1        Sensor PIR 2
-┌──────────┐          ┌──────────┐        ┌──────────┐
-│          │          │          │        │          │
-│  GPIO 12 ├──────────┤ OUT      │        │          │
-│          │          │          │        │          │
-│  GPIO 13 ├───────────────────────────────┤ OUT      │
-│          │          │          │        │          │
-│  5V      ├──────────┤ VCC      ├────────┤ VCC      │
-│          │          │          │        │          │
-│  GND     ├──────────┤ GND      ├────────┤ GND      │
-│          │          └──────────┘        └──────────┘
-│  GPIO 14 ├────┐
-│          │    │     LED Verde
-│  GPIO 27 ├──┐ └────[R 220Ω]───(+)───┐
-│          │  │                         │
-│  GND     ├──┼─────────────────────────┴──(-)
-└──────────┘  │
-              │      LED Rojo
-              └────[R 220Ω]───(+)───┐
-                                     │
-              ┌──────────────────────┴──(-)
-              │
-              GND
-</div></code></pre>
+<p><img src="diagramas/5.4.2 Esquema de Conexiones.png" alt="Esquema de Conexiones ESP32 - Hardware"></p>
 <div style="page-break-after: always;"></div>
 <h4 id="543-programaci%C3%B3n-del-esp32">5.4.3 Programación del ESP32</h4>
 <p><strong>Instalar MicroPython en el ESP32:</strong></p>
@@ -3328,6 +2956,7 @@ Packt Publishing, 2021
 Arquitectura de microservicios con Python</p>
 </li>
 </ol>
+<div style="page-break-after: always;"></div>
 <h3 id="repositorios-de-referencia">Repositorios de Referencia</h3>
 <ol start="17">
 <li>
