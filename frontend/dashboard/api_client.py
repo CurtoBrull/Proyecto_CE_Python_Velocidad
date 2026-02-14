@@ -94,7 +94,21 @@ class RadarAPIClient:
         )
 
     def registrar_medicion(self) -> Dict[str, Any]:
-        return self._post("/mediciones/", data={})
+        # Verificar si hay una medición pendiente
+        hay_pendiente = self.hay_medicion_pendiente()
+
+        # Generar timestamp actual
+        import time
+        timestamp = time.time()
+
+        # Si no hay medición pendiente, enviar detector1
+        # Si ya hay medición pendiente, enviar detector2
+        if hay_pendiente:
+            data = {"detector2": timestamp}
+        else:
+            data = {"detector1": timestamp}
+
+        return self._post("/mediciones/", data=data)
 
     def hay_medicion_pendiente(self) -> bool:
         """Verifica si hay una medición esperando el segundo sensor."""
