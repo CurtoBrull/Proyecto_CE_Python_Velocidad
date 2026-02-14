@@ -190,7 +190,7 @@ Desarrollar un sistema completo de medición de velocidad basado en sensores IoT
 
 El sistema implementa una arquitectura de **tres capas** con comunicación HTTP:
 
-![Arquitectura General del Sistema](diagramas/2.1%20Arquitectura%20General.png)
+![Arquitectura General del Sistema](docs/diagramas/2.1%20Arquitectura%20General.png)
 
 **Características de la arquitectura:**
 
@@ -205,7 +205,7 @@ El sistema implementa una arquitectura de **tres capas** con comunicación HTTP:
 
 #### Esquema de Conexiones ESP32
 
-![Componentes Hardware - Esquema de Conexiones ESP32](diagramas/2.2%20Componentes%20Hardware.png)
+![Componentes Hardware - Esquema de Conexiones ESP32](docs/diagramas/2.2%20Componentes%20Hardware.png)
 
 #### Lista de Componentes
 
@@ -228,7 +228,7 @@ El sistema implementa una arquitectura de **tres capas** con comunicación HTTP:
 
 **Módulos principales:**
 
-![API Backend - FastAPI Estructura de Módulos](diagramas/2.3.1%20API%20Backend%20-%20FastAPI.png)
+![API Backend - FastAPI Estructura de Módulos](docs/diagramas/2.3.1%20API%20Backend%20-%20FastAPI.png)
 
 **Tecnologías:**
 
@@ -243,7 +243,7 @@ El sistema implementa una arquitectura de **tres capas** con comunicación HTTP:
 
 **Módulos principales:**
 
-![Frontend Django - Estructura de Módulos](diagramas/2.3.2%20Frontend%20-%20Django.png)
+![Frontend Django - Estructura de Módulos](docs/diagramas/2.3.2%20Frontend%20-%20Django.png)
 
 **Tecnologías:**
 
@@ -258,7 +258,7 @@ El sistema implementa una arquitectura de **tres capas** con comunicación HTTP:
 
 **Estructura del firmware:**
 
-![Firmware MicroPython - Estructura y Librerías](diagramas/2.3.3%20Firmware%20-%20MicroPython.png)
+![Firmware MicroPython - Estructura y Librerías](docs/diagramas/2.3.3%20Firmware%20-%20MicroPython.png)
 
 **Librerías utilizadas:**
 
@@ -272,7 +272,7 @@ El sistema implementa una arquitectura de **tres capas** con comunicación HTTP:
 
 ### 2.4 Flujo de Datos
 
-![Flujo de Datos - Proceso Completo de Medición](diagramas/2.4%20Flujo%20de%20Datos.png)
+![Flujo de Datos - Proceso Completo de Medición](docs/diagramas/2.4%20Flujo%20de%20Datos.png)
 
 ### 2.5 Diagrama de Base de Datos
 
@@ -332,7 +332,7 @@ CREATE INDEX idx_exceso ON mediciones(exceso_velocidad);
 
 ### 2.6 Diagrama de Secuencia
 
-![Diagrama de Secuencia - Interacción entre Componentes](diagramas/2.6%20Diagrama%20de%20Secuencia.png)
+![Diagrama de Secuencia - Interacción entre Componentes](docs/diagramas/2.6%20Diagrama%20de%20Secuencia.png)
 
 <div style="page-break-after: always;"></div>
 
@@ -1716,7 +1716,7 @@ chmod +x iniciar.sh
 
 ### 5.2 Estructura del Proyecto
 
-![Estructura del Proyecto - Árbol de Directorios](diagramas/5.2%20Estructura%20del%20Proyecto.png)
+![Estructura del Proyecto - Árbol de Directorios](docs/diagramas/5.2%20Estructura%20del%20Proyecto.png)
 
 <div style="page-break-after: always;"></div>
 
@@ -1894,7 +1894,7 @@ Actualiza el límite de velocidad.
 
 #### 5.4.2 Esquema de Conexiones
 
-![Esquema de Conexiones ESP32 - Hardware](diagramas/5.4.2%20Esquema%20de%20Conexiones.png)
+![Esquema de Conexiones ESP32 - Hardware](docs/diagramas/5.4.2%20Esquema%20de%20Conexiones.png)
 
 <div style="page-break-after: always;"></div>
 
