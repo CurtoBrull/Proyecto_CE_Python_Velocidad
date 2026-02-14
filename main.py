@@ -59,7 +59,7 @@ class MedicionResponse(BaseModel):
 
 @app.post("/", response_model=MedicionResponse)
 @app.post("/mediciones/", response_model=MedicionResponse)
-def registrar_medicion(data: Optional[MedicionRequest] = None):
+def registrar_medicion(data: MedicionRequest = MedicionRequest()):
     # Usar timestamp de la placa si viene, sino usar el del servidor
     if data and data.timestamp:
         medicion = data.timestamp

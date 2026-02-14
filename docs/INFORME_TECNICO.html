@@ -434,7 +434,7 @@ code {
 <ul>
 <li>6.1 <a href="#61-requisitos-previos">Requisitos Previos</a></li>
 <li>6.2 <a href="#62-gu%C3%ADa-de-instalaci%C3%B3n">Guía de Instalación</a></li>
-<li>6.3 <a href="#63-uso-del-sistema">Uso del Sistema</a></li>
+<li>6.3 <a href="#63-uso-del-sistema">Uso del Sistema</a> &lt;-------- Arrancar proyecto RENDER</li>
 <li>6.4 <a href="#64-soluci%C3%B3n-de-problemas">Solución de Problemas</a></li>
 </ul>
 </li>
@@ -1645,9 +1645,9 @@ led_rojo.value(<span class="hljs-number">0</span>)
 </ul>
 <h3 id="34-repositorio-del-proyecto">3.4 Repositorio del Proyecto</h3>
 <p>El código completo del proyecto está disponible en GitHub:</p>
-<p><strong>URL del repositorio:</strong> (pendiente de publicar)</p>
+<p><strong>URL del repositorio:</strong></p>
 <pre class="hljs"><code><div><span class="hljs-comment"># Clonar el repositorio</span>
-git <span class="hljs-built_in">clone</span> https://github.com/usuario/Proyecto_CE_Python_Velocidad.git
+git <span class="hljs-built_in">clone</span> https://github.com/CurtoBrull/Proyecto_CE_Python_Velocidad
 <span class="hljs-built_in">cd</span> Proyecto_CE_Python_Velocidad
 
 <span class="hljs-comment"># Instalar dependencias</span>
@@ -1660,6 +1660,19 @@ uvicorn main:app --reload --port 8080
 <span class="hljs-built_in">cd</span> frontend
 python manage.py runserver
 </div></code></pre>
+<h4 id="despliegue-en-producci%C3%B3n">Despliegue en Producción</h4>
+<p>El proyecto está desplegado en <strong>Render</strong> y puede probarse directamente sin necesidad de instalación local:</p>
+<p><strong>🌐 Aplicación en Producción:</strong></p>
+<ul>
+<li><strong>API Backend:</strong> <a href="https://radarpythonapi.onrender.com/mediciones">https://radarpythonapi.onrender.com/mediciones</a></li>
+<li><strong>Frontend Dashboard:</strong> <a href="https://radarpython.onrender.com/">https://radarpython.onrender.com/</a></li>
+</ul>
+<p><strong>⚠️ Nota importante:</strong> El servicio utiliza el plan gratuito de Render, por lo que <strong>tarda unos momentos en arrancar</strong> tras un periodo de inactividad (aproximadamente 50 segundos). Si accedes y ves un error de timeout, espera unos segundos y recarga la página.</p>
+<p><strong>📖 Documentación API interactiva:</strong></p>
+<ul>
+<li><strong>Swagger UI:</strong> <a href="https://radarpythonapi.onrender.com/docs">https://radarpythonapi.onrender.com/docs</a></li>
+<li><strong>ReDoc:</strong> <a href="https://radarpythonapi.onrender.com/redoc">https://radarpythonapi.onrender.com/redoc</a></li>
+</ul>
 <div style="page-break-after: always;"></div>
 <hr>
 <h2 id="4-pruebas-y-validaci%C3%B3n">4. PRUEBAS Y VALIDACIÓN</h2>
@@ -2273,7 +2286,7 @@ velocidad (km/h) = 20 m/s × 3.6 = 72 km/h
 <h4 id="512-instalaci%C3%B3n-paso-a-paso">5.1.2 Instalación Paso a Paso</h4>
 <p><strong>1. Clonar o descargar el repositorio</strong></p>
 <pre class="hljs"><code><div><span class="hljs-comment"># Opción A: Con Git</span>
-git <span class="hljs-built_in">clone</span> https://github.com/usuario/Proyecto_CE_Python_Velocidad.git
+git <span class="hljs-built_in">clone</span> https://github.com/CurtoBrull/Proyecto_CE_Python_Velocidad
 <span class="hljs-built_in">cd</span> Proyecto_CE_Python_Velocidad
 
 <span class="hljs-comment"># Opción B: Descargar ZIP</span>
@@ -2658,7 +2671,18 @@ pip install -r requirements.txt
 <span class="hljs-comment"># Debe mostrar: Python 3.10.x o superior</span>
 </div></code></pre>
 <h3 id="63-uso-del-sistema">6.3 Uso del Sistema</h3>
-<h4 id="631-iniciar-el-sistema">6.3.1 Iniciar el Sistema</h4>
+<h4 id="630-demo-online-sin-instalaci%C3%B3n">6.3.0 Demo Online (Sin Instalación)</h4>
+<p>Si deseas probar el sistema <strong>sin instalar nada en tu equipo</strong>, puedes acceder a la versión desplegada en Render:</p>
+<p><strong>🌐 Accesos directos:</strong></p>
+<ul>
+<li><strong>Dashboard Frontend:</strong> <a href="https://radarpython.onrender.com/">https://radarpython.onrender.com/</a></li>
+<li><strong>API Documentation:</strong> <a href="https://radarpythonapi.onrender.com/docs">https://radarpythonapi.onrender.com/docs</a></li>
+<li><strong>API Endpoint:</strong> <a href="https://radarpythonapi.onrender.com/mediciones">https://radarpythonapi.onrender.com/mediciones</a></li>
+</ul>
+<p><strong>⏱️ Primera carga:</strong> El servicio puede tardar <strong>30-50 segundos</strong> en arrancar si ha estado inactivo. Esto es normal en el plan gratuito de Render. Simplemente espera y recarga la página.</p>
+<p><strong>💡 Consejo:</strong> Abre primero la documentación de la API para que el backend arranque mientras exploras la interfaz.</p>
+<hr>
+<h4 id="631-iniciar-el-sistema-localmente">6.3.1 Iniciar el Sistema Localmente</h4>
 <p><strong>Método 1: Manual (Recomendado para aprendizaje)</strong></p>
 <p>Terminal 1 - Iniciar API:</p>
 <pre class="hljs"><code><div>uvicorn main:app --reload --port 8080

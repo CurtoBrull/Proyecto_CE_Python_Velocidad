@@ -63,7 +63,7 @@ Febrero 2026
 6. [Manual de Usuario](#6-manual-de-usuario)
    - 6.1 [Requisitos Previos](#61-requisitos-previos)
    - 6.2 [Guía de Instalación](#62-guía-de-instalación)
-   - 6.3 [Uso del Sistema](#63-uso-del-sistema)
+   - 6.3 [Uso del Sistema](#63-uso-del-sistema) <-------- Arrancar proyecto RENDER
    - 6.4 [Solución de Problemas](#64-solución-de-problemas)
 
 7. [Referencias](#7-referencias)
@@ -1239,11 +1239,11 @@ if __name__ == '__main__':
 
 El código completo del proyecto está disponible en GitHub:
 
-**URL del repositorio:** (pendiente de publicar)
+**URL del repositorio:**
 
 ```bash
 # Clonar el repositorio
-git clone https://github.com/usuario/Proyecto_CE_Python_Velocidad.git
+git clone https://github.com/CurtoBrull/Proyecto_CE_Python_Velocidad
 cd Proyecto_CE_Python_Velocidad
 
 # Instalar dependencias
@@ -1256,6 +1256,22 @@ uvicorn main:app --reload --port 8080
 cd frontend
 python manage.py runserver
 ```
+
+#### Despliegue en Producción
+
+El proyecto está desplegado en **Render** y puede probarse directamente sin necesidad de instalación local:
+
+**🌐 Aplicación en Producción:**
+
+- **API Backend:** <https://radarpythonapi.onrender.com/mediciones>
+- **Frontend Dashboard:** <https://radarpython.onrender.com/>
+
+**⚠️ Nota importante:** El servicio utiliza el plan gratuito de Render, por lo que **tarda unos momentos en arrancar** tras un periodo de inactividad (aproximadamente 50 segundos). Si accedes y ves un error de timeout, espera unos segundos y recarga la página.
+
+**📖 Documentación API interactiva:**
+
+- **Swagger UI:** <https://radarpythonapi.onrender.com/docs>
+- **ReDoc:** <https://radarpythonapi.onrender.com/redoc>
 
 <div style="page-break-after: always;"></div>
 
@@ -1546,7 +1562,7 @@ Se realizaron pruebas con 5 usuarios no técnicos:
 
 ```bash
 # Opción A: Con Git
-git clone https://github.com/usuario/Proyecto_CE_Python_Velocidad.git
+git clone https://github.com/CurtoBrull/Proyecto_CE_Python_Velocidad
 cd Proyecto_CE_Python_Velocidad
 
 # Opción B: Descargar ZIP
@@ -2002,7 +2018,23 @@ python --version
 
 ### 6.3 Uso del Sistema
 
-#### 6.3.1 Iniciar el Sistema
+#### 6.3.0 Demo Online (Sin Instalación)
+
+Si deseas probar el sistema **sin instalar nada en tu equipo**, puedes acceder a la versión desplegada en Render:
+
+**🌐 Accesos directos:**
+
+- **Dashboard Frontend:** <https://radarpython.onrender.com/>
+- **API Documentation:** <https://radarpythonapi.onrender.com/docs>
+- **API Endpoint:** <https://radarpythonapi.onrender.com/mediciones>
+
+**⏱️ Primera carga:** El servicio puede tardar **30-50 segundos** en arrancar si ha estado inactivo. Esto es normal en el plan gratuito de Render. Simplemente espera y recarga la página.
+
+**💡 Consejo:** Abre primero la documentación de la API para que el backend arranque mientras exploras la interfaz.
+
+---
+
+#### 6.3.1 Iniciar el Sistema Localmente
 
 **Método 1: Manual (Recomendado para aprendizaje)**
 

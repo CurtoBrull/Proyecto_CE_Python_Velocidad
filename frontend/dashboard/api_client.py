@@ -94,7 +94,7 @@ class RadarAPIClient:
         )
 
     def registrar_medicion(self) -> Dict[str, Any]:
-        return self._post("/mediciones/")
+        return self._post("/mediciones/", data={})
 
     def hay_medicion_pendiente(self) -> bool:
         """Verifica si hay una medición esperando el segundo sensor."""
